@@ -16,10 +16,11 @@ export function distanceTo(source: number, x: number, y: number, z: number): num
 }
 
 /** Whether the player's character has one of the jobs (or gangs); an empty list lets everyone in. */
-export function allowed(source: number, place: Place & { gangs?: string[] }): boolean {
+export function allowed(source: number, place: Place & { gangs?: string[]; grades?: Record<string, number> }): boolean {
   const gangs = place.gangs ?? [];
   if (place.jobs.length === 0 && gangs.length === 0) return true;
-  if (place.jobs.length && (core.GetJobs(source) ?? []).some((m) => place.jobs.includes(m.job))) return true;
+  const grades = place.grades ?? {};
+  if (place.jobs.length && (core.GetJobs(source) ?? []).some((m) => place.jobs.includes(m.job) && m.grade >= (grades[m.job] ?? 0))) return true;
   return gangs.length > 0 && (core.GetGangs(source) ?? []).some((m) => gangs.includes(m.gang));
 }
 

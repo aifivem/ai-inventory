@@ -69,9 +69,11 @@ class Inventories {
     return inventory;
   }
 
-  async loadPlayer(source: number, charId: number): Promise<void> {
+  /** `stillCurrent` is asked after the load: false when the player left or switched character meanwhile. */
+  async loadPlayer(source: number, charId: number, stillCurrent: () => boolean): Promise<void> {
     const { rows, maxWeight } = content.settings.player;
     const inventory = await this.load(`player:${charId}`, { kind: "player", label: "", rows, maxWeight, persistent: true });
+    if (!stillCurrent() || this.players.has(source)) return;
     inventory.viewers.add(source);
     this.players.set(source, inventory);
     emitNet(EVENTS.player, source, inventory.view());

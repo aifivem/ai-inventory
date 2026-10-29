@@ -26596,7 +26596,8 @@ var Inventories = class {
 		this.byId.set(id, inventory);
 		return inventory;
 	}
-	async loadPlayer(source, charId) {
+	/** `stillCurrent` is asked after the load: false when the player left or switched character meanwhile. */
+	async loadPlayer(source, charId, stillCurrent) {
 		const { rows, maxWeight } = content.settings.player;
 		const inventory = await this.load(`player:${charId}`, {
 			kind: "player",
@@ -26605,6 +26606,7 @@ var Inventories = class {
 			maxWeight,
 			persistent: true
 		});
+		if (!stillCurrent() || this.players.has(source)) return;
 		inventory.viewers.add(source);
 		this.players.set(source, inventory);
 		emitNet(EVENTS.player, source, inventory.view());
@@ -26782,7 +26784,8 @@ function distanceTo(source, x, y, z) {
 function allowed(source, place) {
 	const gangs = place.gangs ?? [];
 	if (place.jobs.length === 0 && gangs.length === 0) return true;
-	if (place.jobs.length && (core$2.GetJobs(source) ?? []).some((m) => place.jobs.includes(m.job))) return true;
+	const grades = place.grades ?? {};
+	if (place.jobs.length && (core$2.GetJobs(source) ?? []).some((m) => place.jobs.includes(m.job) && m.grade >= (grades[m.job] ?? 0))) return true;
 	return gangs.length > 0 && (core$2.GetGangs(source) ?? []).some((m) => gangs.includes(m.gang));
 }
 const charIdOf = (source) => core$2.GetCharacter(source)?.id ?? null;
@@ -27121,7 +27124,7 @@ function dropPlayer(source) {
 const core = resourceExport("ai-core");
 function load(source, character) {
 	emitNet(EVENTS.drops, source, drops.points());
-	inventories.loadPlayer(source, character.id).catch((error) => log.error(`loading the inventory of character ${character.id} failed`, error));
+	inventories.loadPlayer(source, character.id, () => core.GetCharacter(source)?.id === character.id).catch((error) => log.error(`loading the inventory of character ${character.id} failed`, error));
 }
 function unload(source) {
 	dropPlayer(source);
@@ -27254,25 +27257,29 @@ function setMetadata(inv, slot, metadata) {
 	return true;
 }
 /** Registers (or updates) a script's stash and keeps it in memory so its exports find it. */
-function registerStash(name, label, slots, maxWeight, jobs, personal, coords) {
+function registerStash(name, label, slots, maxWeight, access = {}) {
+	const { groups = {}, personal = false, owner, coords } = access;
 	const stash = {
 		id: name,
 		label,
 		x: coords?.x ?? 0,
 		y: coords?.y ?? 0,
 		z: coords?.z ?? 0,
-		radius: coords ? 3 : 1e5,
-		jobs,
+		radius: 3,
+		jobs: Object.keys(groups),
+		grades: groups,
 		gangs: [],
 		personal,
 		size: {
 			rows: rowsFor(slots),
 			maxWeight
-		}
+		},
+		scriptOnly: !coords || owner !== void 0
 	};
 	scriptStashes.set(name, stash);
 	if (personal) return;
-	inventories.load(`stash:${name}`, {
+	const id = owner === void 0 ? `stash:${name}` : `stash:${name}:${owner}`;
+	inventories.load(id, {
 		kind: "stash",
 		label,
 		...stash.size,
@@ -27386,7 +27393,7 @@ async function open(source, target) {
 		case "stash": {
 			const stash = content.stashes.get(target.id) ?? scriptStashes.get(target.id);
 			const p = pedCoords(source);
-			if (!stash || !nearPlace(stash, p.x, p.y, p.z)) return FAR;
+			if (!stash || stash.scriptOnly || !nearPlace(stash, p.x, p.y, p.z)) return FAR;
 			if (!allowed(source, stash)) return DENIED;
 			const charId = charIdOf(source);
 			if (charId === null) return DENIED;
@@ -27702,7 +27709,10 @@ registerExport("RegisterUsableItem", (name, handler) => {
 registerExport("RegisterStash", (name, label, slots, maxWeight, jobs, personal) => {
 	if (typeof name !== "string") return;
 	const jobList = Array.isArray(jobs) ? jobs.filter((j) => typeof j === "string") : [];
-	registerStash(name, typeof label === "string" ? label : name, Number(slots) || 50, Number(maxWeight) || 1e5, jobList, personal === true);
+	registerStash(name, typeof label === "string" ? label : name, Number(slots) || 50, Number(maxWeight) || 1e5, {
+		groups: Object.fromEntries(jobList.map((job) => [job, 0])),
+		personal: personal === true
+	});
 });
 registerExport("OpenInventory", (source, inv) => typeof source === "number" && forceOpen(source, inv));
 
@@ -27712,7 +27722,13 @@ registerExport("OpenInventory", (source, inv) => typeof source === "number" && f
 * as in ox: a source, a stash name, `{ id, owner }`. Not answered: hooks (`registerHook`), `UpdateVehicle`, `Keyboard`.
 */
 const R$1 = "ox_inventory";
-const jobsOf = (groups) => typeof groups === "string" ? [groups] : isRecord(groups) ? Object.keys(groups) : [];
+/** ox groups: `"police"`, `{ police = 2, ambulance = 0 }` or a list of names -> job -> lowest grade. */
+function groupsOf(groups) {
+	if (typeof groups === "string") return { [groups]: 0 };
+	if (Array.isArray(groups)) return Object.fromEntries(groups.filter((g) => typeof g === "string").map((g) => [g, 0]));
+	if (!isRecord(groups)) return {};
+	return Object.fromEntries(Object.entries(groups).map(([job, grade]) => [job, typeof grade === "number" ? grade : 0]));
+}
 const toList = (items) => Array.isArray(items) ? items.map((row) => Array.isArray(row) ? {
 	name: row[0],
 	count: row[1],
@@ -27821,7 +27837,13 @@ const exportsMap$1 = {
 			y: Number(coords.y),
 			z: Number(coords.z)
 		} : void 0;
-		registerStash(String(name), String(label ?? name), Number(slots) || 50, Number(maxWeight) || 1e5, jobsOf(groups), owner === true, c);
+		const fixedOwner = typeof owner === "string" || typeof owner === "number" ? String(owner) : void 0;
+		registerStash(String(name), String(label ?? name), Number(slots) || 50, Number(maxWeight) || 1e5, {
+			groups: groupsOf(groups),
+			personal: owner === true,
+			owner: fixedOwner,
+			coords: c
+		});
 	},
 	ClearInventory: (inv, keep) => {
 		const inventory = resolve(inv);
@@ -27942,7 +27964,7 @@ const exportsMap = {
 	},
 	CreateInventory: (identifier, data) => {
 		const d = isRecord(data) ? data : {};
-		registerStash(String(identifier), String(d.label ?? identifier), Number(d.slots) || 50, Number(d.maxweight) || 1e5, [], false);
+		registerStash(String(identifier), String(d.label ?? identifier), Number(d.slots) || 50, Number(d.maxweight) || 1e5);
 	},
 	OpenInventory: (source, identifier, data) => {
 		if (typeof source !== "number") return;
@@ -27950,7 +27972,7 @@ const exportsMap = {
 		const id = String(identifier);
 		if (!resolve(id)) {
 			const d = isRecord(data) ? data : {};
-			registerStash(id, String(d.label ?? id), Number(d.slots) || 50, Number(d.maxweight) || 1e5, [], false);
+			registerStash(id, String(d.label ?? id), Number(d.slots) || 50, Number(d.maxweight) || 1e5);
 			setTimeout(() => forceOpen(source, id), 250);
 			return;
 		}

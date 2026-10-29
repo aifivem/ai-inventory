@@ -12,7 +12,13 @@ import { inventories } from "../registry";
  */
 
 const R = "ox_inventory";
-const jobsOf = (groups: unknown): string[] => (typeof groups === "string" ? [groups] : isRecord(groups) ? Object.keys(groups) : []);
+/** ox groups: `"police"`, `{ police = 2, ambulance = 0 }` or a list of names -> job -> lowest grade. */
+function groupsOf(groups: unknown): Record<string, number> {
+  if (typeof groups === "string") return { [groups]: 0 };
+  if (Array.isArray(groups)) return Object.fromEntries(groups.filter((g): g is string => typeof g === "string").map((g) => [g, 0]));
+  if (!isRecord(groups)) return {};
+  return Object.fromEntries(Object.entries(groups).map(([job, grade]) => [job, typeof grade === "number" ? grade : 0]));
+}
 const toList = (items: unknown): Array<{ name: unknown; count: unknown; metadata?: unknown }> =>
   Array.isArray(items)
     ? items.map((row) => (Array.isArray(row) ? { name: row[0], count: row[1], metadata: row[2] } : isRecord(row) ? { name: row.name, count: row.count, metadata: row.metadata } : { name: null, count: 0 }))
@@ -94,7 +100,8 @@ const exportsMap: Record<string, (...args: unknown[]) => unknown> = {
   },
   RegisterStash: (name, label, slots, maxWeight, owner, groups, coords) => {
     const c = isRecord(coords) && typeof coords.x === "number" ? { x: coords.x, y: Number(coords.y), z: Number(coords.z) } : undefined;
-    registerStash(String(name), String(label ?? name), Number(slots) || 50, Number(maxWeight) || 100_000, jobsOf(groups), owner === true, c);
+    const fixedOwner = typeof owner === "string" || typeof owner === "number" ? String(owner) : undefined;
+    registerStash(String(name), String(label ?? name), Number(slots) || 50, Number(maxWeight) || 100_000, { groups: groupsOf(groups), personal: owner === true, owner: fixedOwner, coords: c });
   },
   ClearInventory: (inv, keep) => {
     const inventory = resolve(inv);

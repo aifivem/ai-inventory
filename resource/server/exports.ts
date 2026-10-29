@@ -14,6 +14,9 @@ registerExport("RegisterUsableItem", (name: unknown, handler: unknown) => {
 registerExport("RegisterStash", (name: unknown, label: unknown, slots: unknown, maxWeight: unknown, jobs: unknown, personal: unknown) => {
   if (typeof name !== "string") return;
   const jobList = Array.isArray(jobs) ? jobs.filter((j): j is string => typeof j === "string") : [];
-  registerStash(name, typeof label === "string" ? label : name, Number(slots) || 50, Number(maxWeight) || 100_000, jobList, personal === true);
+  registerStash(name, typeof label === "string" ? label : name, Number(slots) || 50, Number(maxWeight) || 100_000, {
+    groups: Object.fromEntries(jobList.map((job) => [job, 0])),
+    personal: personal === true,
+  });
 });
 registerExport("OpenInventory", (source: unknown, inv: unknown) => typeof source === "number" && forceOpen(source, inv));

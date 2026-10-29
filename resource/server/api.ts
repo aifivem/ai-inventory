@@ -83,23 +83,38 @@ export function setMetadata(inv: unknown, slot: unknown, metadata: unknown): boo
   return true;
 }
 
+export interface StashAccess {
+  /** Job -> lowest grade (0 = any grade). Empty: everyone may open it. */
+  groups?: Record<string, number>;
+  /** Every character gets its own copy. */
+  personal?: boolean;
+  /** One fixed owner (ox `owner = "<identifier>"`): stored as `stash:<name>:<owner>`, opened by scripts only. */
+  owner?: string;
+  /** Where players open it; without a place only scripts open it (`forceOpenInventory`). */
+  coords?: { x: number; y: number; z: number };
+}
+
 /** Registers (or updates) a script's stash and keeps it in memory so its exports find it. */
-export function registerStash(name: string, label: string, slots: number, maxWeight: number, jobs: string[], personal: boolean, coords?: { x: number; y: number; z: number }): void {
+export function registerStash(name: string, label: string, slots: number, maxWeight: number, access: StashAccess = {}): void {
+  const { groups = {}, personal = false, owner, coords } = access;
   const stash: Stash = {
     id: name,
     label,
     x: coords?.x ?? 0,
     y: coords?.y ?? 0,
     z: coords?.z ?? 0,
-    radius: coords ? 3 : 100_000,
-    jobs,
+    radius: 3,
+    jobs: Object.keys(groups),
+    grades: groups,
     gangs: [],
     personal,
     size: { rows: rowsFor(slots), maxWeight },
+    scriptOnly: !coords || owner !== undefined,
   };
   scriptStashes.set(name, stash);
   if (personal) return;
-  void inventories.load(`stash:${name}`, { kind: "stash", label, ...stash.size, persistent: true }).then((inv) => {
+  const id = owner === undefined ? `stash:${name}` : `stash:${name}:${owner}`;
+  void inventories.load(id, { kind: "stash", label, ...stash.size, persistent: true }).then((inv) => {
     inv.pinned = true;
     inv.label = label;
   });

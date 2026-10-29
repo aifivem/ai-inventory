@@ -64,7 +64,7 @@ const exportsMap: Record<string, (...args: unknown[]) => unknown> = {
   },
   CreateInventory: (identifier, data) => {
     const d = isRecord(data) ? data : {};
-    registerStash(String(identifier), String(d.label ?? identifier), Number(d.slots) || 50, Number(d.maxweight) || 100_000, [], false);
+    registerStash(String(identifier), String(d.label ?? identifier), Number(d.slots) || 50, Number(d.maxweight) || 100_000);
   },
   OpenInventory: (source, identifier, data) => {
     if (typeof source !== "number") return;
@@ -72,7 +72,7 @@ const exportsMap: Record<string, (...args: unknown[]) => unknown> = {
     const id = String(identifier);
     if (!resolve(id)) {
       const d = isRecord(data) ? data : {};
-      registerStash(id, String(d.label ?? id), Number(d.slots) || 50, Number(d.maxweight) || 100_000, [], false);
+      registerStash(id, String(d.label ?? id), Number(d.slots) || 50, Number(d.maxweight) || 100_000);
       setTimeout(() => forceOpen(source, id), 250);
       return;
     }

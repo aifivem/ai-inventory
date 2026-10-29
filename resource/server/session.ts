@@ -12,7 +12,7 @@ const core = resourceExport("ai-core");
 
 function load(source: number, character: CharacterInfo): void {
   emitNet(EVENTS.drops, source, drops.points());
-  inventories.loadPlayer(source, character.id).catch((error: unknown) => log.error(`loading the inventory of character ${character.id} failed`, error));
+  inventories.loadPlayer(source, character.id, () => core.GetCharacter(source)?.id === character.id).catch((error: unknown) => log.error(`loading the inventory of character ${character.id} failed`, error));
 }
 
 function unload(source: number): void {

@@ -33,7 +33,7 @@ async function open(source: number, target: OpenTarget): Promise<OpenResult> {
     case "stash": {
       const stash = content.stashes.get(target.id) ?? scriptStashes.get(target.id);
       const p = pedCoords(source);
-      if (!stash || !nearPlace(stash, p.x, p.y, p.z)) return FAR;
+      if (!stash || stash.scriptOnly || !nearPlace(stash, p.x, p.y, p.z)) return FAR;
       if (!allowed(source, stash)) return DENIED;
       const charId = charIdOf(source);
       if (charId === null) return DENIED;

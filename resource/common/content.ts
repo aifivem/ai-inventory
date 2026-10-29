@@ -44,6 +44,10 @@ export interface Stash extends Place {
   /** Every character gets its own copy. */
   personal: boolean;
   size: GridSize;
+  /** Lowest grade per job a script asked for (ox `groups = { police = 2 }`); missing = any grade. */
+  grades?: Record<string, number>;
+  /** Only a server script may open it (no place in the world, or one fixed owner): the client `open` is refused. */
+  scriptOnly?: boolean;
 }
 
 export interface Recipe {
