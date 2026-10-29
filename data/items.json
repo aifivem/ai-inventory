@@ -2074,6 +2074,29 @@
     "image": "",
     "aliases": []
   },
+  "grape": {
+    "label": "Grapes",
+    "description": "Fresh from the vineyard.",
+    "weight": 200,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 50,
+    "type": "item",
+    "usable": true,
+    "consume": 1,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "use": {
+      "anim": "eat",
+      "time": 1500,
+      "status": {
+        "hunger": 5
+      }
+    }
+  },
   "id_card": {
     "label": "ID Card",
     "description": "An identity card with the holder's name and birth date.",
