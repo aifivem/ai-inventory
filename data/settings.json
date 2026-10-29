@@ -1,0 +1,20 @@
+{
+  "columns": 10,
+  "player": {
+    "rows": 6,
+    "maxWeight": 40000
+  },
+  "drop": {
+    "rows": 6,
+    "maxWeight": 1000000,
+    "despawnMinutes": 15
+  },
+  "trunk": {
+    "rows": 6,
+    "maxWeight": 80000
+  },
+  "glovebox": {
+    "rows": 2,
+    "maxWeight": 10000
+  }
+}

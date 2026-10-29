@@ -1,0 +1,18 @@
+{
+  "mrpd_lockers": {
+    "label": "Police Locker",
+    "coords": {
+      "x": 461.57,
+      "y": -995.94,
+      "z": 30.69
+    },
+    "radius": 1.5,
+    "jobs": [
+      "police"
+    ],
+    "gangs": [],
+    "personal": true,
+    "rows": 6,
+    "maxWeight": 100000
+  }
+}

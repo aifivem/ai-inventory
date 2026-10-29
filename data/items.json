@@ -1,0 +1,4363 @@
+{
+  "ammo-22": {
+    "label": ".22 Long Rifle",
+    "description": "",
+    "weight": 3,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 250,
+    "type": "ammo",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "ammo-22.png",
+    "aliases": []
+  },
+  "ammo-38": {
+    "label": ".38 LC",
+    "description": "",
+    "weight": 15,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 250,
+    "type": "ammo",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "ammo-38.png",
+    "aliases": []
+  },
+  "ammo-44": {
+    "label": ".44 Magnum",
+    "description": "",
+    "weight": 16,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 250,
+    "type": "ammo",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "ammo-44.png",
+    "aliases": []
+  },
+  "ammo-45": {
+    "label": ".45 ACP",
+    "description": "",
+    "weight": 15,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 250,
+    "type": "ammo",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "ammo-45.png",
+    "aliases": [
+      "smg_ammo"
+    ]
+  },
+  "ammo-50": {
+    "label": ".50 AE",
+    "description": "",
+    "weight": 45,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 250,
+    "type": "ammo",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "ammo-50.png",
+    "aliases": []
+  },
+  "ammo-9": {
+    "label": "9mm",
+    "description": "",
+    "weight": 7,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 250,
+    "type": "ammo",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "ammo-9.png",
+    "aliases": [
+      "pistol_ammo"
+    ]
+  },
+  "ammo-emp": {
+    "label": "EMP round",
+    "description": "",
+    "weight": 400,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 250,
+    "type": "ammo",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "ammo-emp.png",
+    "aliases": []
+  },
+  "ammo-firework": {
+    "label": "Firework",
+    "description": "",
+    "weight": 200,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 250,
+    "type": "ammo",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "ammo-firework.png",
+    "aliases": []
+  },
+  "ammo-flare": {
+    "label": "Flare round",
+    "description": "",
+    "weight": 38,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 250,
+    "type": "ammo",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "ammo-flare.png",
+    "aliases": []
+  },
+  "ammo-grenade": {
+    "label": "40mm Explosive",
+    "description": "",
+    "weight": 400,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 250,
+    "type": "ammo",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "ammo-grenade.png",
+    "aliases": []
+  },
+  "ammo-heavysniper": {
+    "label": ".50 BMG",
+    "description": "",
+    "weight": 51,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 250,
+    "type": "ammo",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "ammo-heavysniper.png",
+    "aliases": []
+  },
+  "ammo-laser": {
+    "label": "Laser charge",
+    "description": "",
+    "weight": 1,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 250,
+    "type": "ammo",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "ammo-laser.png",
+    "aliases": []
+  },
+  "ammo-musket": {
+    "label": ".50 Ball",
+    "description": "",
+    "weight": 38,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 250,
+    "type": "ammo",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "ammo-musket.png",
+    "aliases": []
+  },
+  "ammo-railgun": {
+    "label": "Railgun charge",
+    "description": "",
+    "weight": 150,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 250,
+    "type": "ammo",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "ammo-railgun.png",
+    "aliases": []
+  },
+  "ammo-rifle": {
+    "label": "5.56x45",
+    "description": "",
+    "weight": 4,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 250,
+    "type": "ammo",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "ammo-rifle.png",
+    "aliases": [
+      "rifle_ammo"
+    ]
+  },
+  "ammo-rifle2": {
+    "label": "7.62x39",
+    "description": "",
+    "weight": 8,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 250,
+    "type": "ammo",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "ammo-rifle2.png",
+    "aliases": []
+  },
+  "ammo-rocket": {
+    "label": "Rocket",
+    "description": "",
+    "weight": 500,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 250,
+    "type": "ammo",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "ammo-rocket.png",
+    "aliases": []
+  },
+  "ammo-shotgun": {
+    "label": "12 Gauge",
+    "description": "",
+    "weight": 38,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 250,
+    "type": "ammo",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "ammo-shotgun.png",
+    "aliases": [
+      "shotgun_ammo"
+    ]
+  },
+  "ammo-sniper": {
+    "label": "7.62x51",
+    "description": "",
+    "weight": 9,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 250,
+    "type": "ammo",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "ammo-sniper.png",
+    "aliases": [
+      "snp_ammo"
+    ]
+  },
+  "armour": {
+    "label": "Bulletproof Vest",
+    "description": "",
+    "weight": 3000,
+    "size": {
+      "w": 3,
+      "h": 3
+    },
+    "stack": 1,
+    "type": "item",
+    "usable": true,
+    "consume": 1,
+    "close": true,
+    "image": "armour.png",
+    "aliases": [],
+    "use": {
+      "anim": "armour",
+      "time": 3500,
+      "status": {}
+    }
+  },
+  "at_barrel": {
+    "label": "Heavy Barrel",
+    "description": "",
+    "weight": 280,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "at_barrel.png",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_AR_BARREL_02",
+        "COMPONENT_AT_BP_BARREL_02",
+        "COMPONENT_AT_CR_BARREL_02",
+        "COMPONENT_AT_MG_BARREL_02",
+        "COMPONENT_AT_MRFL_BARREL_02",
+        "COMPONENT_AT_SB_BARREL_02",
+        "COMPONENT_AT_SC_BARREL_02",
+        "COMPONENT_AT_SR_BARREL_02"
+      ]
+    }
+  },
+  "at_clip_drum_rifle": {
+    "label": "Rifle Drum",
+    "description": "",
+    "weight": 280,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_ASSAULTRIFLE_CLIP_03",
+        "COMPONENT_COMPACTRIFLE_CLIP_03",
+        "COMPONENT_CARBINERIFLE_CLIP_03",
+        "COMPONENT_SPECIALCARBINE_CLIP_03"
+      ]
+    }
+  },
+  "at_clip_drum_shotgun": {
+    "label": "Shotgun Drum",
+    "description": "",
+    "weight": 280,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_HEAVYSHOTGUN_CLIP_03"
+      ]
+    }
+  },
+  "at_clip_drum_smg": {
+    "label": "SMG Drum",
+    "description": "",
+    "weight": 280,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_COMBATPDW_CLIP_03",
+        "COMPONENT_MACHINEPISTOL_CLIP_03",
+        "COMPONENT_SMG_CLIP_03"
+      ]
+    }
+  },
+  "at_clip_extended_mg": {
+    "label": "Extended MG Clip",
+    "description": "",
+    "weight": 280,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_GUSENBERG_CLIP_02",
+        "COMPONENT_MG_CLIP_02",
+        "COMPONENT_COMBATMG_CLIP_02",
+        "COMPONENT_COMBATMG_MK2_CLIP_02"
+      ]
+    }
+  },
+  "at_clip_extended_pistol": {
+    "label": "Extended Pistol Clip",
+    "description": "",
+    "weight": 280,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_APPISTOL_CLIP_02",
+        "COMPONENT_CERAMICPISTOL_CLIP_02",
+        "COMPONENT_COMBATPISTOL_CLIP_02",
+        "COMPONENT_HEAVYPISTOL_CLIP_02",
+        "COMPONENT_PISTOL_CLIP_02",
+        "COMPONENT_PISTOL_MK2_CLIP_02",
+        "COMPONENT_PISTOL50_CLIP_02",
+        "COMPONENT_SNSPISTOL_CLIP_02",
+        "COMPONENT_SNSPISTOL_MK2_CLIP_02",
+        "COMPONENT_VINTAGEPISTOL_CLIP_02",
+        "COMPONENT_TECPISTOL_CLIP_02"
+      ]
+    }
+  },
+  "at_clip_extended_rifle": {
+    "label": "Extended Rifle Clip",
+    "description": "",
+    "weight": 280,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_ADVANCEDRIFLE_CLIP_02",
+        "COMPONENT_ASSAULTRIFLE_CLIP_02",
+        "COMPONENT_ASSAULTRIFLE_MK2_CLIP_02",
+        "COMPONENT_BULLPUPRIFLE_CLIP_02",
+        "COMPONENT_BULLPUPRIFLE_MK2_CLIP_02",
+        "COMPONENT_CARBINERIFLE_CLIP_02",
+        "COMPONENT_CARBINERIFLE_MK2_CLIP_02",
+        "COMPONENT_COMPACTRIFLE_CLIP_02",
+        "COMPONENT_HEAVYRIFLE_CLIP_02",
+        "COMPONENT_MILITARYRIFLE_CLIP_02",
+        "COMPONENT_SPECIALCARBINE_CLIP_02",
+        "COMPONENT_SPECIALCARBINE_MK2_CLIP_02",
+        "COMPONENT_TACTICALRIFLE_CLIP_02",
+        "COMPONENT_BATTLERIFLE_CLIP_02"
+      ]
+    }
+  },
+  "at_clip_extended_shotgun": {
+    "label": "Extended Shotgun Clip",
+    "description": "",
+    "weight": 280,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_ASSAULTSHOTGUN_CLIP_02",
+        "COMPONENT_HEAVYSHOTGUN_CLIP_02"
+      ]
+    }
+  },
+  "at_clip_extended_smg": {
+    "label": "Extended SMG Clip",
+    "description": "",
+    "weight": 280,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_ASSAULTSMG_CLIP_02",
+        "COMPONENT_COMBATPDW_CLIP_02",
+        "COMPONENT_MACHINEPISTOL_CLIP_02",
+        "COMPONENT_MICROSMG_CLIP_02",
+        "COMPONENT_MINISMG_CLIP_02",
+        "COMPONENT_SMG_CLIP_02",
+        "COMPONENT_SMG_MK2_CLIP_02"
+      ]
+    }
+  },
+  "at_clip_extended_sniper": {
+    "label": "Extended Sniper Clip",
+    "description": "",
+    "weight": 280,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_HEAVYSNIPER_MK2_CLIP_02",
+        "COMPONENT_MARKSMANRIFLE_CLIP_02",
+        "COMPONENT_MARKSMANRIFLE_MK2_CLIP_02"
+      ]
+    }
+  },
+  "at_compensator": {
+    "label": "Compensator",
+    "description": "",
+    "weight": 280,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_PI_COMP",
+        "COMPONENT_AT_PI_COMP_02",
+        "COMPONENT_AT_PI_COMP_03"
+      ]
+    }
+  },
+  "at_flashlight": {
+    "label": "Tactical Flashlight",
+    "description": "",
+    "weight": 120,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "at_flashlight.png",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_AR_FLSH",
+        "COMPONENT_AT_AR_FLSH_REH",
+        "COMPONENT_AT_PI_FLSH",
+        "COMPONENT_AT_PI_FLSH_02",
+        "COMPONENT_AT_PI_FLSH_03"
+      ]
+    }
+  },
+  "at_grip": {
+    "label": "Grip",
+    "description": "",
+    "weight": 280,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "at_grip.png",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_AR_AFGRIP",
+        "COMPONENT_AT_AR_AFGRIP_02"
+      ]
+    }
+  },
+  "at_muzzle_bell": {
+    "label": "Bell Muzzle",
+    "description": "",
+    "weight": 80,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "at_muzzle_bell.png",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_MUZZLE_09"
+      ]
+    }
+  },
+  "at_muzzle_fat": {
+    "label": "Fat Muzzle",
+    "description": "",
+    "weight": 80,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "at_muzzle_fat.png",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_MUZZLE_03"
+      ]
+    }
+  },
+  "at_muzzle_flat": {
+    "label": "Flat Muzzle",
+    "description": "",
+    "weight": 80,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "at_muzzle_flat.png",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_MUZZLE_01"
+      ]
+    }
+  },
+  "at_muzzle_heavy": {
+    "label": "Heavy Muzzle",
+    "description": "",
+    "weight": 80,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "at_muzzle_heavy.png",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_MUZZLE_05"
+      ]
+    }
+  },
+  "at_muzzle_precision": {
+    "label": "Precision Muzzle",
+    "description": "",
+    "weight": 80,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_MUZZLE_04"
+      ]
+    }
+  },
+  "at_muzzle_slanted": {
+    "label": "Slanted Muzzle",
+    "description": "",
+    "weight": 80,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "at_muzzle_slanted.png",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_MUZZLE_06"
+      ]
+    }
+  },
+  "at_muzzle_split": {
+    "label": "Split Muzzle",
+    "description": "",
+    "weight": 80,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "at_muzzle_split.png",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_MUZZLE_07"
+      ]
+    }
+  },
+  "at_muzzle_squared": {
+    "label": "Squared Muzzle",
+    "description": "",
+    "weight": 80,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "at_muzzle_squared.png",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_MUZZLE_08"
+      ]
+    }
+  },
+  "at_muzzle_tactical": {
+    "label": "Tactical Muzzle",
+    "description": "",
+    "weight": 80,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "at_muzzle_tactical.png",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_MUZZLE_02"
+      ]
+    }
+  },
+  "at_scope_advanced": {
+    "label": "Advanced Scope",
+    "description": "",
+    "weight": 280,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "at_scope_advanced.png",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_SCOPE_MAX"
+      ]
+    }
+  },
+  "at_scope_holo": {
+    "label": "Holographic Sight",
+    "description": "",
+    "weight": 280,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "at_scope_holo.png",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_PI_RAIL",
+        "COMPONENT_AT_PI_RAIL_02",
+        "COMPONENT_AT_SIGHTS",
+        "COMPONENT_AT_SIGHTS_SMG"
+      ]
+    }
+  },
+  "at_scope_large": {
+    "label": "Large Scope",
+    "description": "",
+    "weight": 280,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "at_scope_large.png",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_SCOPE_LARGE_MK2"
+      ]
+    }
+  },
+  "at_scope_macro": {
+    "label": "Macro Scope",
+    "description": "",
+    "weight": 280,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_SCOPE_MACRO",
+        "COMPONENT_AT_SCOPE_MACRO_02",
+        "COMPONENT_AT_SCOPE_MACRO_MK2",
+        "COMPONENT_AT_SCOPE_MACRO_02_MK2",
+        "COMPONENT_AT_SCOPE_MACRO_02_SMG_MK2"
+      ]
+    }
+  },
+  "at_scope_medium": {
+    "label": "Medium Scope",
+    "description": "",
+    "weight": 280,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "at_scope_medium.png",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_SCOPE_MEDIUM",
+        "COMPONENT_AT_SCOPE_MEDIUM_MK2"
+      ]
+    }
+  },
+  "at_scope_nv": {
+    "label": "NV Scope",
+    "description": "",
+    "weight": 420,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "at_scope_nv.png",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_SCOPE_NV"
+      ]
+    }
+  },
+  "at_scope_small": {
+    "label": "Small Scope",
+    "description": "",
+    "weight": 280,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "at_scope_small.png",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_SCOPE_SMALL",
+        "COMPONENT_AT_SCOPE_SMALL_02",
+        "COMPONENT_AT_SCOPE_SMALL_MK2",
+        "COMPONENT_AT_SCOPE_SMALL_SMG_MK2"
+      ]
+    }
+  },
+  "at_scope_thermal": {
+    "label": "Thermal Scope",
+    "description": "",
+    "weight": 420,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "at_scope_thermal.png",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_SCOPE_THERMAL"
+      ]
+    }
+  },
+  "at_skin_ballas": {
+    "label": "Ballas Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_KNUCKLE_VARMOD_BALLAS"
+      ]
+    }
+  },
+  "at_skin_blagueurs": {
+    "label": "Blagueurs Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_BAT_VARMOD_XM3"
+      ]
+    }
+  },
+  "at_skin_bodyguard": {
+    "label": "Bodyguard Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_REVOLVER_VARMOD_GOON",
+        "COMPONENT_SWITCHBLADE_VARMOD_VAR2"
+      ]
+    }
+  },
+  "at_skin_boom": {
+    "label": "Boom Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_ASSAULTRIFLE_MK2_CAMO_10",
+        "COMPONENT_BULLPUPRIFLE_MK2_CAMO_10",
+        "COMPONENT_CARBINERIFLE_MK2_CAMO_10",
+        "COMPONENT_COMBATMG_MK2_CAMO_10",
+        "COMPONENT_HEAVYSNIPER_MK2_CAMO_10",
+        "COMPONENT_MARKSMANRIFLE_MK2_CAMO_10",
+        "COMPONENT_PISTOL_MK2_CAMO_10",
+        "COMPONENT_PUMPSHOTGUN_MK2_CAMO_10",
+        "COMPONENT_REVOLVER_MK2_CAMO_10",
+        "COMPONENT_SMG_MK2_CAMO_10",
+        "COMPONENT_SNSPISTOL_MK2_CAMO_10",
+        "COMPONENT_SPECIALCARBINE_MK2_CAMO_10"
+      ]
+    }
+  },
+  "at_skin_brushstroke": {
+    "label": "Brushstroke Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_ASSAULTRIFLE_MK2_CAMO_02",
+        "COMPONENT_BULLPUPRIFLE_MK2_CAMO_02",
+        "COMPONENT_CARBINERIFLE_MK2_CAMO_02",
+        "COMPONENT_COMBATMG_MK2_CAMO_02",
+        "COMPONENT_HEAVYSNIPER_MK2_CAMO_02",
+        "COMPONENT_MARKSMANRIFLE_MK2_CAMO_02",
+        "COMPONENT_PISTOL_MK2_CAMO_02",
+        "COMPONENT_PUMPSHOTGUN_MK2_CAMO_02",
+        "COMPONENT_REVOLVER_MK2_CAMO_02",
+        "COMPONENT_SMG_MK2_CAMO_02",
+        "COMPONENT_SNSPISTOL_MK2_CAMO_02",
+        "COMPONENT_SPECIALCARBINE_MK2_CAMO_02"
+      ]
+    }
+  },
+  "at_skin_bulletholes": {
+    "label": "Bullet Holes Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_BAT_VARMOD_XM3_02"
+      ]
+    }
+  },
+  "at_skin_burgershot": {
+    "label": "Burger Shot Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_BAT_VARMOD_XM3_03"
+      ]
+    }
+  },
+  "at_skin_camo": {
+    "label": "Camo Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_ASSAULTRIFLE_MK2_CAMO",
+        "COMPONENT_BULLPUPRIFLE_MK2_CAMO",
+        "COMPONENT_CARBINERIFLE_MK2_CAMO",
+        "COMPONENT_COMBATMG_MK2_CAMO",
+        "COMPONENT_HEAVYSNIPER_MK2_CAMO",
+        "COMPONENT_MARKSMANRIFLE_MK2_CAMO",
+        "COMPONENT_PISTOL_MK2_CAMO",
+        "COMPONENT_PUMPSHOTGUN_MK2_CAMO",
+        "COMPONENT_REVOLVER_MK2_CAMO",
+        "COMPONENT_SMG_MK2_CAMO",
+        "COMPONENT_SNSPISTOL_MK2_CAMO",
+        "COMPONENT_SPECIALCARBINE_MK2_CAMO"
+      ]
+    }
+  },
+  "at_skin_cluckinbell": {
+    "label": "Cluckin Bell Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_BAT_VARMOD_XM3_04"
+      ]
+    }
+  },
+  "at_skin_diamond": {
+    "label": "Diamond Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_KNUCKLE_VARMOD_DIAMOND"
+      ]
+    }
+  },
+  "at_skin_dollar": {
+    "label": "Dollar Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_KNUCKLE_VARMOD_DOLLAR"
+      ]
+    }
+  },
+  "at_skin_fatalincursion": {
+    "label": "Fatal Incursion Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_BAT_VARMOD_XM3_05"
+      ]
+    }
+  },
+  "at_skin_festive": {
+    "label": "Festive Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_RAYPISTOL_VARMOD_XMAS18"
+      ]
+    }
+  },
+  "at_skin_geometric": {
+    "label": "Geometric Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_ASSAULTRIFLE_MK2_CAMO_09",
+        "COMPONENT_BULLPUPRIFLE_MK2_CAMO_09",
+        "COMPONENT_CARBINERIFLE_MK2_CAMO_09",
+        "COMPONENT_COMBATMG_MK2_CAMO_09",
+        "COMPONENT_HEAVYSNIPER_MK2_CAMO_09",
+        "COMPONENT_MARKSMANRIFLE_MK2_CAMO_09",
+        "COMPONENT_PISTOL_MK2_CAMO_09",
+        "COMPONENT_PUMPSHOTGUN_MK2_CAMO_09",
+        "COMPONENT_REVOLVER_MK2_CAMO_09",
+        "COMPONENT_SMG_MK2_CAMO_09",
+        "COMPONENT_SNSPISTOL_MK2_CAMO_09",
+        "COMPONENT_SPECIALCARBINE_MK2_CAMO_09"
+      ]
+    }
+  },
+  "at_skin_hate": {
+    "label": "Hate Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_KNUCKLE_VARMOD_HATE"
+      ]
+    }
+  },
+  "at_skin_king": {
+    "label": "King Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_KNUCKLE_VARMOD_KING"
+      ]
+    }
+  },
+  "at_skin_leopard": {
+    "label": "Leopard Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_ASSAULTRIFLE_MK2_CAMO_07",
+        "COMPONENT_BULLPUPRIFLE_MK2_CAMO_07",
+        "COMPONENT_CARBINERIFLE_MK2_CAMO_07",
+        "COMPONENT_COMBATMG_MK2_CAMO_07",
+        "COMPONENT_HEAVYSNIPER_MK2_CAMO_07",
+        "COMPONENT_MARKSMANRIFLE_MK2_CAMO_07",
+        "COMPONENT_PISTOL_MK2_CAMO_07",
+        "COMPONENT_PUMPSHOTGUN_MK2_CAMO_07",
+        "COMPONENT_REVOLVER_MK2_CAMO_07",
+        "COMPONENT_SMG_MK2_CAMO_07",
+        "COMPONENT_SNSPISTOL_MK2_CAMO_07",
+        "COMPONENT_SPECIALCARBINE_MK2_CAMO_07"
+      ]
+    }
+  },
+  "at_skin_love": {
+    "label": "Love Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_KNUCKLE_VARMOD_LOVE"
+      ]
+    }
+  },
+  "at_skin_luchalibre": {
+    "label": "Lucha Libre Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_BAT_VARMOD_XM3_06"
+      ]
+    }
+  },
+  "at_skin_luxe": {
+    "label": "Luxury Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_ASSAULTRIFLE_VARMOD_LUXE",
+        "COMPONENT_ASSAULTSMG_VARMOD_LOWRIDER",
+        "COMPONENT_CARBINERIFLE_VARMOD_LUXE",
+        "COMPONENT_COMBATPISTOL_VARMOD_LOWRIDER",
+        "COMPONENT_MARKSMANRIFLE_VARMOD_LUXE",
+        "COMPONENT_MG_VARMOD_LOWRIDER",
+        "COMPONENT_MICROSMG_VARMOD_LUXE",
+        "COMPONENT_PISTOL_VARMOD_LUXE",
+        "COMPONENT_PUMPSHOTGUN_VARMOD_LOWRIDER",
+        "COMPONENT_SMG_VARMOD_LUXE"
+      ]
+    }
+  },
+  "at_skin_metal": {
+    "label": "Metal Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_ADVANCEDRIFLE_VARMOD_LUXE",
+        "COMPONENT_APPISTOL_VARMOD_LUXE",
+        "COMPONENT_BULLPUPRIFLE_VARMOD_LOW",
+        "COMPONENT_SAWNOFFSHOTGUN_VARMOD_LUXE",
+        "COMPONENT_SPECIALCARBINE_VARMOD_LOWRIDER"
+      ]
+    }
+  },
+  "at_skin_patriotic": {
+    "label": "Patriotic Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_ASSAULTRIFLE_MK2_CAMO_IND_01",
+        "COMPONENT_BULLPUPRIFLE_MK2_CAMO_IND_01",
+        "COMPONENT_CARBINERIFLE_MK2_CAMO_IND_01",
+        "COMPONENT_COMBATMG_MK2_CAMO_IND_01",
+        "COMPONENT_HEAVYSNIPER_MK2_CAMO_IND_01",
+        "COMPONENT_MARKSMANRIFLE_MK2_CAMO_IND_01",
+        "COMPONENT_PISTOL_MK2_CAMO_IND_01",
+        "COMPONENT_PUMPSHOTGUN_MK2_CAMO_IND_01",
+        "COMPONENT_REVOLVER_MK2_CAMO_IND_01",
+        "COMPONENT_SMG_MK2_CAMO_IND_01",
+        "COMPONENT_SNSPISTOL_MK2_CAMO_IND_01",
+        "COMPONENT_SPECIALCARBINE_MK2_CAMO_IND_01"
+      ]
+    }
+  },
+  "at_skin_pearl": {
+    "label": "Pearl Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_PISTOL50_VARMOD_LUXE"
+      ]
+    }
+  },
+  "at_skin_perseus": {
+    "label": "Perseus Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_ASSAULTRIFLE_MK2_CAMO_06",
+        "COMPONENT_BULLPUPRIFLE_MK2_CAMO_06",
+        "COMPONENT_CARBINERIFLE_MK2_CAMO_06",
+        "COMPONENT_COMBATMG_MK2_CAMO_06",
+        "COMPONENT_HEAVYSNIPER_MK2_CAMO_06",
+        "COMPONENT_MARKSMANRIFLE_MK2_CAMO_06",
+        "COMPONENT_PISTOL_MK2_CAMO_06",
+        "COMPONENT_PUMPSHOTGUN_MK2_CAMO_06",
+        "COMPONENT_REVOLVER_MK2_CAMO_06",
+        "COMPONENT_SMG_MK2_CAMO_06",
+        "COMPONENT_SNSPISTOL_MK2_CAMO_06",
+        "COMPONENT_SPECIALCARBINE_MK2_CAMO_06"
+      ]
+    }
+  },
+  "at_skin_pimp": {
+    "label": "Pimp Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_KNUCKLE_VARMOD_PIMP"
+      ]
+    }
+  },
+  "at_skin_player": {
+    "label": "Player Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_KNUCKLE_VARMOD_PLAYER"
+      ]
+    }
+  },
+  "at_skin_security": {
+    "label": "Security Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_APPISTOL_VARMOD_SECURITY",
+        "COMPONENT_MICROSMG_VARMOD_SECURITY"
+      ]
+    }
+  },
+  "at_skin_sessanta": {
+    "label": "Sessanta Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_ASSAULTRIFLE_MK2_CAMO_05",
+        "COMPONENT_BULLPUPRIFLE_MK2_CAMO_05",
+        "COMPONENT_CARBINERIFLE_MK2_CAMO_05",
+        "COMPONENT_COMBATMG_MK2_CAMO_05",
+        "COMPONENT_HEAVYSNIPER_MK2_CAMO_05",
+        "COMPONENT_MARKSMANRIFLE_MK2_CAMO_05",
+        "COMPONENT_PISTOL_MK2_CAMO_05",
+        "COMPONENT_PUMPSHOTGUN_MK2_CAMO_05",
+        "COMPONENT_REVOLVER_MK2_CAMO_05",
+        "COMPONENT_SMG_MK2_CAMO_05",
+        "COMPONENT_SNSPISTOL_MK2_CAMO_05",
+        "COMPONENT_SPECIALCARBINE_MK2_CAMO_05"
+      ]
+    }
+  },
+  "at_skin_skull": {
+    "label": "Skull Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_ASSAULTRIFLE_MK2_CAMO_04",
+        "COMPONENT_BULLPUPRIFLE_MK2_CAMO_04",
+        "COMPONENT_CARBINERIFLE_MK2_CAMO_04",
+        "COMPONENT_COMBATMG_MK2_CAMO_04",
+        "COMPONENT_HEAVYSNIPER_MK2_CAMO_04",
+        "COMPONENT_MARKSMANRIFLE_MK2_CAMO_04",
+        "COMPONENT_PISTOL_MK2_CAMO_04",
+        "COMPONENT_PUMPSHOTGUN_MK2_CAMO_04",
+        "COMPONENT_REVOLVER_MK2_CAMO_04",
+        "COMPONENT_SMG_MK2_CAMO_04",
+        "COMPONENT_SNSPISTOL_MK2_CAMO_04",
+        "COMPONENT_SPECIALCARBINE_MK2_CAMO_04"
+      ]
+    }
+  },
+  "at_skin_splatter": {
+    "label": "Splatter Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_BAT_VARMOD_XM3_01"
+      ]
+    }
+  },
+  "at_skin_tiedye": {
+    "label": "Tie-Dye Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_BAT_VARMOD_XM3_08"
+      ]
+    }
+  },
+  "at_skin_trippy": {
+    "label": "Trippy Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_BAT_VARMOD_XM3_07"
+      ]
+    }
+  },
+  "at_skin_vagos": {
+    "label": "Vagos Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_KNUCKLE_VARMOD_VAGOS"
+      ]
+    }
+  },
+  "at_skin_vip": {
+    "label": "VIP Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_REVOLVER_VARMOD_BOSS",
+        "COMPONENT_SWITCHBLADE_VARMOD_VAR1"
+      ]
+    }
+  },
+  "at_skin_wall": {
+    "label": "Wall Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_BAT_VARMOD_XM3_09"
+      ]
+    }
+  },
+  "at_skin_wood": {
+    "label": "Wood Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_HEAVYPISTOL_VARMOD_LUXE",
+        "COMPONENT_SNIPERRIFLE_VARMOD_LUXE",
+        "COMPONENT_SNSPISTOL_VARMOD_LOWRIDER"
+      ]
+    }
+  },
+  "at_skin_woodland": {
+    "label": "Woodland Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_ASSAULTRIFLE_MK2_CAMO_03",
+        "COMPONENT_BULLPUPRIFLE_MK2_CAMO_03",
+        "COMPONENT_CARBINERIFLE_MK2_CAMO_03",
+        "COMPONENT_COMBATMG_MK2_CAMO_03",
+        "COMPONENT_HEAVYSNIPER_MK2_CAMO_03",
+        "COMPONENT_MARKSMANRIFLE_MK2_CAMO_03",
+        "COMPONENT_PISTOL_MK2_CAMO_03",
+        "COMPONENT_PUMPSHOTGUN_MK2_CAMO_03",
+        "COMPONENT_REVOLVER_MK2_CAMO_03",
+        "COMPONENT_SMG_MK2_CAMO_03",
+        "COMPONENT_SNSPISTOL_MK2_CAMO_03",
+        "COMPONENT_SPECIALCARBINE_MK2_CAMO_03"
+      ]
+    }
+  },
+  "at_skin_zebra": {
+    "label": "Zebra Weapon Kit",
+    "description": "",
+    "weight": 50,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_ASSAULTRIFLE_MK2_CAMO_08",
+        "COMPONENT_BULLPUPRIFLE_MK2_CAMO_08",
+        "COMPONENT_CARBINERIFLE_MK2_CAMO_08",
+        "COMPONENT_COMBATMG_MK2_CAMO_08",
+        "COMPONENT_HEAVYSNIPER_MK2_CAMO_08",
+        "COMPONENT_MARKSMANRIFLE_MK2_CAMO_08",
+        "COMPONENT_PISTOL_MK2_CAMO_08",
+        "COMPONENT_PUMPSHOTGUN_MK2_CAMO_08",
+        "COMPONENT_REVOLVER_MK2_CAMO_08",
+        "COMPONENT_SMG_MK2_CAMO_08",
+        "COMPONENT_SNSPISTOL_MK2_CAMO_08",
+        "COMPONENT_SPECIALCARBINE_MK2_CAMO_08"
+      ]
+    }
+  },
+  "at_suppressor_heavy": {
+    "label": "Tactical Suppressor",
+    "description": "",
+    "weight": 280,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_AR_SUPP",
+        "COMPONENT_AT_AR_SUPP_02",
+        "COMPONENT_AT_SR_SUPP",
+        "COMPONENT_AT_SR_SUPP_03"
+      ]
+    }
+  },
+  "at_suppressor_light": {
+    "label": "Suppressor",
+    "description": "",
+    "weight": 280,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "component",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "component": {
+      "hashes": [
+        "COMPONENT_AT_PI_SUPP",
+        "COMPONENT_AT_PI_SUPP_02",
+        "COMPONENT_CERAMICPISTOL_SUPP",
+        "COMPONENT_PISTOLXM3_SUPP"
+      ]
+    }
+  },
+  "bandage": {
+    "label": "Bandage",
+    "description": "Stops bleeding and restores a little health.",
+    "weight": 115,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "item",
+    "usable": true,
+    "consume": 1,
+    "close": true,
+    "image": "bandage.png",
+    "aliases": [],
+    "use": {
+      "anim": "bandage",
+      "time": 2500,
+      "status": {}
+    }
+  },
+  "burger": {
+    "label": "Burger",
+    "description": "",
+    "weight": 220,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "item",
+    "usable": true,
+    "consume": 1,
+    "close": true,
+    "image": "burger.png",
+    "aliases": [],
+    "use": {
+      "anim": "eat",
+      "time": 2500,
+      "status": {
+        "hunger": 25
+      }
+    }
+  },
+  "lockpick": {
+    "label": "Lockpick",
+    "description": "",
+    "weight": 160,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "lockpick.png",
+    "aliases": []
+  },
+  "paperbag": {
+    "label": "Paper Bag",
+    "description": "",
+    "weight": 1,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "paperbag.png",
+    "aliases": []
+  },
+  "parachute": {
+    "label": "Parachute",
+    "description": "",
+    "weight": 8000,
+    "size": {
+      "w": 2,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "item",
+    "usable": true,
+    "consume": 1,
+    "close": true,
+    "image": "parachute.png",
+    "aliases": []
+  },
+  "phone": {
+    "label": "Phone",
+    "description": "",
+    "weight": 190,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "phone.png",
+    "aliases": []
+  },
+  "radio": {
+    "label": "Radio",
+    "description": "",
+    "weight": 1000,
+    "size": {
+      "w": 1,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "radio.png",
+    "aliases": []
+  },
+  "scrapmetal": {
+    "label": "Scrap Metal",
+    "description": "",
+    "weight": 80,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 50,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "scrapmetal.png",
+    "aliases": []
+  },
+  "sprunk": {
+    "label": "Sprunk",
+    "description": "",
+    "weight": 350,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "item",
+    "usable": true,
+    "consume": 1,
+    "close": true,
+    "image": "sprunk.png",
+    "aliases": [],
+    "use": {
+      "anim": "drink",
+      "time": 2500,
+      "status": {
+        "thirst": 25
+      }
+    }
+  },
+  "water": {
+    "label": "Water",
+    "description": "",
+    "weight": 500,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "item",
+    "usable": true,
+    "consume": 1,
+    "close": true,
+    "image": "water.png",
+    "aliases": [],
+    "use": {
+      "anim": "drink",
+      "time": 2500,
+      "status": {
+        "thirst": 35
+      }
+    }
+  },
+  "weapon_advancedrifle": {
+    "label": "Advanced Rifle",
+    "description": "",
+    "weight": 3100,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_advancedrifle.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rifle",
+      "throwable": false
+    }
+  },
+  "weapon_appistol": {
+    "label": "AP Pistol",
+    "description": "",
+    "weight": 1400,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_appistol.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-9",
+      "throwable": false
+    }
+  },
+  "weapon_assaultrifle": {
+    "label": "Assault Rifle",
+    "description": "",
+    "weight": 4500,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_assaultrifle.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rifle2",
+      "throwable": false
+    }
+  },
+  "weapon_assaultrifle_mk2": {
+    "label": "Assault Rifle MK2",
+    "description": "",
+    "weight": 2950,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_assaultrifle_mk2.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rifle2",
+      "throwable": false
+    }
+  },
+  "weapon_assaultshotgun": {
+    "label": "Assault Shotgun",
+    "description": "",
+    "weight": 5200,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_assaultshotgun.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-shotgun",
+      "throwable": false
+    }
+  },
+  "weapon_assaultsmg": {
+    "label": "Assault SMG",
+    "description": "",
+    "weight": 2900,
+    "size": {
+      "w": 3,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_assaultsmg.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rifle",
+      "throwable": false
+    }
+  },
+  "weapon_autoshotgun": {
+    "label": "Sweeper Shotgun",
+    "description": "",
+    "weight": 4400,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_autoshotgun.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-shotgun",
+      "throwable": false
+    }
+  },
+  "weapon_ball": {
+    "label": "Ball",
+    "description": "",
+    "weight": 149,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_ball.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": true
+    }
+  },
+  "weapon_bat": {
+    "label": "Bat",
+    "description": "",
+    "weight": 1134,
+    "size": {
+      "w": 1,
+      "h": 3
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_bat.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_battleaxe": {
+    "label": "Battle Axe",
+    "description": "",
+    "weight": 6500,
+    "size": {
+      "w": 1,
+      "h": 3
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_battleaxe.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_battlerifle": {
+    "label": "Battle Rifle",
+    "description": "",
+    "weight": 3300,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rifle2",
+      "throwable": false
+    }
+  },
+  "weapon_bottle": {
+    "label": "Bottle",
+    "description": "",
+    "weight": 350,
+    "size": {
+      "w": 1,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_bottle.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_bullpuprifle": {
+    "label": "Bullpup Rifle",
+    "description": "",
+    "weight": 2900,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_bullpuprifle.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rifle",
+      "throwable": false
+    }
+  },
+  "weapon_bullpuprifle_mk2": {
+    "label": "Bullpup Rifle MK2",
+    "description": "",
+    "weight": 2900,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_bullpuprifle_mk2.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rifle",
+      "throwable": false
+    }
+  },
+  "weapon_bullpupshotgun": {
+    "label": "Bullpup Shotgun",
+    "description": "",
+    "weight": 3100,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_bullpupshotgun.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-shotgun",
+      "throwable": false
+    }
+  },
+  "weapon_bzgas": {
+    "label": "BZ Gas",
+    "description": "",
+    "weight": 600,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_bzgas.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": true
+    }
+  },
+  "weapon_candycane": {
+    "label": "Candy Cane",
+    "description": "",
+    "weight": 85,
+    "size": {
+      "w": 1,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_candycane.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_carbinerifle": {
+    "label": "Carbine Rifle",
+    "description": "",
+    "weight": 3100,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_carbinerifle.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rifle",
+      "throwable": false
+    }
+  },
+  "weapon_carbinerifle_mk2": {
+    "label": "Carbine Rifle MK2",
+    "description": "",
+    "weight": 3000,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_carbinerifle_mk2.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rifle",
+      "throwable": false
+    }
+  },
+  "weapon_ceramicpistol": {
+    "label": "Ceramic Pistol",
+    "description": "",
+    "weight": 800,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_ceramicpistol.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-9",
+      "throwable": false
+    }
+  },
+  "weapon_combatmg": {
+    "label": "Combat MG",
+    "description": "",
+    "weight": 7500,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_combatmg.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rifle",
+      "throwable": false
+    }
+  },
+  "weapon_combatmg_mk2": {
+    "label": "Combat MG MK2",
+    "description": "",
+    "weight": 8000,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_combatmg_mk2.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rifle2",
+      "throwable": false
+    }
+  },
+  "weapon_combatpdw": {
+    "label": "Combat PDW",
+    "description": "",
+    "weight": 2300,
+    "size": {
+      "w": 3,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_combatpdw.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-9",
+      "throwable": false
+    }
+  },
+  "weapon_combatpistol": {
+    "label": "Combat Pistol",
+    "description": "",
+    "weight": 785,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_combatpistol.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-9",
+      "throwable": false
+    }
+  },
+  "weapon_combatshotgun": {
+    "label": "Combat Shotgun",
+    "description": "",
+    "weight": 4400,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_combatshotgun.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-shotgun",
+      "throwable": false
+    }
+  },
+  "weapon_compactlauncher": {
+    "label": "Compact Grenade Launcher",
+    "description": "",
+    "weight": 2500,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_compactlauncher.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-grenade",
+      "throwable": false
+    }
+  },
+  "weapon_compactrifle": {
+    "label": "Compact Rifle",
+    "description": "",
+    "weight": 3600,
+    "size": {
+      "w": 3,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_compactrifle.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rifle2",
+      "throwable": false
+    }
+  },
+  "weapon_crowbar": {
+    "label": "Crowbar",
+    "description": "",
+    "weight": 2500,
+    "size": {
+      "w": 1,
+      "h": 3
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_crowbar.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_dagger": {
+    "label": "Dagger",
+    "description": "",
+    "weight": 800,
+    "size": {
+      "w": 1,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_dagger.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_dbshotgun": {
+    "label": "Double Barrel Shotgun",
+    "description": "",
+    "weight": 3175,
+    "size": {
+      "w": 3,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_dbshotgun.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-shotgun",
+      "throwable": false
+    }
+  },
+  "weapon_doubleaction": {
+    "label": "Double Action Revolver",
+    "description": "",
+    "weight": 940,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_doubleaction.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-38",
+      "throwable": false
+    }
+  },
+  "weapon_emplauncher": {
+    "label": "Compact EMP Launcher",
+    "description": "",
+    "weight": 2750,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_emplauncher.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-emp",
+      "throwable": false
+    }
+  },
+  "weapon_fertilizercan": {
+    "label": "Fertilizer Can",
+    "description": "",
+    "weight": 12000,
+    "size": {
+      "w": 2,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_fertilizercan.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_fireextinguisher": {
+    "label": "Fire Extinguisher",
+    "description": "",
+    "weight": 8616,
+    "size": {
+      "w": 2,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_fireextinguisher.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_firework": {
+    "label": "Firework Launcher",
+    "description": "",
+    "weight": 1000,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_firework.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-firework",
+      "throwable": false
+    }
+  },
+  "weapon_flare": {
+    "label": "Flare",
+    "description": "",
+    "weight": 250,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_flare.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": true
+    }
+  },
+  "weapon_flaregun": {
+    "label": "Flare Gun",
+    "description": "",
+    "weight": 1000,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_flaregun.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-flare",
+      "throwable": false
+    }
+  },
+  "weapon_flashlight": {
+    "label": "Flashlight",
+    "description": "",
+    "weight": 125,
+    "size": {
+      "w": 1,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_flashlight.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_gadgetpistol": {
+    "label": "Perico Pistol",
+    "description": "",
+    "weight": 1750,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_gadgetpistol.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-9",
+      "throwable": false
+    }
+  },
+  "weapon_golfclub": {
+    "label": "Golf Club",
+    "description": "",
+    "weight": 330,
+    "size": {
+      "w": 1,
+      "h": 3
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_golfclub.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_grenade": {
+    "label": "Grenade",
+    "description": "",
+    "weight": 400,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_grenade.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": true
+    }
+  },
+  "weapon_grenadelauncher": {
+    "label": "Grenade Launcher",
+    "description": "",
+    "weight": 6500,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_grenadelauncher.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-grenade",
+      "throwable": false
+    }
+  },
+  "weapon_gusenberg": {
+    "label": "Gusenberg",
+    "description": "",
+    "weight": 4900,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_gusenberg.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-45",
+      "throwable": false
+    }
+  },
+  "weapon_hammer": {
+    "label": "Hammer",
+    "description": "",
+    "weight": 1200,
+    "size": {
+      "w": 1,
+      "h": 3
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_hammer.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_hatchet": {
+    "label": "Hatchet",
+    "description": "",
+    "weight": 1000,
+    "size": {
+      "w": 1,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_hatchet.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_hazardcan": {
+    "label": "Hazard Can",
+    "description": "",
+    "weight": 12000,
+    "size": {
+      "w": 2,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_hazardcan.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_heavypistol": {
+    "label": "Heavy Pistol",
+    "description": "",
+    "weight": 1100,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_heavypistol.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-45",
+      "throwable": false
+    }
+  },
+  "weapon_heavyrifle": {
+    "label": "Heavy Rifle",
+    "description": "",
+    "weight": 3300,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_heavyrifle.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rifle",
+      "throwable": false
+    }
+  },
+  "weapon_heavyshotgun": {
+    "label": "Heavy Shotgun",
+    "description": "",
+    "weight": 3600,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_heavyshotgun.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-shotgun",
+      "throwable": false
+    }
+  },
+  "weapon_heavysniper": {
+    "label": "Heavy Sniper",
+    "description": "",
+    "weight": 12700,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_heavysniper.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-heavysniper",
+      "throwable": false
+    }
+  },
+  "weapon_heavysniper_mk2": {
+    "label": "Heavy Sniper MK2",
+    "description": "",
+    "weight": 14000,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_heavysniper_mk2.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-heavysniper",
+      "throwable": false
+    }
+  },
+  "weapon_hominglauncher": {
+    "label": "Homing Launcher",
+    "description": "",
+    "weight": 10000,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_hominglauncher.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rocket",
+      "throwable": false
+    }
+  },
+  "weapon_knife": {
+    "label": "Knife",
+    "description": "",
+    "weight": 300,
+    "size": {
+      "w": 1,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_knife.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_knuckle": {
+    "label": "Knuckle Dusters",
+    "description": "",
+    "weight": 300,
+    "size": {
+      "w": 1,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_knuckle.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_machete": {
+    "label": "Machete",
+    "description": "",
+    "weight": 1000,
+    "size": {
+      "w": 1,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_machete.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_machinepistol": {
+    "label": "Machine Pistol",
+    "description": "",
+    "weight": 1400,
+    "size": {
+      "w": 3,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_machinepistol.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-9",
+      "throwable": false
+    }
+  },
+  "weapon_marksmanpistol": {
+    "label": "Marksman Pistol",
+    "description": "",
+    "weight": 1588,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_marksmanpistol.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-22",
+      "throwable": false
+    }
+  },
+  "weapon_marksmanrifle": {
+    "label": "Marksman Rifle",
+    "description": "",
+    "weight": 7500,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_marksmanrifle.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-sniper",
+      "throwable": false
+    }
+  },
+  "weapon_marksmanrifle_mk2": {
+    "label": "Marksman Rifle MK2",
+    "description": "",
+    "weight": 4000,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_marksmanrifle_mk2.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-sniper",
+      "throwable": false
+    }
+  },
+  "weapon_metaldetector": {
+    "label": "Metal Detector",
+    "description": "",
+    "weight": 1200,
+    "size": {
+      "w": 1,
+      "h": 3
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_metaldetector.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_mg": {
+    "label": "Machine Gun",
+    "description": "",
+    "weight": 9000,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_mg.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rifle2",
+      "throwable": false
+    }
+  },
+  "weapon_microsmg": {
+    "label": "Micro SMG",
+    "description": "",
+    "weight": 3000,
+    "size": {
+      "w": 3,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_microsmg.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-45",
+      "throwable": false
+    }
+  },
+  "weapon_militaryrifle": {
+    "label": "Military Rifle",
+    "description": "",
+    "weight": 3600,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_militaryrifle.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rifle",
+      "throwable": false
+    }
+  },
+  "weapon_minigun": {
+    "label": "Minigun",
+    "description": "",
+    "weight": 38500,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_minigun.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rifle2",
+      "throwable": false
+    }
+  },
+  "weapon_minismg": {
+    "label": "Mini SMG",
+    "description": "",
+    "weight": 1270,
+    "size": {
+      "w": 3,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_minismg.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-9",
+      "throwable": false
+    }
+  },
+  "weapon_molotov": {
+    "label": "Molotov",
+    "description": "",
+    "weight": 1800,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_molotov.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": true
+    }
+  },
+  "weapon_musket": {
+    "label": "Musket",
+    "description": "",
+    "weight": 4500,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_musket.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-musket",
+      "throwable": false
+    }
+  },
+  "weapon_navyrevolver": {
+    "label": "Navy Revolver",
+    "description": "",
+    "weight": 4000,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_navyrevolver.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-44",
+      "throwable": false
+    }
+  },
+  "weapon_nightstick": {
+    "label": "Nightstick",
+    "description": "",
+    "weight": 1000,
+    "size": {
+      "w": 1,
+      "h": 3
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_nightstick.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_petrolcan": {
+    "label": "Jerry Can",
+    "description": "",
+    "weight": 4000,
+    "size": {
+      "w": 2,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_petrolcan.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_pipebomb": {
+    "label": "Pipe Bomb",
+    "description": "",
+    "weight": 1800,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_pipebomb.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": true
+    }
+  },
+  "weapon_pistol": {
+    "label": "Pistol",
+    "description": "",
+    "weight": 1130,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_pistol.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-9",
+      "throwable": false
+    }
+  },
+  "weapon_pistol50": {
+    "label": "Pistol .50",
+    "description": "",
+    "weight": 2000,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_pistol50.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-50",
+      "throwable": false
+    }
+  },
+  "weapon_pistol_mk2": {
+    "label": "Pistol MK2",
+    "description": "",
+    "weight": 1000,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_pistol_mk2.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-9",
+      "throwable": false
+    }
+  },
+  "weapon_pistolxm3": {
+    "label": "WM 29 Pistol",
+    "description": "",
+    "weight": 969,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_pistolxm3.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-9",
+      "throwable": false
+    }
+  },
+  "weapon_poolcue": {
+    "label": "Pool Cue",
+    "description": "",
+    "weight": 146,
+    "size": {
+      "w": 1,
+      "h": 3
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_poolcue.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_precisionrifle": {
+    "label": "Precision Rifle",
+    "description": "",
+    "weight": 4800,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_precisionrifle.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-sniper",
+      "throwable": false
+    }
+  },
+  "weapon_proxmine": {
+    "label": "Proximity Mine",
+    "description": "",
+    "weight": 2500,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_proxmine.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": true
+    }
+  },
+  "weapon_pumpshotgun": {
+    "label": "Pump Shotgun",
+    "description": "",
+    "weight": 3400,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_pumpshotgun.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-shotgun",
+      "throwable": false
+    }
+  },
+  "weapon_pumpshotgun_mk2": {
+    "label": "Pump Shotgun MK2",
+    "description": "",
+    "weight": 3200,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_pumpshotgun_mk2.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-shotgun",
+      "throwable": false
+    }
+  },
+  "weapon_railgun": {
+    "label": "Railgun",
+    "description": "",
+    "weight": 3570,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_railgun.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-railgun",
+      "throwable": false
+    }
+  },
+  "weapon_railgunxm3": {
+    "label": "Railgun XM3",
+    "description": "",
+    "weight": 3570,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_railgunxm3.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-railgun",
+      "throwable": false
+    }
+  },
+  "weapon_raycarbine": {
+    "label": "Unholy Hellbringer",
+    "description": "",
+    "weight": 3620,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_raycarbine.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-laser",
+      "throwable": false
+    }
+  },
+  "weapon_rayminigun": {
+    "label": "Widowmaker",
+    "description": "",
+    "weight": 7000,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_rayminigun.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-laser",
+      "throwable": false
+    }
+  },
+  "weapon_raypistol": {
+    "label": "Up-n-Atomizer",
+    "description": "",
+    "weight": 1540,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_raypistol.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_revolver": {
+    "label": "Revolver",
+    "description": "",
+    "weight": 2260,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_revolver.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-44",
+      "throwable": false
+    }
+  },
+  "weapon_revolver_mk2": {
+    "label": "Revolver MK2",
+    "description": "",
+    "weight": 2600,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_revolver_mk2.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-44",
+      "throwable": false
+    }
+  },
+  "weapon_rpg": {
+    "label": "RPG",
+    "description": "",
+    "weight": 5000,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_rpg.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rocket",
+      "throwable": false
+    }
+  },
+  "weapon_sawnoffshotgun": {
+    "label": "Sawn Off Shotgun",
+    "description": "",
+    "weight": 2380,
+    "size": {
+      "w": 3,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_sawnoffshotgun.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-shotgun",
+      "throwable": false
+    }
+  },
+  "weapon_smg": {
+    "label": "SMG",
+    "description": "",
+    "weight": 3084,
+    "size": {
+      "w": 3,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_smg.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-9",
+      "throwable": false
+    }
+  },
+  "weapon_smg_mk2": {
+    "label": "SMG Mk2",
+    "description": "",
+    "weight": 2700,
+    "size": {
+      "w": 3,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_smg_mk2.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-9",
+      "throwable": false
+    }
+  },
+  "weapon_smokegrenade": {
+    "label": "Smoke Grenade",
+    "description": "",
+    "weight": 600,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_smokegrenade.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": true
+    }
+  },
+  "weapon_sniperrifle": {
+    "label": "Sniper Rifle",
+    "description": "",
+    "weight": 5000,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_sniperrifle.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-sniper",
+      "throwable": false
+    }
+  },
+  "weapon_snowball": {
+    "label": "Snow Ball",
+    "description": "",
+    "weight": 5,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_snowball.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": true
+    }
+  },
+  "weapon_snowlauncher": {
+    "label": "Snowball Launcher",
+    "description": "",
+    "weight": 1000,
+    "size": {
+      "w": 5,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "weapon": {
+      "ammo": "weapon_snowball",
+      "throwable": false
+    }
+  },
+  "weapon_snspistol": {
+    "label": "SNS Pistol",
+    "description": "",
+    "weight": 465,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_snspistol.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-45",
+      "throwable": false
+    }
+  },
+  "weapon_snspistol_mk2": {
+    "label": "SNS Pistol MK2",
+    "description": "",
+    "weight": 465,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_snspistol_mk2.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-45",
+      "throwable": false
+    }
+  },
+  "weapon_specialcarbine": {
+    "label": "Special Carbine",
+    "description": "",
+    "weight": 3000,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_specialcarbine.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rifle",
+      "throwable": false
+    }
+  },
+  "weapon_specialcarbine_mk2": {
+    "label": "Special Carbine MK2",
+    "description": "",
+    "weight": 3370,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_specialcarbine_mk2.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rifle",
+      "throwable": false
+    }
+  },
+  "weapon_stickybomb": {
+    "label": "Sticky Bomb",
+    "description": "",
+    "weight": 1000,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 10,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_stickybomb.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": true
+    }
+  },
+  "weapon_stone_hatchet": {
+    "label": "Stone Hatchet",
+    "description": "",
+    "weight": 800,
+    "size": {
+      "w": 1,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_stone_hatchet.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_stungun": {
+    "label": "Tazer",
+    "description": "",
+    "weight": 227,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_stungun.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_switchblade": {
+    "label": "Switchblade",
+    "description": "",
+    "weight": 300,
+    "size": {
+      "w": 1,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_switchblade.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  },
+  "weapon_tacticalrifle": {
+    "label": "Tactical Rifle",
+    "description": "",
+    "weight": 3400,
+    "size": {
+      "w": 4,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-rifle",
+      "throwable": false
+    }
+  },
+  "weapon_teargas": {
+    "label": "Tear Gas",
+    "description": "",
+    "weight": 600,
+    "size": {
+      "w": 1,
+      "h": 3
+    },
+    "stack": 10,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": true
+    }
+  },
+  "weapon_tecpistol": {
+    "label": "Tactical SMG",
+    "description": "",
+    "weight": 1500,
+    "size": {
+      "w": 3,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_tecpistol.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-9",
+      "throwable": false
+    }
+  },
+  "weapon_vintagepistol": {
+    "label": "Vintage Pistol",
+    "description": "",
+    "weight": 700,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_vintagepistol.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "ammo-9",
+      "throwable": false
+    }
+  },
+  "weapon_wrench": {
+    "label": "Wrench",
+    "description": "",
+    "weight": 2500,
+    "size": {
+      "w": 1,
+      "h": 3
+    },
+    "stack": 1,
+    "type": "weapon",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "weapon_wrench.png",
+    "aliases": [],
+    "weapon": {
+      "ammo": "",
+      "throwable": false
+    }
+  }
+}

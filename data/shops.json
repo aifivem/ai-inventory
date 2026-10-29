@@ -1,0 +1,80 @@
+{
+  "shop_innocence": {
+    "label": "24/7 Supermarket",
+    "coords": {
+      "x": 25.74,
+      "y": -1347.29,
+      "z": 29.49
+    },
+    "radius": 2.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "water",
+        "price": 5
+      },
+      {
+        "name": "sprunk",
+        "price": 7
+      },
+      {
+        "name": "burger",
+        "price": 10
+      },
+      {
+        "name": "bandage",
+        "price": 25
+      },
+      {
+        "name": "phone",
+        "price": 350
+      },
+      {
+        "name": "radio",
+        "price": 250
+      }
+    ]
+  },
+  "ammunation_pillbox": {
+    "label": "Ammu-Nation",
+    "coords": {
+      "x": 22.09,
+      "y": -1107.28,
+      "z": 29.8
+    },
+    "radius": 2.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "weapon_pistol",
+        "price": 2500
+      },
+      {
+        "name": "ammo-9",
+        "price": 5
+      },
+      {
+        "name": "weapon_knife",
+        "price": 300
+      },
+      {
+        "name": "at_flashlight",
+        "price": 200
+      },
+      {
+        "name": "armour",
+        "price": 1000
+      }
+    ]
+  }
+}
