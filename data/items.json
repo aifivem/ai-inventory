@@ -4432,5 +4432,23 @@
       "ammo": "",
       "throwable": false
     }
+  },
+  "repairkit": {
+    "label": "Repair Kit",
+    "description": "Fixes a vehicle's engine enough to drive to a mechanic.",
+    "weight": 2500,
+    "size": {
+      "w": 2,
+      "h": 2
+    },
+    "stack": 3,
+    "type": "item",
+    "usable": true,
+    "consume": 0,
+    "close": true,
+    "image": "",
+    "aliases": [
+      "advancedrepairkit"
+    ]
   }
 }
