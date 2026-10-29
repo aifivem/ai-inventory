@@ -1,11 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { BenchView, InventoryView, ItemView, ShopView, Stack } from "../../../resource/common/nui";
 
-export interface Toast {
-  id: number;
-  text: string;
-}
-
 interface InventoryState {
   open: boolean;
   items: Record<string, ItemView>;
@@ -13,14 +8,11 @@ interface InventoryState {
   other: InventoryView | null;
   shop: ShopView | null;
   bench: BenchView | null;
-  toasts: Toast[];
-  progress: { label: string; time: number; startedAt: number } | null;
   /** Recipe being crafted: index and when it ends (screen clock). */
   crafting: { index: number; endsAt: number } | null;
 }
 
-const initialState: InventoryState = { open: false, items: {}, player: null, other: null, shop: null, bench: null, toasts: [], progress: null, crafting: null };
-let toastId = 0;
+const initialState: InventoryState = { open: false, items: {}, player: null, other: null, shop: null, bench: null, crafting: null };
 
 function applyDelta(view: InventoryView | null, put: Stack[], remove: number[], maxWeight: number): void {
   if (!view) return;
@@ -62,23 +54,11 @@ const inventory = createSlice({
       if (state.player?.id === id) applyDelta(state.player, put, remove, maxWeight);
       if (state.other?.id === id) applyDelta(state.other, put, remove, maxWeight);
     },
-    toastAdded: {
-      reducer(state, action: PayloadAction<Toast>) {
-        state.toasts = [...state.toasts.slice(-2), action.payload];
-      },
-      prepare: (text: string) => ({ payload: { id: ++toastId, text } }),
-    },
-    toastRemoved(state, action: PayloadAction<number>) {
-      state.toasts = state.toasts.filter((t) => t.id !== action.payload);
-    },
-    progressSet(state, action: PayloadAction<{ label: string; time: number } | null>) {
-      state.progress = action.payload ? { ...action.payload, startedAt: Date.now() } : null;
-    },
     craftingSet(state, action: PayloadAction<{ index: number; endsAt: number } | null>) {
       state.crafting = action.payload;
     },
   },
 });
 
-export const { itemsSet, playerSet, opened, closed, otherClosed, deltaApplied, toastAdded, toastRemoved, progressSet, craftingSet } = inventory.actions;
+export const { itemsSet, playerSet, opened, closed, otherClosed, deltaApplied, craftingSet } = inventory.actions;
 export default inventory.reducer;

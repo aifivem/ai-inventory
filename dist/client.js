@@ -162,6 +162,8 @@ try{
 		createCharacterCallback: "ai-core:createCharacter",
 		deleteCharacterCallback: "ai-core:deleteCharacter",
 		selectCharacterCallback: "ai-core:selectCharacter",
+		/** Server -> client: (notification: Notification) a notification card on the player's screen. */
+		clientNotifyEvent: "ai-core:client:notify",
 		/** Server -> client: (spawn: SpawnPoint) puts the loaded character into the world. */
 		spawnEvent: "ai-core:client:spawn",
 		/** Server -> client: () the character was let go (switch); show the character screen again. */
@@ -496,6 +498,61 @@ try{
 		});
 	}
 
+// ../../../packages/lib/src/client/streaming.ts
+/**
+	* Loads a model and resolves with its hash. Rejects when the model does not exist or does not load in time.
+	* Call `SetModelAsNoLongerNeeded(hash)` once the entity is created.
+	*/
+	async function requestModel(model, timeoutMs = 1e4) {
+		const hash = typeof model === "number" ? model : GetHashKey(model);
+		if (!IsModelInCdimage(hash)) throw new Error(`model ${model} does not exist`);
+		RequestModel(hash);
+		await waitFor(() => HasModelLoaded(hash) || void 0, timeoutMs);
+		return hash;
+	}
+	/** Loads an animation dictionary. Call `RemoveAnimDict(dict)` when it is no longer played. */
+	async function requestAnimDict(dict, timeoutMs = 1e4) {
+		if (!DoesAnimDictExist(dict)) throw new Error(`anim dict ${dict} does not exist`);
+		RequestAnimDict(dict);
+		await waitFor(() => HasAnimDictLoaded(dict) || void 0, timeoutMs);
+		return dict;
+	}
+
+// ../../../packages/lib/src/client/notify.ts
+/** Shows a notification card on this player's screen (ai-core draws it); `text` is already translated. */
+	function notify(text, kind = "info", duration) {
+		resourceExport(CORE.resource).Notify({
+			text,
+			kind,
+			duration
+		});
+	}
+	/**
+	* Runs a timed action with ai-core's progress bar and an optional animation; resolves true when it ran out, false
+	* when cancelled (death, getting into a vehicle). Checks ten times a second, nothing per frame.
+	*/
+	async function progress(options) {
+		const core = resourceExport(CORE.resource);
+		const ped = cache.ped;
+		if (options.anim) {
+			await requestAnimDict(options.anim.dict);
+			TaskPlayAnim(ped, options.anim.dict, options.anim.clip, 3, 3, options.duration, options.anim.flag ?? 49, 0, false, false, false);
+		}
+		core.ShowProgress(options.label, options.duration);
+		const end = GetGameTimer() + options.duration;
+		const done = await new Promise((resolve) => {
+			const timer = setInterval(() => {
+				const cancelled = IsEntityDead(cache.ped) || !options.allowVehicle && cache.vehicle !== false;
+				if (!cancelled && GetGameTimer() < end) return;
+				clearInterval(timer);
+				resolve(!cancelled);
+			}, 100);
+		});
+		if (options.anim) StopAnimTask(ped, options.anim.dict, options.anim.clip, 1);
+		core.HideProgress();
+		return done;
+	}
+
 // ../../../packages/lib/src/client/keybind.ts
 /** A key the player can rebind in GTA's settings (RegisterKeyMapping); no per-frame key polling. */
 	var Keybind = class {
@@ -536,26 +593,6 @@ try{
 			this.pressed = false;
 		}
 	};
-
-// ../../../packages/lib/src/client/streaming.ts
-/**
-	* Loads a model and resolves with its hash. Rejects when the model does not exist or does not load in time.
-	* Call `SetModelAsNoLongerNeeded(hash)` once the entity is created.
-	*/
-	async function requestModel(model, timeoutMs = 1e4) {
-		const hash = typeof model === "number" ? model : GetHashKey(model);
-		if (!IsModelInCdimage(hash)) throw new Error(`model ${model} does not exist`);
-		RequestModel(hash);
-		await waitFor(() => HasModelLoaded(hash) || void 0, timeoutMs);
-		return hash;
-	}
-	/** Loads an animation dictionary. Call `RemoveAnimDict(dict)` when it is no longer played. */
-	async function requestAnimDict(dict, timeoutMs = 1e4) {
-		if (!DoesAnimDictExist(dict)) throw new Error(`anim dict ${dict} does not exist`);
-		RequestAnimDict(dict);
-		await waitFor(() => HasAnimDictLoaded(dict) || void 0, timeoutMs);
-		return dict;
-	}
 
 // ../../../packages/lib/src/fivem/locale.ts
 /** Convar holding the language (`setr ai:locale "en"` in misc.cfg); replicated so clients read it too. */
@@ -1043,11 +1080,10 @@ try{
 			error: "INV_ERR_GONE"
 		};
 	}
+	const texts = loadLocaleTexts();
+	/** An action failed: ai-core's notification with the server's reason (a lang key of this resource). */
 	function toast(error) {
-		send({
-			action: "toast",
-			data: { error }
-		});
+		notify(texts[error] ?? error, "error");
 	}
 	/** The inventory screen: opening (asks the server), the NUI focus, and forwarding deltas while it is open. */
 	var Screen = class {
@@ -1249,39 +1285,13 @@ try{
 		const result = toResult(await triggerServerCallback(EVENTS.use, [slot, hash]).catch(() => null));
 		if (!result.ok) toast(result.error);
 	}
-	/** Plays the use animation for the item's time (cancelled by getting into a vehicle or dying), then reports it. */
+	/** Plays the use animation with ai-core's progress bar (getting into a vehicle or dying cancels), then reports it. */
 	async function play(use) {
-		const anim = ANIMS[use.anim];
-		const ped = cache.ped;
-		if (anim) {
-			await requestAnimDict(anim.dict);
-			TaskPlayAnim(ped, anim.dict, anim.clip, 3, 3, use.time, anim.flag, 0, false, false, false);
-		}
-		send({
-			action: "progress",
-			data: {
-				label: content.items.get(use.name)?.label ?? use.name,
-				time: use.time
-			}
-		});
-		const end = GetGameTimer() + use.time;
-		const cancelled = await new Promise((resolve) => {
-			const timer = setInterval(() => {
-				if (cache.vehicle !== false || IsEntityDead(cache.ped)) {
-					clearInterval(timer);
-					resolve(true);
-				} else if (GetGameTimer() >= end) {
-					clearInterval(timer);
-					resolve(false);
-				}
-			}, 100);
-		});
-		if (anim) StopAnimTask(ped, anim.dict, anim.clip, 1);
-		send({
-			action: "progress",
-			data: null
-		});
-		if (cancelled) return void emitNet(EVENTS.cancelUse);
+		if (!await progress({
+			label: Locale("UI_USING", content.items.get(use.name)?.label ?? use.name),
+			duration: use.time,
+			anim: ANIMS[use.anim]
+		})) return void emitNet(EVENTS.cancelUse);
 		const result = toResult(await triggerServerCallback(EVENTS.finishUse, [use.token]).catch(() => null));
 		if (!result.ok) toast(result.error);
 	}

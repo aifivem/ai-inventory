@@ -5,11 +5,10 @@ import { TooltipProvider } from "./components/ui/tooltip";
 import { MOCK_OPEN, MOCK_PLAYER, MOCK_SETUP } from "./dev/mock";
 import { setTexts } from "./lib/lang";
 import { store, useAppSelector } from "./store";
-import { closed, deltaApplied, itemsSet, opened, otherClosed, playerSet, progressSet, toastAdded } from "./store/inventory";
+import { closed, deltaApplied, itemsSet, opened, otherClosed, playerSet } from "./store/inventory";
 import { closeScreen } from "./features/actions";
 import { Ghost } from "./features/grid/Ghost";
 import { AmountDialog, ItemMenu } from "./features/menu/ItemMenu";
-import { Overlay } from "./features/overlay/Overlay";
 import { InventoryPanel } from "./features/panels/InventoryPanel";
 import { BenchPanel, GroundPanel, ShopPanel } from "./features/panels/SidePanels";
 import { ui } from "./features/ui";
@@ -31,8 +30,6 @@ const onClose = () => {
   store.dispatch(closed());
 };
 const onOtherClosed = () => store.dispatch(otherClosed());
-const onToast = (data: Data<"toast">) => store.dispatch(toastAdded(data.error));
-const onProgress = (data: Data<"progress">) => store.dispatch(progressSet(data));
 
 const SETUP_MOCK = { mockData: MOCK_SETUP };
 const PLAYER_MOCK = { mockData: MOCK_PLAYER, mockDelay: 50 };
@@ -49,8 +46,6 @@ export function App() {
   useNuiEvent("delta", onDelta);
   useNuiEvent("close", onClose);
   useNuiEvent("otherClosed", onOtherClosed);
-  useNuiEvent("toast", onToast);
-  useNuiEvent("progress", onProgress);
 
   // Escape or Tab closes the screen (the game's Tab bind does not fire while the NUI has focus); dialogs close first.
   useEffect(() => {
@@ -84,7 +79,6 @@ export function App() {
           <AmountDialog />
         </div>
       )}
-      <Overlay />
     </TooltipProvider>
   );
 }

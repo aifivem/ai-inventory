@@ -1,8 +1,9 @@
-import { cache, onServerEvent, requestAnimDict, triggerServerCallback } from "@aicore-fivem/lib/client";
+import { onServerEvent, progress, triggerServerCallback } from "@aicore-fivem/lib/client";
+import { Locale } from "common";
 import { EVENTS } from "common/events";
 import type { PendingUse } from "common/nui";
 import { content } from "./content";
-import { send, toast, toResult } from "./screen";
+import { toast, toResult } from "./screen";
 import { state } from "./state";
 import { weapons } from "./weapons";
 
@@ -24,30 +25,10 @@ export async function useItem(slot: number): Promise<void> {
   if (!result.ok) toast(result.error);
 }
 
-/** Plays the use animation for the item's time (cancelled by getting into a vehicle or dying), then reports it. */
+/** Plays the use animation with ai-core's progress bar (getting into a vehicle or dying cancels), then reports it. */
 async function play(use: PendingUse): Promise<void> {
-  const anim = ANIMS[use.anim];
-  const ped = cache.ped;
-  if (anim) {
-    await requestAnimDict(anim.dict);
-    TaskPlayAnim(ped, anim.dict, anim.clip, 3, 3, use.time, anim.flag, 0, false, false, false);
-  }
-  send({ action: "progress", data: { label: content.items.get(use.name)?.label ?? use.name, time: use.time } });
-  const end = GetGameTimer() + use.time;
-  const cancelled = await new Promise<boolean>((resolve) => {
-    const timer = setInterval(() => {
-      if (cache.vehicle !== false || IsEntityDead(cache.ped)) {
-        clearInterval(timer);
-        resolve(true);
-      } else if (GetGameTimer() >= end) {
-        clearInterval(timer);
-        resolve(false);
-      }
-    }, 100);
-  });
-  if (anim) StopAnimTask(ped, anim.dict, anim.clip, 1);
-  send({ action: "progress", data: null });
-  if (cancelled) return void emitNet(EVENTS.cancelUse);
+  const done = await progress({ label: Locale("UI_USING", content.items.get(use.name)?.label ?? use.name), duration: use.time, anim: ANIMS[use.anim] });
+  if (!done) return void emitNet(EVENTS.cancelUse);
   const result = toResult(await triggerServerCallback(EVENTS.finishUse, [use.token]).catch(() => null));
   if (!result.ok) toast(result.error);
 }

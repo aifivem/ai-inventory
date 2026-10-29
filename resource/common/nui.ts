@@ -102,9 +102,7 @@ export type NuiMessage =
   | { action: "open"; data: { other: InventoryView | null; shop: ShopView | null; bench: BenchView | null } }
   | { action: "delta"; data: { id: string; put: Stack[]; remove: number[]; maxWeight: number } }
   | { action: "close"; data: null }
-  | { action: "otherClosed"; data: null }
-  | { action: "toast"; data: { error: string } }
-  | { action: "progress"; data: { label: string; time: number } | null };
+  | { action: "otherClosed"; data: null };
 
 /** NUI -> client callbacks (fetchNui names). */
 export const NUI = {

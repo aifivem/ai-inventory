@@ -1,4 +1,4 @@
-import { loadLocaleTexts, triggerServerCallback } from "@aicore-fivem/lib/client";
+import { loadLocaleTexts, notify, triggerServerCallback } from "@aicore-fivem/lib/client";
 import { EVENTS, type ActionResult } from "common/events";
 import { toPanel, type InventoryView, type NuiMessage, type OpenTarget, type Panel } from "common/nui";
 import { benchView, content, itemViews, shopView } from "./content";
@@ -14,8 +14,11 @@ export function toResult(v: unknown): ActionResult {
   return { ok: false, error: "INV_ERR_GONE" };
 }
 
+const texts = loadLocaleTexts();
+
+/** An action failed: ai-core's notification with the server's reason (a lang key of this resource). */
 export function toast(error: string): void {
-  send({ action: "toast", data: { error } });
+  notify(texts[error] ?? error, "error");
 }
 
 /** The inventory screen: opening (asks the server), the NUI focus, and forwarding deltas while it is open. */
