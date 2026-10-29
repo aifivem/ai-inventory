@@ -68,6 +68,7 @@ for (const [name, fn] of Object.entries(qb)) provideExport("qb-inventory", name,
 
 registerExport("OpenInventory", (type: unknown, data: unknown) => openInventory(type, data));
 registerExport("CloseInventory", () => screen.close());
+registerExport("OpenSelf", () => void screen.open({ kind: "self" }));
 registerExport("GetItemCount", (item: unknown) => (typeof item === "string" ? state.count(item) : 0));
 registerExport("HasItem", (items: unknown, amount: unknown) => hasItem(items, amount));
 registerExport("GetPlayerItems", () => playerItems());
