@@ -553,6 +553,9 @@ try{
 		return done;
 	}
 
+// ../../../packages/lib/src/client/vehicleProps.ts
+	const MOD_TYPES = Array.from({ length: 50 }, (_, i) => i);
+
 // ../../../packages/lib/src/client/keybind.ts
 /** A key the player can rebind in GTA's settings (RegisterKeyMapping); no per-frame key polling. */
 	var Keybind = class {

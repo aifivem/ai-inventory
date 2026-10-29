@@ -2074,6 +2074,24 @@
     "image": "lockpick.png",
     "aliases": []
   },
+  "medikit": {
+    "label": "Medikit",
+    "description": "Revives an unconscious person (medics only) or heals you.",
+    "weight": 500,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "stack": 5,
+    "type": "item",
+    "usable": true,
+    "consume": 0,
+    "close": true,
+    "image": "",
+    "aliases": [
+      "firstaid"
+    ]
+  },
   "paperbag": {
     "label": "Paper Bag",
     "description": "",

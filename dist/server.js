@@ -27716,6 +27716,9 @@ registerExport("RegisterStash", (name, label, slots, maxWeight, jobs, personal) 
 		personal: personal === true
 	});
 });
+registerExport("ClearInventory", (inv) => {
+	resolve(inv)?.clear();
+});
 registerExport("OpenInventory", (source, inv) => typeof source === "number" && forceOpen(source, inv));
 
 // resource/server/compat/ox.ts

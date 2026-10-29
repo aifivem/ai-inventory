@@ -19,4 +19,8 @@ registerExport("RegisterStash", (name: unknown, label: unknown, slots: unknown, 
     personal: personal === true,
   });
 });
+registerExport("ClearInventory", (inv: unknown) => {
+  const inventory = resolve(inv);
+  inventory?.clear();
+});
 registerExport("OpenInventory", (source: unknown, inv: unknown) => typeof source === "number" && forceOpen(source, inv));
