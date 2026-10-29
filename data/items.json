@@ -2058,6 +2058,38 @@
       }
     }
   },
+  "driver_license": {
+    "label": "Driver License",
+    "description": "Allows its holder to drive.",
+    "weight": 10,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "item",
+    "usable": true,
+    "consume": 0,
+    "close": true,
+    "image": "",
+    "aliases": []
+  },
+  "id_card": {
+    "label": "ID Card",
+    "description": "An identity card with the holder's name and birth date.",
+    "weight": 10,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "item",
+    "usable": true,
+    "consume": 0,
+    "close": true,
+    "image": "",
+    "aliases": []
+  },
   "lockpick": {
     "label": "Lockpick",
     "description": "",
