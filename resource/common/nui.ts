@@ -1,3 +1,4 @@
+import type { ClothesState } from "./clothes";
 /** Wire and NUI contract of ai-inventory: shapes sent between server, client and the screen. No natives. */
 
 export type Metadata = Record<string, unknown>;
@@ -123,6 +124,7 @@ export type NuiMessage =
       action: "delta";
       data: { id: string; put: Stack[]; remove: number[]; maxWeight: number };
     }
+  | { action: "profile"; data: { name: string; clothes: ClothesState } }
   | { action: "close"; data: null }
   | { action: "otherClosed"; data: null };
 
@@ -136,6 +138,7 @@ export const NUI = {
   buy: "buy",
   craft: "craft",
   detach: "detach",
+  clothes: "clothes",
 } as const;
 
 /** Parsers for boundary data. */

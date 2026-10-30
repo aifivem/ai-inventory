@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNuiEvent } from "fivem-nui-react";
 import type { NuiMessage } from "../../resource/common/nui";
 import { TooltipProvider } from "./components/ui/tooltip";
-import { MOCK_OPEN, MOCK_PLAYER, MOCK_SETUP } from "./dev/mock";
+import { MOCK_OPEN, MOCK_PLAYER, MOCK_PROFILE, MOCK_SETUP } from "./dev/mock";
 import { setTexts } from "./lib/lang";
 import { store, useAppSelector } from "./store";
 import {
@@ -12,10 +12,12 @@ import {
   opened,
   otherClosed,
   playerSet,
+  profileSet,
 } from "./store/inventory";
 import { closeScreen } from "./features/actions";
 import { Ghost } from "./features/grid/Ghost";
 import { AmountDialog, ItemMenu } from "./features/menu/ItemMenu";
+import { ClothesColumn } from "./features/panels/ClothesColumn";
 import { Header } from "./features/panels/Header";
 import { InventoryPanel } from "./features/panels/InventoryPanel";
 import {
@@ -45,10 +47,12 @@ const onClose = () => {
   store.dispatch(closed());
 };
 const onOtherClosed = () => store.dispatch(otherClosed());
+const onProfile = (data: Data<"profile">) => store.dispatch(profileSet(data));
 
 const SETUP_MOCK = { mockData: MOCK_SETUP };
 const PLAYER_MOCK = { mockData: MOCK_PLAYER, mockDelay: 50 };
 const OPEN_MOCK = { mockData: MOCK_OPEN, mockDelay: 100 };
+const PROFILE_MOCK = { mockData: MOCK_PROFILE, mockDelay: 120 };
 
 /** Root: listens to the client; while open shows the player inventory next to the second inventory, a shop, a bench or the ground. */
 export function App() {
@@ -61,6 +65,7 @@ export function App() {
   useNuiEvent("delta", onDelta);
   useNuiEvent("close", onClose);
   useNuiEvent("otherClosed", onOtherClosed);
+  useNuiEvent("profile", onProfile, PROFILE_MOCK);
 
   // Escape or Tab closes the screen (the game's Tab bind does not fire while the NUI has focus); dialogs close first.
   useEffect(() => {
@@ -89,6 +94,7 @@ export function App() {
           <Header />
           <div className="flex min-h-0 flex-1 items-start justify-between gap-[3.2vh]">
             <InventoryPanel view={state.player} own />
+            <ClothesColumn />
             {state.other ? (
               <InventoryPanel view={state.other} own={false} />
             ) : state.shop ? (

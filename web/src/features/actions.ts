@@ -10,6 +10,11 @@ const OK = { mockData: { ok: true } };
 const isOk = (v: unknown): boolean =>
   typeof v === "object" && v !== null && "ok" in v && v.ok === true;
 
+/** Takes a piece of clothing off or puts it back on (the new state arrives as a `profile` message). */
+export function toggleClothes(id: string): void {
+  void fetchNui(NUI.clothes, { id }, OK);
+}
+
 export function closeScreen(): void {
   void fetchNui(NUI.close, undefined, OK);
 }

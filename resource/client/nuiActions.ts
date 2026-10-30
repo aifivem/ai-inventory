@@ -2,7 +2,9 @@ import { cache, triggerServerCallback } from "@aicore-fivem/lib/client";
 import { EVENTS, type ActionResult } from "common/events";
 import { NUI, toMoveInput } from "common/nui";
 import { content } from "./content";
-import { screen, toResult, toast } from "./screen";
+import { isClothesId } from "common/clothes";
+import { wardrobe } from "./clothes";
+import { screen, sendProfile, toResult, toast } from "./screen";
 import { state } from "./state";
 import { useItem } from "./use";
 
@@ -48,6 +50,16 @@ function closestPlayer(): number | null {
 RegisterNuiCallback(NUI.close, (_data: unknown, cb: (r: unknown) => void) => {
   screen.close();
   cb({ ok: true });
+});
+
+// The clothes column: a click takes a piece off or puts it back on (the column greys out while it changes).
+RegisterNuiCallback(NUI.clothes, (data: unknown, cb: NuiReply) => {
+  const id = isObj(data) ? data.id : null;
+  if (!isClothesId(id)) return cb({ ok: false, error: "INV_ERR_GONE" });
+  cb({ ok: true });
+  const done = wardrobe.toggle(id);
+  sendProfile();
+  void done.then(sendProfile);
 });
 
 RegisterNuiCallback(NUI.move, (data: unknown, cb: NuiReply) => {

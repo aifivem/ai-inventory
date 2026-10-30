@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faComputerMouse, faDoorOpen } from "@fortawesome/free-solid-svg-icons";
 import { useLang } from "../../lib/lang";
+import { useAppSelector } from "../../store";
 import { closeScreen } from "../actions";
 
 /** A key cap as on the TGIANN screens: small white box, dark bold label. */
@@ -45,11 +46,23 @@ function EscClose() {
   );
 }
 
-/** Top of the screen: the big title with the controls under it on the left, close on the right. */
+/** The character's name in a pill (tgiann-inventory header). */
+function NameChip() {
+  const name = useAppSelector((s) => s.inventory.profile?.name);
+  if (!name) return null;
+  return (
+    <span className="flex h-[4.4vh] items-center gap-[0.9vh] rounded-full border border-white/8 bg-black/50 px-[1.8vh] text-[1.5vh] font-semibold">
+      <span className="size-[0.9vh] rounded-full bg-tgi-green" />
+      {name}
+    </span>
+  );
+}
+
+/** Top of the screen: the big title with the controls under it on the left, the name in the middle, close on the right. */
 export function Header() {
   const t = useLang();
   return (
-    <header className="flex shrink-0 items-start justify-between gap-[4vh]">
+    <header className="grid shrink-0 grid-cols-[1fr_auto_1fr] items-start gap-[4vh]">
       <div className="flex flex-col gap-[2vh]">
         <h1 className="font-display text-[4.4vh] leading-none font-extrabold tracking-[-0.01em] uppercase">
           {t("UI_INVENTORY")}
@@ -69,7 +82,10 @@ export function Header() {
           <Hint keys={<Key>R</Key>} text={t("UI_ROTATE_HINT")} />
         </div>
       </div>
-      <EscClose />
+      <NameChip />
+      <div className="flex justify-end">
+        <EscClose />
+      </div>
     </header>
   );
 }

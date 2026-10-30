@@ -6,6 +6,7 @@ import type {
   ShopView,
   Stack,
 } from "../../../resource/common/nui";
+import type { ClothesState } from "../../../resource/common/clothes";
 
 interface InventoryState {
   open: boolean;
@@ -16,6 +17,8 @@ interface InventoryState {
   bench: BenchView | null;
   /** Recipe being crafted: index and when it ends (screen clock). */
   crafting: { index: number; endsAt: number } | null;
+  /** The character's name and the clothes column. */
+  profile: { name: string; clothes: ClothesState } | null;
 }
 
 const initialState: InventoryState = {
@@ -26,6 +29,7 @@ const initialState: InventoryState = {
   shop: null,
   bench: null,
   crafting: null,
+  profile: null,
 };
 
 function applyDelta(
@@ -51,6 +55,12 @@ const inventory = createSlice({
       state.items = Object.fromEntries(
         action.payload.map((item) => [item.name, item]),
       );
+    },
+    profileSet(
+      state,
+      action: PayloadAction<{ name: string; clothes: ClothesState }>,
+    ) {
+      state.profile = action.payload;
     },
     playerSet(state, action: PayloadAction<InventoryView>) {
       state.player = action.payload;
@@ -109,5 +119,6 @@ export const {
   otherClosed,
   deltaApplied,
   craftingSet,
+  profileSet,
 } = inventory.actions;
 export default inventory.reducer;

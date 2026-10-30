@@ -14,6 +14,7 @@ Grid inventory: items have a size in cells and can be turned; player inventory, 
 - Weapon ammo lives in the weapon's metadata; the client reports only lower ammo, reloading takes ammo items on the server. A held weapon is found again by its `serial` when it moves. Weapons not given by ai-inventory are removed from the ped (`onCache("weapon")`).
 - Item use with an animation is two steps: the server sends `startUse`, the client plays it and calls `finishUse`, the server refuses a finish earlier than 80 % of the item's time.
 - Keys 1-5 use the stacks covering the first five cells of the top row; no separate hotbar screen.
+- The screen follows tgiann-inventory's layout: player grid left, a clothes column in the middle, the second inventory right, the character's name in the header. The clothes column takes pieces off and puts them back on with a click (`client/clothes.ts`, pieces in `common/clothes.ts`): the "off" drawables are base-game values per freemode sex, the worn piece is kept by collection name + local index and only this client changes the ped (ped clothes replicate). Not items: nothing is stored, a new ped (model change) forgets what was kept.
 - Item images come from ox_inventory (GPL-3.0, `NOTICE.md`), converted to lowercase file names; default items from its `data/items.lua` and `weapons.lua`.
 
 ## Contracts
@@ -36,6 +37,6 @@ Grid inventory: items have a size in cells and can be turned; player inventory, 
 
 - Grid rules: `resource/common/grid.ts`; one inventory `server/inventory.ts`; loading, saving, viewers `server/registry.ts`.
 - Moving and swapping: `server/move.ts`; move / drop / give callbacks `server/actions.ts`; use, weapons `server/use.ts`, `server/weapons.ts`; shops and crafting `server/shop.ts`; opening `server/open.ts`.
-- Client: screen and NUI messages `client/screen.ts`, Tab key and context `client/open.ts`, shop / stash / bench points `client/places.ts` (lib `Points`, a blip for shops that want one), ground bags `client/drops.ts` (a `Zones` area spawns the bag prop, a `Points` entry opens it), held weapon `client/weapons.ts`.
+- Client: screen and NUI messages `client/screen.ts` (the `profile` message: name and clothes), clothes column `client/clothes.ts`, Tab key and context `client/open.ts`, shop / stash / bench points `client/places.ts` (lib `Points`, a blip for shops that want one), ground bags `client/drops.ts` (a `Zones` area spawns the bag prop, a `Points` entry opens it), held weapon `client/weapons.ts`.
 - NUI: root `web/src/App.tsx`, grid and drag `web/src/features/grid/`, panels `web/src/features/panels/`; browser preview `bun run webdev` with `?view=stash|ground|shop|bench`.
 - Scale numbers: `bun run bench` (`bench/inventory.bench.ts`).

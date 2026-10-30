@@ -208,5 +208,20 @@
   "UI_STACK_INFO": "{0} kg, {1} pieces",
   "UI_PART": "{0}x {1}",
   "ADMIN_DELETE_ITEM_DESC": "Players who have it keep a stack nobody can use.",
-  "ADMIN_DELETE_STASH_DESC": "Items stored in it stay in the database."
+  "ADMIN_DELETE_STASH_DESC": "Items stored in it stay in the database.",
+  "UI_CLOTHES": "Clothes",
+  "UI_CLOTHES_OFF": "Take it off",
+  "UI_CLOTHES_ON": "Put it back on",
+  "UI_CLOTHES_HAT": "Hat",
+  "UI_CLOTHES_MASK": "Mask",
+  "UI_CLOTHES_NECK": "Necklace",
+  "UI_CLOTHES_EAR": "Ear",
+  "UI_CLOTHES_SHIRT": "Top",
+  "UI_CLOTHES_GLASSES": "Glasses",
+  "UI_CLOTHES_VEST": "Vest",
+  "UI_CLOTHES_BAG": "Bag",
+  "UI_CLOTHES_BRACELET": "Bracelet",
+  "UI_CLOTHES_WATCH": "Watch",
+  "UI_CLOTHES_PANTS": "Pants",
+  "UI_CLOTHES_SHOES": "Shoes"
 }

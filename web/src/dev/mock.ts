@@ -125,3 +125,22 @@ export const MOCK_OPEN = {
   shop: view === "shop" ? MOCK_SHOP : null,
   bench: view === "bench" ? MOCK_BENCH : null,
 };
+
+/** Browser preview: a character with some clothes worn, one taken off. */
+export const MOCK_PROFILE = {
+  name: "Ricky Vance",
+  clothes: {
+    hat: { worn: true, can: true },
+    mask: { worn: false, can: false },
+    neck: { worn: true, can: true },
+    ear: { worn: false, can: false },
+    shirt: { worn: true, can: true },
+    glasses: { worn: false, can: true },
+    vest: { worn: false, can: false },
+    bag: { worn: true, can: true },
+    bracelet: { worn: false, can: false },
+    watch: { worn: true, can: true },
+    pants: { worn: true, can: true },
+    shoes: { worn: true, can: true },
+  },
+};

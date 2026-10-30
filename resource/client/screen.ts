@@ -1,5 +1,7 @@
+import { wardrobe } from "./clothes";
 import {
   cache,
+  getPlayerData,
   hud,
   loadLocaleTexts,
   notify,
@@ -17,6 +19,18 @@ import { benchView, content, itemViews, shopView } from "./content";
 import { state, toView } from "./state";
 
 export const send = (message: NuiMessage): void => SendNUIMessage(message);
+
+/** The character's name and the clothes column (worn pieces) for the screen. */
+export function sendProfile(): void {
+  const character = getPlayerData("character");
+  send({
+    action: "profile",
+    data: {
+      name: character ? `${character.firstname} ${character.lastname}` : "",
+      clothes: wardrobe.state(),
+    },
+  });
+}
 
 export function toResult(v: unknown): ActionResult {
   if (typeof v === "object" && v !== null && "ok" in v) {
@@ -77,6 +91,7 @@ class Screen {
         bench: panel?.kind === "bench" ? benchView(panel.id) : null,
       },
     });
+    sendProfile();
     if (!this.isOpen) {
       SetNuiFocus(true, true);
       hud.hide("inventory");
