@@ -1,6 +1,11 @@
 import { VEHICLE_BAGS } from "@aicore-fivem/shared";
 import { asArgs } from "@aicore-fivem/lib/shared";
-import { EntityState, onClientCallback, onClientEvent, stateBoolean } from "@aicore-fivem/lib/server";
+import {
+  EntityState,
+  onClientCallback,
+  onClientEvent,
+  stateBoolean,
+} from "@aicore-fivem/lib/server";
 import { nearPlace } from "common/content";
 import { EVENTS } from "common/events";
 import { toOpenTarget, type OpenResult, type OpenTarget } from "common/nui";

@@ -1,4 +1,12 @@
-import { bool, int, num, record, str, readPlacePed, type PlacePed } from "@aicore-fivem/lib/shared";
+import {
+  bool,
+  int,
+  num,
+  record,
+  str,
+  readPlacePed,
+  type PlacePed,
+} from "@aicore-fivem/lib/shared";
 import { ItemList } from "./items";
 
 /** Panel content (`data/*.json`): the server reads it from its AdminPanel, clients from the AdminWorld mirror. No natives. */

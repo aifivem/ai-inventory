@@ -1,5 +1,6 @@
 import {
   cache,
+  hud,
   loadLocaleTexts,
   notify,
   triggerServerCallback,
@@ -78,6 +79,7 @@ class Screen {
     });
     if (!this.isOpen) {
       SetNuiFocus(true, true);
+      hud.hide("inventory");
       // The NUI floats over the game (TGIANN full-screen look): the game behind it is blurred.
       TriggerScreenblurFadeIn(250);
     }
@@ -89,6 +91,7 @@ class Screen {
     this.isOpen = false;
     state.otherId = null;
     SetNuiFocus(false, false);
+    hud.show("inventory");
     TriggerScreenblurFadeOut(250);
     send({ action: "close", data: null });
     emitNet(EVENTS.close);

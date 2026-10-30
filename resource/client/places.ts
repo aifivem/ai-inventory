@@ -21,7 +21,12 @@ const SHOP_BLIP = { sprite: 52, color: 2, scale: 0.7 };
 /** Shops, stashes and crafting benches from the panel, a map blip for shops that want one. Rebuilt when the panel changes them. */
 const points = new Points();
 
-function add(kind: Kind, place: Place, blip = false, ped?: PlacePed | null): void {
+function add(
+  kind: Kind,
+  place: Place,
+  blip = false,
+  ped?: PlacePed | null,
+): void {
   points.add(`${kind}:${place.id}`, {
     coords: { x: place.x, y: place.y, z: place.z },
     label: Locale(PROMPT[kind], place.label),
@@ -35,7 +40,8 @@ function add(kind: Kind, place: Place, blip = false, ped?: PlacePed | null): voi
 
 function rebuild(): void {
   points.clear();
-  for (const shop of content.shops.values()) add("shop", shop, shop.blip, shop.ped);
+  for (const shop of content.shops.values())
+    add("shop", shop, shop.blip, shop.ped);
   for (const stash of content.stashes.values()) add("stash", stash);
   for (const bench of content.benches.values()) add("bench", bench);
 }
