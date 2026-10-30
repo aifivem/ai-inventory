@@ -375,7 +375,7 @@ function toPatch(value) {
 		default: return null;
 	}
 }
-const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(value)), core$9 = resourceExport(CORE.resource), ERR = {
+const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(value)), core$10 = resourceExport(CORE.resource), ERR = {
 	type: "ADMIN_ERR_TYPE",
 	range: "ADMIN_ERR_RANGE",
 	length: "ADMIN_ERR_LENGTH",
@@ -389,7 +389,7 @@ const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(va
 		if (cached && Date.now() - cached.at < 2e3) return cached.values.size > 0 ? cached.values : null;
 		let list = [];
 		try {
-			list = core$9.GetLookupValues(source);
+			list = core$10.GetLookupValues(source);
 		} catch {}
 		let values = new Set(Array.isArray(list) ? list.filter((v) => typeof v == "string") : []);
 		return this.lists.set(source, {
@@ -591,7 +591,7 @@ function writeSchema(resource, name, text, log) {
 	(0, node_fs_promises.mkdir)(dir, { recursive: !0 }).then(() => (0, node_fs_promises.writeFile)(`${dir}/${name}.schema.json`, text, "utf8")).catch((error) => log.error(`writing ${resource}/${path} failed`, error));
 }
 // ../../../packages/lib/src/server/admin/panel.ts
-const core$8 = resourceExport(CORE.resource), DEFAULT_KEY = "^[a-z0-9_]{2,32}$";
+const core$9 = resourceExport(CORE.resource), DEFAULT_KEY = "^[a-z0-9_]{2,32}$";
 function imported(spec, value) {
 	let base = clone(spec.newRecord ?? {}), out = {};
 	for (let name of Object.keys(spec.sections)) {
@@ -612,7 +612,7 @@ var AdminPanel = class {
 	constructor(schema) {
 		this.schema = schema;
 		for (let [name, spec] of Object.entries(schema.files)) this.load(name, spec);
-		registerExport("AdminPanelSnapshot", () => this.snapshot()), registerExport("AdminPanelApply", (admin, patch) => this.apply(admin, patch)), onClientCallback(ADMIN.worldChangesCallback(this.resource), () => Object.fromEntries(this.worldChanges)), setImmediate(() => core$8.RegisterAdminPanel(this.resource));
+		registerExport("AdminPanelSnapshot", () => this.snapshot()), registerExport("AdminPanelApply", (admin, patch) => this.apply(admin, patch)), onClientCallback(ADMIN.worldChangesCallback(this.resource), () => Object.fromEntries(this.worldChanges)), setImmediate(() => core$9.RegisterAdminPanel(this.resource));
 	}
 	get(file) {
 		return this.data.get(file) ?? {};
@@ -698,7 +698,7 @@ var AdminPanel = class {
 		let spec = this.schema.files[file], data = this.get(file), value = key === void 0 ? data : data[key] ?? null;
 		this.dataFiles.get(file)?.write(data);
 		for (let handler of this.handlers.get(file) ?? []) handler(key, value);
-		if (core$8.AdminPanelChanged({
+		if (core$9.AdminPanelChanged({
 			resource: this.resource,
 			file,
 			key,
@@ -728,7 +728,7 @@ function aiLogChannels(channels) {
 }
 resourceExport(CORE.resource);
 // ../../../packages/lib/src/server/online.ts
-const core$6 = resourceExport(CORE.resource);
+const core$7 = resourceExport(CORE.resource);
 var OnlinePlayers = class {
 	players = new Map();
 	onDuty = new Map();
@@ -737,7 +737,7 @@ var OnlinePlayers = class {
 		if (this.started) return;
 		this.started = !0;
 		let load = (source, character) => {
-			this.put(source, character, (core$6.GetJobs(source) ?? []).map((m) => m.job), (core$6.GetGangs(source) ?? []).map((m) => m.gang)), this.setDuty(source, core$6.GetDutyJob(source));
+			this.put(source, character, (core$7.GetJobs(source) ?? []).map((m) => m.job), (core$7.GetGangs(source) ?? []).map((m) => m.gang)), this.setDuty(source, core$7.GetDutyJob(source));
 		};
 		on(CORE.playerLoadedEvent, load), on(CORE.playerUnloadedEvent, (source) => this.drop(source)), on(CORE.jobsChangedEvent, (source, jobs) => {
 			let player = this.players.get(source);
@@ -746,8 +746,8 @@ var OnlinePlayers = class {
 			let player = this.players.get(source);
 			player && (player.gangs = gangs.map((m) => m.gang));
 		}), on(CORE.dutyChangedEvent, (source, job) => this.setDuty(source, job));
-		for (let source of core$6.GetLoadedSources()) {
-			let character = core$6.GetCharacter(source);
+		for (let source of core$7.GetLoadedSources()) {
+			let character = core$7.GetCharacter(source);
 			character && load(source, character);
 		}
 	}
@@ -15184,7 +15184,7 @@ var Mirror = class {
 		DoesEntityExist(entity) && (Entity(entity).state.set(this.key, value ?? null, !0), this.put(entity, value));
 	}
 };
-resourceExport(CORE.resource), createLocale();
+resourceExport(CORE.resource), resourceExport(CORE.resource), createLocale();
 // resource/common/resource.ts
 const ResourceName = GetCurrentResourceName();
 IsDuplicityVersion();
