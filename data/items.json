@@ -4840,5 +4840,53 @@
     "close": true,
     "image": "",
     "aliases": []
+  },
+  "fakeplate": {
+    "label": "Fake Plate",
+    "description": "Fit it on a vehicle you have the keys to; use it on the same vehicle again to take it off.",
+    "weight": 800,
+    "size": {
+      "w": 2,
+      "h": 1
+    },
+    "type": "item",
+    "usable": true,
+    "consume": 0,
+    "close": true,
+    "image": "",
+    "aliases": [],
+    "stack": 5
+  },
+  "notepad": {
+    "label": "Notepad",
+    "description": "Write a page and tear it off as a note.",
+    "weight": 150,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "type": "item",
+    "usable": true,
+    "consume": 0,
+    "close": true,
+    "image": "",
+    "aliases": [],
+    "stack": 1
+  },
+  "note": {
+    "label": "Note",
+    "description": "A handwritten note.",
+    "weight": 10,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "type": "item",
+    "usable": true,
+    "consume": 0,
+    "close": true,
+    "image": "",
+    "aliases": [],
+    "stack": 1
   }
 }

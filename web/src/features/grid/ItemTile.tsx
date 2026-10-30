@@ -28,7 +28,7 @@ interface Props {
 export const TILE_CLASS =
   "flex items-center justify-center overflow-hidden rounded-[0.9vh] border px-[0.6vh] pt-[1.8vh] pb-[0.6vh] [box-shadow:inset_0_0_2.4vh_rgba(0,0,0,0.25)]";
 
-/** What the tooltip lists from metadata (ammo, serial, condition); script data stays hidden. */
+/** What the tooltip lists from metadata (ammo, serial, condition, a stack's own description); script data stays hidden. */
 function MetaLines({ stack }: { stack: Stack }) {
   const t = useLang();
   const m = stack.metadata;
@@ -44,6 +44,9 @@ function MetaLines({ stack }: { stack: Stack }) {
       )}
       {typeof m.serial === "string" && (
         <p className="text-text-3">{t("UI_SERIAL", m.serial)}</p>
+      )}
+      {typeof m.description === "string" && (
+        <p className="line-clamp-3 text-text-3 italic">{m.description}</p>
       )}
     </>
   );
