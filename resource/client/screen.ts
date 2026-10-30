@@ -52,7 +52,11 @@ class Screen {
       action: "open",
       data: { other, shop: panel?.kind === "shop" ? shopView(panel.id) : null, bench: panel?.kind === "bench" ? benchView(panel.id) : null },
     });
-    if (!this.isOpen) SetNuiFocus(true, true);
+    if (!this.isOpen) {
+      SetNuiFocus(true, true);
+      // The NUI floats over the game (TGIANN full-screen look): the game behind it is blurred.
+      TriggerScreenblurFadeIn(250);
+    }
     this.isOpen = true;
   }
 
@@ -61,6 +65,7 @@ class Screen {
     this.isOpen = false;
     state.otherId = null;
     SetNuiFocus(false, false);
+    TriggerScreenblurFadeOut(250);
     send({ action: "close", data: null });
     emitNet(EVENTS.close);
   }
@@ -73,6 +78,10 @@ class Screen {
 }
 
 export const screen = new Screen();
+
+on("onResourceStop", (resource: string) => {
+  if (resource === GetCurrentResourceName() && screen.isOpen) TriggerScreenblurFadeOut(0);
+});
 
 state.onDelta((id, put, remove, maxWeight) => {
   if (screen.isOpen && (id === state.player?.id || id === state.otherId)) send({ action: "delta", data: { id, put, remove, maxWeight } });

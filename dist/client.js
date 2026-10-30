@@ -1168,7 +1168,10 @@ try{
 					bench: panel?.kind === "bench" ? benchView(panel.id) : null
 				}
 			});
-			if (!this.isOpen) SetNuiFocus(true, true);
+			if (!this.isOpen) {
+				SetNuiFocus(true, true);
+				TriggerScreenblurFadeIn(250);
+			}
 			this.isOpen = true;
 		}
 		close() {
@@ -1176,6 +1179,7 @@ try{
 			this.isOpen = false;
 			state.otherId = null;
 			SetNuiFocus(false, false);
+			TriggerScreenblurFadeOut(250);
 			send({
 				action: "close",
 				data: null
@@ -1192,6 +1196,9 @@ try{
 		}
 	};
 	const screen = new Screen();
+	on("onResourceStop", (resource) => {
+		if (resource === GetCurrentResourceName() && screen.isOpen) TriggerScreenblurFadeOut(0);
+	});
 	state.onDelta((id, put, remove, maxWeight) => {
 		if (screen.isOpen && (id === state.player?.id || id === state.otherId)) send({
 			action: "delta",
