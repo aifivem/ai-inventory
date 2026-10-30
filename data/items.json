@@ -4546,5 +4546,69 @@
     "close": false,
     "image": "",
     "aliases": []
+  },
+  "plastic": {
+    "label": "Plastic",
+    "description": "Crafting material.",
+    "weight": 100,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 50,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": []
+  },
+  "copper": {
+    "label": "Copper",
+    "description": "Crafting material.",
+    "weight": 100,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 50,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": []
+  },
+  "steel": {
+    "label": "Steel",
+    "description": "Crafting material.",
+    "weight": 100,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 50,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": []
+  },
+  "glass": {
+    "label": "Glass",
+    "description": "Crafting material.",
+    "weight": 100,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 50,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": []
   }
 }
