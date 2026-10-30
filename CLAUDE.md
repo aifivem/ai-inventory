@@ -19,7 +19,7 @@ Grid inventory: items have a size in cells and can be turned; player inventory, 
 ## Contracts
 
 - Net events and callbacks: `resource/common/events.ts`; wire and NUI shapes: `resource/common/nui.ts`.
-- Server exports (own): `AddItem`, `RemoveItem`, `GetItemCount`, `CanCarryItem`, `GetItems`, `RegisterUsableItem(name, handler)`, `RegisterStash`, `OpenInventory`. Client: `OpenInventory`, `CloseInventory`, `GetItemCount`, `HasItem`, `GetPlayerItems`.
+- Server exports (own): `AddItem`, `RemoveItem`, `GetItemCount`, `CanCarryItem`, `GetItems`, `RegisterUsableItem(name, handler)`, `RegisterStash`, `OpenInventory`, `ClearInventory`, `Items`. Other ai-* scripts never call them: they go through ai-core's inventory layer, whose ai-inventory adapter uses these (`docs/compat/inventory.md`); never call ai-core's inventory exports from here (loop). Client: `OpenInventory`, `CloseInventory`, `GetItemCount`, `HasItem`, `GetPlayerItems`.
 - ox_inventory and qb-inventory exports: `server/compat/ox.ts`, `server/compat/qb.ts`, client ones in `client/exports.ts`; what they answer and leave out: `docs/compat/ox_inventory.md`, `docs/compat/qb-inventory.md`.
 - Server local event `ai-inventory:usedItem (source, name, slot, metadata, status)` after every use (`status` = the item's hunger / thirst / stress values).
 - Table `ai_inventory_inventories` (id, items JSON `{ v: 1, s: [[slot, name, count, metadata, rotated]] }`).

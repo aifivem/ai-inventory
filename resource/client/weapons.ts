@@ -89,4 +89,4 @@ onServerEvent(EVENTS.components, { args: ([raw]) => (Array.isArray(raw) ? [raw.f
 );
 onCache("weapon", (weapon) => weapons.guard(weapon));
 
-new Keybind({ name: "inventory_reload_R", description: Locale("KEYBIND_RELOAD"), defaultKey: "R", onPressed: () => void weapons.reload() });
+new Keybind({ name: "inventory_reload", description: Locale("KEYBIND_RELOAD"), defaultKey: "R", onPressed: () => void weapons.reload() });

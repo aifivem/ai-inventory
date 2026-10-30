@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBullseye, faCubes, faGun, faMagnifyingGlass, faPuzzlePiece, faWeightHanging, type IconDefinition } from "@fortawesome/free-solid-svg-icons";
 import type { InventoryView } from "../../../../resource/common/nui";
 import { ScrollArea } from "../../components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../../components/ui/tooltip";
 import { CELL_VH, kg } from "../../lib/cell";
 import { useLang } from "../../lib/lang";
 import { cn } from "../../lib/utils";
@@ -64,20 +65,23 @@ const FILTERS: Array<{ type: string; icon: IconDefinition; label: string }> = [
   { type: "item", icon: faCubes, label: "ADMIN_O_ITEM" },
 ];
 
+/** Narrower grids than this show the kind filters as icons with a tooltip; wider ones show icon and label. */
+const LABELLED_COLUMNS = 9;
+
 const filterButton = (active: boolean) =>
   cn(
-    "flex h-[3.6vh] min-w-[3.6vh] items-center justify-center rounded-full border bg-white/2 text-[1.5vh] transition-[background-color,border-color,color] duration-150 active:[transform:scale(0.94)]",
+    "flex h-[3.6vh] min-w-[3.6vh] shrink-0 items-center justify-center gap-[0.7vh] rounded-full border bg-white/2 text-[1.5vh] transition-[background-color,border-color,color] duration-150 active:[transform:scale(0.94)]",
     active ? "border-dashed border-tgi-green text-tgi-green" : "border-white/10 text-text-3 hover:border-tgi-green hover:text-white",
   );
 
 /** Search pill and item kind filters: stacks that do not match are dimmed in place (the grid keeps its layout). */
-function Toolbar({ filter, onChange }: { filter: StackFilter; onChange: (filter: StackFilter) => void }) {
+function Toolbar({ filter, labelled, onChange }: { filter: StackFilter; labelled: boolean; onChange: (filter: StackFilter) => void }) {
   const t = useLang();
   return (
     <div className="flex items-center gap-[0.6vh]">
       <label
         className={cn(
-          "flex h-[3.6vh] w-[24vh] items-center gap-[0.6vh] rounded-full border bg-[#2222224D] px-[1.4vh] transition-colors duration-150 focus-within:border-tgi-green-40",
+          "flex h-[3.6vh] min-w-[12vh] flex-1 items-center gap-[0.6vh] rounded-full border bg-[#2222224D] px-[1.4vh] transition-colors duration-150 focus-within:border-tgi-green-40",
           filter.search ? "border-dashed border-tgi-green" : "border-white/8",
         )}
       >
@@ -90,15 +94,35 @@ function Toolbar({ filter, onChange }: { filter: StackFilter; onChange: (filter:
         />
         <FontAwesomeIcon icon={faMagnifyingGlass} className="text-[1.4vh] text-text-3" />
       </label>
-      <div className="ml-auto flex items-center gap-[0.6vh]">
-        <button type="button" className={cn(filterButton(filter.type === null), "px-[1.2vh] text-[1.4vh]")} onClick={() => onChange({ ...filter, type: null })}>
+      <div className="flex shrink-0 items-center gap-[0.6vh]">
+        <button type="button" aria-pressed={filter.type === null} className={cn(filterButton(filter.type === null), "px-[1.3vh] text-[1.3vh] font-medium")} onClick={() => onChange({ ...filter, type: null })}>
           {t("UI_ALL")}
         </button>
-        {FILTERS.map((f) => (
-          <button key={f.type} type="button" aria-label={t(f.label)} className={filterButton(filter.type === f.type)} onClick={() => onChange({ ...filter, type: filter.type === f.type ? null : f.type })}>
-            <FontAwesomeIcon icon={f.icon} />
-          </button>
-        ))}
+        {FILTERS.map((f) => {
+          const button = (
+            <button
+              key={f.type}
+              type="button"
+              aria-label={labelled ? undefined : t(f.label)}
+              aria-pressed={filter.type === f.type}
+              className={cn(filterButton(filter.type === f.type), labelled && "pr-[1.3vh] pl-[1.1vh] text-[1.3vh] font-medium")}
+              onClick={() => onChange({ ...filter, type: filter.type === f.type ? null : f.type })}
+            >
+              <FontAwesomeIcon icon={f.icon} className={labelled ? "text-[1.3vh]" : undefined} />
+              {labelled && t(f.label)}
+            </button>
+          );
+          return labelled ? (
+            button
+          ) : (
+            <Tooltip key={f.type}>
+              <TooltipTrigger asChild>{button}</TooltipTrigger>
+              <TooltipContent side="bottom" className="w-auto px-[0.8vh] py-[0.4vh] text-[1.2vh] text-white/90">
+                {t(f.label)}
+              </TooltipContent>
+            </Tooltip>
+          );
+        })}
       </div>
     </div>
   );
@@ -114,7 +138,7 @@ export function InventoryPanel({ view, own }: { view: InventoryView; own: boolea
   const kind = own || !view.label ? undefined : t(KIND_KEY[view.kind]);
   return (
     <PanelFrame title={title} kind={kind} weight={<Weight view={view} />} bar={<WeightBar view={view} />} width={sideWidth(view.columns)}>
-      <Toolbar filter={filter} onChange={setFilter} />
+      <Toolbar filter={filter} labelled={view.columns >= LABELLED_COLUMNS} onChange={setFilter} />
       <ScrollArea className="max-h-[60vh]">
         <Grid view={view} own={own} filter={filter} />
       </ScrollArea>

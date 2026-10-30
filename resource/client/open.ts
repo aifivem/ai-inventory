@@ -34,7 +34,7 @@ function contextTarget(): OpenTarget {
 }
 
 new Keybind({
-  name: "inventory_open_TAB",
+  name: "inventory_open",
   description: Locale("KEYBIND_OPEN"),
   defaultKey: "TAB",
   onPressed: () => {

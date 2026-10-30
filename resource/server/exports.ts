@@ -1,5 +1,6 @@
 import { registerExport } from "@aicore-fivem/lib/server";
-import { addItem, canCarry, countItem, forceOpen, itemView, registerStash, removeItem, resolve } from "./api";
+import { addItem, canCarry, countItem, definitionView, forceOpen, itemView, registerStash, removeItem, resolve } from "./api";
+import { content } from "./content";
 import { registerUsable, type UseHandler } from "./use";
 
 /** ai-inventory's own exports (`exports["ai-inventory"]`); ox_inventory and qb-inventory names are in `compat/`. */
@@ -24,3 +25,6 @@ registerExport("ClearInventory", (inv: unknown) => {
   inventory?.clear();
 });
 registerExport("OpenInventory", (source: unknown, inv: unknown) => typeof source === "number" && forceOpen(source, inv));
+registerExport("Items", (name?: unknown) =>
+  typeof name === "string" ? definitionView(name) : Object.fromEntries([...content.items.byName.keys()].map((k) => [k, definitionView(k)])),
+);
