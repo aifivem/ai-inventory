@@ -111,6 +111,7 @@ export const inventorySchema: PanelSchema = {
       listSub: "type",
       createLabel: "ADMIN_NEW_ITEM",
       deleteLabel: "ADMIN_DELETE_ITEM",
+      deleteDesc: "ADMIN_DELETE_ITEM_DESC",
       cards: [
         {
           icon: "tag",
@@ -232,6 +233,7 @@ export const inventorySchema: PanelSchema = {
       desc: "ADMIN_TAB_STASHES_DESC",
       createLabel: "ADMIN_NEW_STASH",
       deleteLabel: "ADMIN_DELETE_STASH",
+      deleteDesc: "ADMIN_DELETE_STASH_DESC",
       cards: [
         {
           icon: "warehouse",

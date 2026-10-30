@@ -72,13 +72,13 @@
   "ADMIN_TAB_SETTINGS": "Settings",
   "ADMIN_TAB_SETTINGS_DESC": "How big the inventories of players, the ground and vehicles are.",
   "ADMIN_NEW_ITEM": "New item",
-  "ADMIN_DELETE_ITEM": "Delete this item? Players who have it keep a stack nobody can use.",
+  "ADMIN_DELETE_ITEM": "Delete item",
   "ADMIN_NEW_SHOP": "New shop",
-  "ADMIN_DELETE_SHOP": "Delete this shop?",
+  "ADMIN_DELETE_SHOP": "Delete shop",
   "ADMIN_NEW_STASH": "New stash",
-  "ADMIN_DELETE_STASH": "Delete this stash? Items stored in it stay in the database.",
+  "ADMIN_DELETE_STASH": "Delete stash",
   "ADMIN_NEW_BENCH": "New bench",
-  "ADMIN_DELETE_BENCH": "Delete this bench?",
+  "ADMIN_DELETE_BENCH": "Delete bench",
   "ADMIN_C_ITEM": "Item",
   "ADMIN_C_ITEM_DESC": "The name players see and what kind of item it is.",
   "ADMIN_C_SIZE": "Size and weight",
@@ -199,5 +199,7 @@
   "ADMIN_ADD_RECIPE": "Add recipe",
   "ADMIN_U_CELLS": "cells",
   "UI_STACK_INFO": "{0} kg, {1} pieces",
-  "UI_PART": "{0}x {1}"
+  "UI_PART": "{0}x {1}",
+  "ADMIN_DELETE_ITEM_DESC": "Players who have it keep a stack nobody can use.",
+  "ADMIN_DELETE_STASH_DESC": "Items stored in it stay in the database."
 }

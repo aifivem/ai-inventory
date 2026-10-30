@@ -25774,6 +25774,7 @@ const inventorySchema = {
 			listSub: "type",
 			createLabel: "ADMIN_NEW_ITEM",
 			deleteLabel: "ADMIN_DELETE_ITEM",
+			deleteDesc: "ADMIN_DELETE_ITEM_DESC",
 			cards: [
 				{
 					icon: "tag",
@@ -26055,6 +26056,7 @@ const inventorySchema = {
 			desc: "ADMIN_TAB_STASHES_DESC",
 			createLabel: "ADMIN_NEW_STASH",
 			deleteLabel: "ADMIN_DELETE_STASH",
+			deleteDesc: "ADMIN_DELETE_STASH_DESC",
 			cards: [{
 				icon: "warehouse",
 				title: "ADMIN_C_STASH",
