@@ -149,6 +149,11 @@ state.onDelta((id, put, remove, maxWeight) => {
   if (shown) send({ action: "delta", data: { id, put, remove, maxWeight } });
 });
 
+state.onLayout((id, columns, rows, maxWeight) => {
+  if (id === state.otherId || id === state.player?.id)
+    send({ action: "layout", data: { id, columns, rows, maxWeight } });
+});
+
 content.subscribe((file) => {
   if (file === "items" || file === "rarities")
     send({ action: "items", data: itemViews() });

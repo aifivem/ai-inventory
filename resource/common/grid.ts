@@ -4,6 +4,16 @@
  * No natives here.
  */
 
+/**
+ * The quick slots (keys 1-5) of a player inventory: slot numbers outside every grid, each holding one stack of any
+ * size. Their weight counts; they cover no cells.
+ */
+export const HOTBAR_FIRST = 9001;
+export const HOTBAR_SIZE = 5;
+export const hotbarSlot = (index: number): number => HOTBAR_FIRST + index;
+export const isHotbarSlot = (slot: number): boolean =>
+  slot >= HOTBAR_FIRST && slot < HOTBAR_FIRST + HOTBAR_SIZE;
+
 export interface Size {
   w: number;
   h: number;

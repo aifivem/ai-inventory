@@ -1,6 +1,7 @@
 import { cache, Keybind, onServerEvent } from "@aicore-fivem/lib/client";
 import { Locale } from "common";
 import { EVENTS } from "common/events";
+import { hotbarSlot } from "common/grid";
 import { toPanel, type OpenTarget } from "common/nui";
 import { drops } from "./drops";
 import { hotbar, screen } from "./screen";
@@ -46,9 +47,10 @@ function contextTarget(): OpenTarget {
 const openBind = new Keybind({
   name: "inventory_open",
   description: Locale("KEYBIND_OPEN"),
-  defaultKey: "F1",
+  defaultKey: "F2",
   hint: "always",
   icon: "box-open",
+  hintLabel: Locale("HINT_INVENTORY"),
   onPressed: () => {
     if (screen.isOpen) return screen.close();
     void screen.open(contextTarget());
@@ -63,10 +65,11 @@ new Keybind({
   defaultKey: "TAB",
   hint: "always",
   icon: "table-cells",
+  hintLabel: Locale("HINT_HOTBAR"),
   onPressed: () => hotbar.toggle(),
 });
 
-/** Keys 1-5 use whatever covers the first five cells of the top row. */
+/** Keys 1-5 use the stacks in the quick slots (their own five slots, not grid cells). */
 for (let i = 1; i <= 5; i++) {
   new Keybind({
     name: `inventory_hotbar_${i}`,
@@ -74,8 +77,9 @@ for (let i = 1; i <= 5; i++) {
     defaultKey: String(i),
     onPressed: () => {
       if (screen.isOpen || IsPauseMenuActive()) return;
-      const stack = state.stackAtCell(i - 1);
-      if (stack) void useItem(stack.slot);
+      const slot = hotbarSlot(i - 1);
+      if (state.player?.stacks.some((s) => s.slot === slot))
+        void useItem(slot);
     },
   });
 }

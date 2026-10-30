@@ -69,9 +69,13 @@ class DragStore {
     if (!drag) return;
     const el = document.elementFromPoint(this.x, this.y);
     const grid = el?.closest<HTMLElement>("[data-grid]");
+    const quick = el?.closest<HTMLElement>("[data-hotbar]");
     const ground = Boolean(el?.closest("[data-ground]"));
     let target: DragState["target"] = null;
-    if (grid?.dataset.grid) {
+    if (quick?.dataset.inv && quick.dataset.slot) {
+      // A quick slot under the pointer itself (it holds one stack of any size).
+      target = { inv: quick.dataset.inv, slot: Number(quick.dataset.slot) };
+    } else if (grid?.dataset.grid) {
       const rect = grid.getBoundingClientRect();
       const cell = vh(CELL_VH);
       const columns = Number(grid.dataset.columns);

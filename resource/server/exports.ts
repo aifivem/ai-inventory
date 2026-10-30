@@ -44,6 +44,10 @@ registerExport(
   (inv: unknown, item: unknown, count: unknown, metadata?: unknown) =>
     canCarry(inv, item, count, metadata),
 );
+registerExport("GetWeight", (inv: unknown) => {
+  const found = resolve(inv);
+  return found ? { weight: found.weight, maxWeight: found.maxWeight } : null;
+});
 registerExport("GetItems", (inv: unknown) =>
   [...(resolve(inv)?.stacks.values() ?? [])].map(itemView),
 );

@@ -15200,6 +15200,7 @@ IsDuplicityVersion();
 const log = createLogger(ResourceName), EVENTS = {
 	player: "ai-inventory:client:player",
 	delta: "ai-inventory:client:delta",
+	layout: "ai-inventory:client:layout",
 	forceOpen: "ai-inventory:client:forceOpen",
 	forceClose: "ai-inventory:client:forceClose",
 	drops: "ai-inventory:client:drops",
@@ -16231,7 +16232,7 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 			]
 		}
 	]
-})), footprint = (size, rotated) => rotated ? {
+})), isHotbarSlot = (slot) => slot >= 9001 && slot < 9006, footprint = (size, rotated) => rotated ? {
 	w: size.h,
 	h: size.w
 } : size;
@@ -16317,12 +16318,25 @@ var Inventory = class {
 	get slots() {
 		return this.columns * this.rows;
 	}
+	get hasHotbar() {
+		return this.kind === "player";
+	}
+	coveredAt(slot, w, h) {
+		return isHotbarSlot(slot) ? new Set(this.hasHotbar && this.stacks.has(slot) ? [slot] : []) : this.grid.covered(slot, w, h);
+	}
+	fitsAt(slot, w, h, ignore = 0) {
+		return isHotbarSlot(slot) ? this.hasHotbar && (!this.stacks.has(slot) || slot === ignore) : this.grid.fits(slot, w, h, ignore);
+	}
 	rebuild() {
 		this.grid = new Occupancy(this.columns, this.rows), this.weight = 0;
 		for (let stack of this.stacks.values()) {
 			let def = content.items.get(stack.name), { w, h } = footprint(sizeOf(def), stack.rotated);
 			this.grid.fits(stack.slot, w, h) && this.grid.mark(stack.slot, w, h, stack.slot), this.weight += (def?.weight ?? 0) * stack.count;
 		}
+	}
+	relayout(columns, rows, maxWeight) {
+		let changed = columns !== this.columns || rows !== this.rows || maxWeight !== this.maxWeight;
+		if (this.columns = columns, this.rows = rows, this.maxWeight = maxWeight, this.rebuild(), changed) for (let viewer of this.viewers) emitNet(EVENTS.layout, viewer, this.id, columns, rows, maxWeight);
 	}
 	shape(name, rotated) {
 		return footprint(sizeOf(content.items.get(name)), rotated);
@@ -16331,13 +16345,13 @@ var Inventory = class {
 		let old = this.stacks.get(stack.slot);
 		old && this.take(old.slot);
 		let def = content.items.get(stack.name), { w, h } = footprint(sizeOf(def), stack.rotated);
-		this.stacks.set(stack.slot, stack), this.grid.mark(stack.slot, w, h, stack.slot), this.weight += (def?.weight ?? 0) * stack.count, this.touch(stack.slot);
+		this.stacks.set(stack.slot, stack), isHotbarSlot(stack.slot) || this.grid.mark(stack.slot, w, h, stack.slot), this.weight += (def?.weight ?? 0) * stack.count, this.touch(stack.slot);
 	}
 	take(slot) {
 		let stack = this.stacks.get(slot);
 		if (!stack) return;
 		let def = content.items.get(stack.name), { w, h } = footprint(sizeOf(def), stack.rotated);
-		return this.stacks.delete(slot), this.grid.mark(slot, w, h, 0), this.weight -= (def?.weight ?? 0) * stack.count, this.touch(slot), stack;
+		return this.stacks.delete(slot), isHotbarSlot(slot) || this.grid.mark(slot, w, h, 0), this.weight -= (def?.weight ?? 0) * stack.count, this.touch(slot), stack;
 	}
 	setCount(slot, count) {
 		let stack = this.stacks.get(slot);
@@ -16560,7 +16574,16 @@ const inventories = new class {
 		}
 	}
 	rebuildAll() {
-		for (let inventory of this.byId.values()) inventory.columns = content.settings.columns, inventory.rebuild();
+		let s = content.settings, shapes = {
+			player: s.player,
+			drop: s.drop,
+			trunk: s.trunk,
+			glovebox: s.glovebox
+		};
+		for (let inventory of this.byId.values()) {
+			let shape = shapes[inventory.kind] ?? inventory;
+			inventory.relayout(s.columns, shape.rows, shape.maxWeight);
+		}
 	}
 	async save(list) {
 		let dirty = list.filter((inv) => inv.persistent && inv.dirty);
@@ -17199,7 +17222,7 @@ function moveStack(a, b, m) {
 	if (!def) return fail$1("INV_ERR_GONE");
 	let same = a === b, whole = m.count === stack.count;
 	if (same && whole && m.toSlot === m.fromSlot && m.rotated === stack.rotated) return OK;
-	let { w, h } = b.shape(stack.name, m.rotated), movedWeight = def.weight * m.count, covered = b.grid.covered(m.toSlot, w, h);
+	let { w, h } = b.shape(stack.name, m.rotated), movedWeight = def.weight * m.count, covered = b.coveredAt(m.toSlot, w, h);
 	if (same && whole && covered.delete(m.fromSlot), covered.size === 1) {
 		let target = b.stacks.get([...covered][0] ?? 0);
 		if (target && target.slot !== m.fromSlot && target.name === stack.name && def.stack > 1 && metaKey(target.metadata) === metaKey(stack.metadata)) {
@@ -17207,7 +17230,7 @@ function moveStack(a, b, m) {
 			return add <= 0 ? fail$1("INV_ERR_FULL_STACK") : !same && !weightFits(b, def.weight * add) ? fail$1("INV_ERR_HEAVY") : (a.setCount(stack.slot, stack.count - add), b.setCount(target.slot, target.count + add), OK);
 		}
 	}
-	if (b.grid.fits(m.toSlot, w, h, same && whole ? m.fromSlot : 0)) return !same && !weightFits(b, movedWeight) ? fail$1("INV_ERR_HEAVY") : (whole ? (a.take(stack.slot), b.put({
+	if (b.fitsAt(m.toSlot, w, h, same && whole ? m.fromSlot : 0)) return !same && !weightFits(b, movedWeight) ? fail$1("INV_ERR_HEAVY") : (whole ? (a.take(stack.slot), b.put({
 		...stack,
 		slot: m.toSlot,
 		rotated: m.rotated
@@ -17230,13 +17253,13 @@ function swap(a, b, stack, other, m) {
 		if (!weightFits(a, delta) || !weightFits(b, -delta)) return fail$1("INV_ERR_HEAVY");
 	}
 	a.take(stack.slot), b.take(other.slot);
-	let mine = b.shape(stack.name, m.rotated), placeMine = b.grid.fits(m.toSlot, mine.w, mine.h);
-	placeMine && b.grid.mark(m.toSlot, mine.w, mine.h, m.toSlot);
+	let mine = b.shape(stack.name, m.rotated), placeMine = b.fitsAt(m.toSlot, mine.w, mine.h), reserve = placeMine && !isHotbarSlot(m.toSlot);
+	reserve && b.grid.mark(m.toSlot, mine.w, mine.h, m.toSlot);
 	let theirs = [other.rotated, !other.rotated].find((rot) => {
 		let s = a.shape(other.name, rot);
-		return a.grid.fits(stack.slot, s.w, s.h);
+		return a.fitsAt(stack.slot, s.w, s.h);
 	});
-	return placeMine && b.grid.mark(m.toSlot, mine.w, mine.h, 0), !placeMine || theirs === void 0 ? (a.put(stack), b.put(other), fail$1("INV_ERR_NO_SPACE")) : (b.put({
+	return reserve && b.grid.mark(m.toSlot, mine.w, mine.h, 0), !placeMine || theirs === void 0 ? (a.put(stack), b.put(other), fail$1("INV_ERR_NO_SPACE")) : (b.put({
 		...stack,
 		slot: m.toSlot,
 		rotated: m.rotated
@@ -17317,7 +17340,13 @@ onClientCallback(EVENTS.move, {
 			count
 		}
 	}), { ok: !0 });
-}), registerExport("AddItem", (inv, item, count, metadata, slot) => addItem(inv, item, count, metadata, slot)), registerExport("RemoveItem", (inv, item, count, metadata, slot) => removeItem(inv, item, count, metadata, slot)), registerExport("GetItemCount", (inv, item, metadata) => countItem(inv, item, metadata)), registerExport("CanCarryItem", (inv, item, count, metadata) => canCarry(inv, item, count, metadata)), registerExport("GetItems", (inv) => [...resolve(inv)?.stacks.values() ?? []].map(itemView)), registerExport("RegisterUsableItem", (name, handler) => {
+}), registerExport("AddItem", (inv, item, count, metadata, slot) => addItem(inv, item, count, metadata, slot)), registerExport("RemoveItem", (inv, item, count, metadata, slot) => removeItem(inv, item, count, metadata, slot)), registerExport("GetItemCount", (inv, item, metadata) => countItem(inv, item, metadata)), registerExport("CanCarryItem", (inv, item, count, metadata) => canCarry(inv, item, count, metadata)), registerExport("GetWeight", (inv) => {
+	let found = resolve(inv);
+	return found ? {
+		weight: found.weight,
+		maxWeight: found.maxWeight
+	} : null;
+}), registerExport("GetItems", (inv) => [...resolve(inv)?.stacks.values() ?? []].map(itemView)), registerExport("RegisterUsableItem", (name, handler) => {
 	typeof name == "string" && typeof handler == "function" && registerUsable(name, handler);
 }), registerExport("RegisterStash", (name, label, slots, maxWeight, jobs, personal) => {
 	if (typeof name != "string") return;

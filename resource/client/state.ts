@@ -57,6 +57,9 @@ class InventoryState {
     (id: string, put: Stack[], remove: number[], maxWeight: number) => void
   > = [];
   private readonly playerListeners: Array<(view: InventoryView) => void> = [];
+  private readonly layoutListeners: Array<
+    (id: string, columns: number, rows: number, maxWeight: number) => void
+  > = [];
 
   onDelta(
     listener: (
@@ -94,6 +97,30 @@ class InventoryState {
     for (const listener of this.listeners) listener(id, put, remove, maxWeight);
   }
 
+  /** The panel changed an inventory's columns, rows or weight limit. */
+  applyLayout(
+    id: string,
+    columns: number,
+    rows: number,
+    maxWeight: number,
+  ): void {
+    if (this.player?.id === id)
+      Object.assign(this.player, { columns, rows, maxWeight });
+    for (const listener of this.layoutListeners)
+      listener(id, columns, rows, maxWeight);
+  }
+
+  onLayout(
+    listener: (
+      id: string,
+      columns: number,
+      rows: number,
+      maxWeight: number,
+    ) => void,
+  ): void {
+    this.layoutListeners.push(listener);
+  }
+
   count(name: string): number {
     const def = content.items.get(name);
     if (!def || !this.player) return 0;
@@ -101,22 +128,6 @@ class InventoryState {
       (sum, s) => sum + (s.name === def.name ? s.count : 0),
       0,
     );
-  }
-
-  /** The stack covering a cell of the player grid (0-based), for the hotbar. */
-  stackAtCell(cell: number): Stack | undefined {
-    const view = this.player;
-    if (!view) return undefined;
-    const cx = cell % view.columns;
-    const cy = Math.floor(cell / view.columns);
-    return view.stacks.find((s) => {
-      const size = content.items.get(s.name)?.size ?? { w: 1, h: 1 };
-      const w = s.rotated ? size.h : size.w;
-      const h = s.rotated ? size.w : size.h;
-      const x = (s.slot - 1) % view.columns;
-      const y = Math.floor((s.slot - 1) / view.columns);
-      return cx >= x && cx < x + w && cy >= y && cy < y + h;
-    });
   }
 
   weight(): number {
@@ -155,4 +166,19 @@ onServerEvent(
         : null,
   },
   (id, put, remove, maxWeight) => state.applyDelta(id, put, remove, maxWeight),
+);
+
+onServerEvent(
+  EVENTS.layout,
+  {
+    args: ([id, columns, rows, maxWeight]) =>
+      typeof id === "string" &&
+      typeof columns === "number" &&
+      typeof rows === "number" &&
+      typeof maxWeight === "number"
+        ? [id, columns, rows, maxWeight]
+        : null,
+  },
+  (id, columns, rows, maxWeight) =>
+    state.applyLayout(id, columns, rows, maxWeight),
 );

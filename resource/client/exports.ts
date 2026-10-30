@@ -5,6 +5,20 @@ import { state } from "./state";
 import { useItem } from "./use";
 import { weapons } from "./weapons";
 
+/** The held weapon in ox_inventory's shape plus its picture (HUDs show it). */
+function currentWeapon() {
+  const held = weapons.current;
+  if (!held) return null;
+  const def = content.items.get(held.name);
+  return {
+    ...held,
+    label: def?.label ?? held.name,
+    image: def?.image
+      ? `nui://ai-inventory/dist/web/images/${def.image}`
+      : undefined,
+  };
+}
+
 /** Client exports: own names, ox_inventory's and qb-inventory's (the common read-only ones and open / close). */
 
 const isObj = (v: unknown): v is Record<string, unknown> =>
@@ -86,8 +100,8 @@ const ox: Record<string, (...args: unknown[]) => unknown> = {
         ),
   useSlot: (slot) =>
     typeof slot === "number" ? void useItem(slot) : undefined,
-  getCurrentWeapon: () => weapons.current,
-  GetCurrentWeapon: () => weapons.current,
+  getCurrentWeapon: () => currentWeapon(),
+  GetCurrentWeapon: () => currentWeapon(),
   displayMetadata: () => undefined,
   weaponWheel: () => undefined,
   setStashTarget: () => undefined,

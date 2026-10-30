@@ -140,11 +140,20 @@ class Inventories {
     this.byId.delete(id);
   }
 
-  /** Re-lays every inventory after the item list or the column count changed. */
+  /** Re-lays every inventory after the item list or the settings changed; open screens get the new layout at once. */
   rebuildAll(): void {
+    const s = content.settings;
+    const shapes: Partial<
+      Record<InventoryKind, { rows: number; maxWeight: number }>
+    > = {
+      player: s.player,
+      drop: s.drop,
+      trunk: s.trunk,
+      glovebox: s.glovebox,
+    };
     for (const inventory of this.byId.values()) {
-      inventory.columns = content.settings.columns;
-      inventory.rebuild();
+      const shape = shapes[inventory.kind] ?? inventory;
+      inventory.relayout(s.columns, shape.rows, shape.maxWeight);
     }
   }
 

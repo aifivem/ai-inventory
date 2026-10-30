@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
-import { Occupancy } from "../../../../resource/common/grid";
 import type { ClothesId } from "../../../../resource/common/clothes";
 import bag from "../../assets/clothes/bag.svg";
 import bproof from "../../assets/clothes/bproof.svg";
@@ -15,13 +14,12 @@ import pant from "../../assets/clothes/pant.svg";
 import shoes from "../../assets/clothes/shoes.svg";
 import torso from "../../assets/clothes/torso.svg";
 import watch from "../../assets/clothes/watch.svg";
-import { imageUrl, tint } from "../../lib/cell";
 import { useLang } from "../../lib/lang";
 import { cn } from "../../lib/utils";
 import { useAppSelector } from "../../store";
 import { setWorldPed, toggleClothes } from "../actions";
+import { QuickSlots, SLOT_VH } from "./QuickSlots";
 
-const SLOT_VH = 7.4;
 const ICONS: Record<ClothesId, string> = {
   hat: helmet,
   ear,
@@ -148,73 +146,6 @@ function ClothesSlot({ id }: { id: ClothesId }) {
         }}
       />
     </button>
-  );
-}
-
-/** The stacks keys 1-5 use: whatever covers each of the first five cells of the top row. */
-export function useQuickStacks() {
-  const view = useAppSelector((s) => s.inventory.player);
-  const items = useAppSelector((s) => s.inventory.items);
-  return useMemo(() => {
-    if (!view) return [];
-    const sized = view.stacks.map((s) => {
-      const def = items[s.name];
-      const w = def?.w ?? 1;
-      const h = def?.h ?? 1;
-      return { slot: s.slot, w: s.rotated ? h : w, h: s.rotated ? w : h };
-    });
-    const grid = Occupancy.of(view.columns, view.rows, sized);
-    return [0, 1, 2, 3, 4].map((i) => {
-      const anchor = grid.cells[i] ?? 0;
-      return anchor ? view.stacks.find((s) => s.slot === anchor) : undefined;
-    });
-  }, [view, items]);
-}
-
-/** The quick slots under the equipment column. */
-export function QuickSlots() {
-  const items = useAppSelector((s) => s.inventory.items);
-  const slots = useQuickStacks();
-  return (
-    <div className="flex gap-[0.6vh]">
-      {slots.map((stack, i) => {
-        const def = stack ? items[stack.name] : undefined;
-        const src = def ? imageUrl(def.image) : null;
-        return (
-          <div
-            key={i}
-            className="relative flex shrink-0 items-center justify-center overflow-hidden rounded-[0.2vh] border-[0.1vh] border-white/12 bg-[rgba(16,16,16,0.86)]"
-            style={{
-              width: `${SLOT_VH}vh`,
-              height: `${SLOT_VH}vh`,
-              ...(def?.rarity
-                ? {
-                    backgroundColor: tint(def.rarity, 0.22),
-                    borderColor: tint(def.rarity, 0.55),
-                  }
-                : null),
-            }}
-          >
-            <span className="absolute inset-0 flex items-center justify-center text-[4.4vh] leading-none font-medium text-white/10">
-              {i + 1}
-            </span>
-            {src && (
-              <img
-                src={src}
-                alt=""
-                draggable={false}
-                className="relative max-h-[78%] max-w-[78%] object-contain"
-              />
-            )}
-            {stack && stack.count > 1 && (
-              <span className="absolute right-[0.5vh] bottom-[0.4vh] text-[1.2vh] font-bold text-white tabular-nums">
-                {stack.count}
-              </span>
-            )}
-          </div>
-        );
-      })}
-    </div>
   );
 }
 

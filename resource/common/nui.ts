@@ -132,7 +132,12 @@ export type NuiMessage =
   | { action: "close"; data: null }
   /** The quick slots bar at the bottom while the inventory is closed (Tab). */
   | { action: "hotbar"; data: boolean }
-  | { action: "otherClosed"; data: null };
+  | { action: "otherClosed"; data: null }
+  /** The panel changed an inventory's columns, rows or weight limit. */
+  | {
+      action: "layout";
+      data: { id: string; columns: number; rows: number; maxWeight: number };
+    };
 
 /** NUI -> client callbacks (fetchNui names). */
 export const NUI = {

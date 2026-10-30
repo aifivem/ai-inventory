@@ -9,6 +9,7 @@ import { store, useAppSelector } from "./store";
 import {
   closed,
   deltaApplied,
+  layoutSet,
   itemsSet,
   opened,
   otherClosed,
@@ -47,6 +48,10 @@ const onPlayer = (data: Data<"player">) => {
 };
 const onOpen = (data: Data<"open">) => store.dispatch(opened(data));
 const onDelta = (data: Data<"delta">) => store.dispatch(deltaApplied(data));
+const onLayout = (data: Data<"layout">) => {
+  setCellFor(data.columns);
+  store.dispatch(layoutSet(data));
+};
 const onClose = () => {
   ui.setMenu(null);
   ui.setAmount(null);
@@ -74,6 +79,7 @@ export function App() {
   useNuiEvent("otherClosed", onOtherClosed);
   useNuiEvent("profile", onProfile, PROFILE_MOCK);
   useNuiEvent("hotbar", onHotbar);
+  useNuiEvent("layout", onLayout);
 
   // Escape or the open key closes the screen (game keybinds do not fire while the NUI has focus); dialogs close first.
   // It closes when the key comes up: closing on the press hands the release to the game (Escape opens the pause menu).

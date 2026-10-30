@@ -1,5 +1,5 @@
 import { fetchNui } from "fivem-nui-react";
-import { Occupancy } from "../../../resource/common/grid";
+import { isHotbarSlot, Occupancy } from "../../../resource/common/grid";
 import { NUI } from "../../../resource/common/nui";
 import { store } from "../store";
 import { craftingSet } from "../store/inventory";
@@ -56,12 +56,14 @@ export function splitItem(inv: string, slot: number, count: number): void {
   const grid = Occupancy.of(
     view.columns,
     view.rows,
-    view.stacks.map((s) => {
-      const d = state.items[s.name];
-      const w = d ? (s.rotated ? d.h : d.w) : 1;
-      const h = d ? (s.rotated ? d.w : d.h) : 1;
-      return { slot: s.slot, w, h };
-    }),
+    view.stacks
+      .filter((s) => !isHotbarSlot(s.slot))
+      .map((s) => {
+        const d = state.items[s.name];
+        const w = d ? (s.rotated ? d.h : d.w) : 1;
+        const h = d ? (s.rotated ? d.w : d.h) : 1;
+        return { slot: s.slot, w, h };
+      }),
   );
   const place = grid.findPlace({ w: def.w, h: def.h });
   if (!place) return;

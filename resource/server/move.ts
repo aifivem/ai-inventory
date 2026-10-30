@@ -1,5 +1,6 @@
 import type { ActionResult } from "common/events";
 import type { MoveInput, Stack } from "common/nui";
+import { isHotbarSlot } from "common/grid";
 import { content } from "./content";
 import { metaKey, type Inventory } from "./inventory";
 
@@ -30,7 +31,7 @@ export function moveStack(
   const { w, h } = b.shape(stack.name, m.rotated);
   const movedWeight = def.weight * m.count;
 
-  const covered = b.grid.covered(m.toSlot, w, h);
+  const covered = b.coveredAt(m.toSlot, w, h);
   if (same && whole) covered.delete(m.fromSlot);
 
   // Merge onto an equal stack under the cursor.
@@ -54,7 +55,7 @@ export function moveStack(
   }
 
   // Free cells.
-  if (b.grid.fits(m.toSlot, w, h, same && whole ? m.fromSlot : 0)) {
+  if (b.fitsAt(m.toSlot, w, h, same && whole ? m.fromSlot : 0)) {
     if (!same && !weightFits(b, movedWeight)) return fail("INV_ERR_HEAVY");
     if (whole) {
       a.take(stack.slot);
@@ -97,14 +98,16 @@ function swap(
   a.take(stack.slot);
   b.take(other.slot);
   const mine = b.shape(stack.name, m.rotated);
-  const placeMine = b.grid.fits(m.toSlot, mine.w, mine.h);
-  if (placeMine) b.grid.mark(m.toSlot, mine.w, mine.h, m.toSlot);
+  const placeMine = b.fitsAt(m.toSlot, mine.w, mine.h);
+  // Reserve the cells while the other stack looks for a place (a quick slot covers no cells).
+  const reserve = placeMine && !isHotbarSlot(m.toSlot);
+  if (reserve) b.grid.mark(m.toSlot, mine.w, mine.h, m.toSlot);
   // The other stack goes where the moved one was, as it was turned or turned the other way.
   const theirs = [other.rotated, !other.rotated].find((rot) => {
     const s = a.shape(other.name, rot);
-    return a.grid.fits(stack.slot, s.w, s.h);
+    return a.fitsAt(stack.slot, s.w, s.h);
   });
-  if (placeMine) b.grid.mark(m.toSlot, mine.w, mine.h, 0);
+  if (reserve) b.grid.mark(m.toSlot, mine.w, mine.h, 0);
   if (!placeMine || theirs === undefined) {
     a.put(stack);
     b.put(other);

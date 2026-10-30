@@ -1,4 +1,4 @@
-import { footprint, Occupancy } from "common/grid";
+import { footprint, isHotbarSlot, Occupancy } from "common/grid";
 import type { ItemDef } from "common/items";
 import type { InventoryKind, InventoryView, Metadata, Stack } from "common/nui";
 import { EVENTS } from "common/events";
@@ -63,6 +63,23 @@ export class Inventory {
     return this.columns * this.rows;
   }
 
+  /** Only player inventories have quick slots. */
+  get hasHotbar(): boolean {
+    return this.kind === "player";
+  }
+
+  /** Anchor slots of the stacks `w x h` at `slot` would cover (a quick slot covers only its own stack). */
+  coveredAt(slot: number, w: number, h: number): Set<number> {
+    if (!isHotbarSlot(slot)) return this.grid.covered(slot, w, h);
+    return new Set(this.hasHotbar && this.stacks.has(slot) ? [slot] : []);
+  }
+
+  /** Whether a stack fits at `slot`: free cells of the grid, or an empty quick slot (`ignore` = the moving stack). */
+  fitsAt(slot: number, w: number, h: number, ignore = 0): boolean {
+    if (!isHotbarSlot(slot)) return this.grid.fits(slot, w, h, ignore);
+    return this.hasHotbar && (!this.stacks.has(slot) || slot === ignore);
+  }
+
   /** Recomputes occupancy and weight (after load, a resize or an item definition change). */
   rebuild(): void {
     this.grid = new Occupancy(this.columns, this.rows);
@@ -74,6 +91,21 @@ export class Inventory {
         this.grid.mark(stack.slot, w, h, stack.slot);
       this.weight += (def?.weight ?? 0) * stack.count;
     }
+  }
+
+  /** Takes a new column count, rows and weight limit from the panel; viewers get the new layout (only when it changed). */
+  relayout(columns: number, rows: number, maxWeight: number): void {
+    const changed =
+      columns !== this.columns ||
+      rows !== this.rows ||
+      maxWeight !== this.maxWeight;
+    this.columns = columns;
+    this.rows = rows;
+    this.maxWeight = maxWeight;
+    this.rebuild();
+    if (!changed) return;
+    for (const viewer of this.viewers)
+      emitNet(EVENTS.layout, viewer, this.id, columns, rows, maxWeight);
   }
 
   /** Cells a stack of `name` covers at `rotated`. */
@@ -88,7 +120,7 @@ export class Inventory {
     const def = content.items.get(stack.name);
     const { w, h } = footprint(sizeOf(def), stack.rotated);
     this.stacks.set(stack.slot, stack);
-    this.grid.mark(stack.slot, w, h, stack.slot);
+    if (!isHotbarSlot(stack.slot)) this.grid.mark(stack.slot, w, h, stack.slot);
     this.weight += (def?.weight ?? 0) * stack.count;
     this.touch(stack.slot);
   }
@@ -100,7 +132,7 @@ export class Inventory {
     const def = content.items.get(stack.name);
     const { w, h } = footprint(sizeOf(def), stack.rotated);
     this.stacks.delete(slot);
-    this.grid.mark(slot, w, h, 0);
+    if (!isHotbarSlot(slot)) this.grid.mark(slot, w, h, 0);
     this.weight -= (def?.weight ?? 0) * stack.count;
     this.touch(slot);
     return stack;

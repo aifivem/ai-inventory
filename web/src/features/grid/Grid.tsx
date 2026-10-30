@@ -1,5 +1,5 @@
 import { memo, useMemo, type ReactNode } from "react";
-import { Occupancy } from "../../../../resource/common/grid";
+import { isHotbarSlot, Occupancy } from "../../../../resource/common/grid";
 import type { InventoryView, ItemView } from "../../../../resource/common/nui";
 import { CELL_GAP_VH, CELL_VH } from "../../lib/cell";
 import { cn } from "../../lib/utils";
@@ -28,7 +28,12 @@ function fitAt(
   drag: DragState,
   items: Record<string, ItemView>,
 ): { fit: Fit; slot: number; w: number; h: number } | null {
-  if (!drag.target || drag.target.inv !== view.id) return null;
+  if (
+    !drag.target ||
+    drag.target.inv !== view.id ||
+    isHotbarSlot(drag.target.slot)
+  )
+    return null;
   const def = items[drag.name];
   const { w, h } = sizeOf(def, drag.rotated);
   const slot = drag.target.slot;
@@ -92,7 +97,7 @@ const EmptyCells = memo(function EmptyCells({ grid }: { grid: Occupancy }) {
   return <>{cells}</>;
 });
 
-/** An inventory grid: empty cells, the drop highlight while dragging, and the stacks. Quick slots numbered on the player grid. */
+/** An inventory grid: empty cells, the drop highlight while dragging, and the stacks (quick slot stacks are not on it). */
 export function Grid({
   view,
   own,
@@ -104,17 +109,22 @@ export function Grid({
 }) {
   const items = useAppSelector((state) => state.inventory.items);
   const drag = useDrag();
+  // Quick slot stacks belong to the player inventory but cover no cells.
+  const stacks = useMemo(
+    () => view.stacks.filter((s) => !isHotbarSlot(s.slot)),
+    [view],
+  );
   const grid = useMemo(
     () =>
       Occupancy.of(
         view.columns,
         view.rows,
-        view.stacks.map((s) => ({
+        stacks.map((s) => ({
           slot: s.slot,
           ...sizeOf(items[s.name], s.rotated),
         })),
       ),
-    [view, items],
+    [view.columns, view.rows, stacks, items],
   );
   const fit = drag ? fitAt(view, grid, drag, items) : null;
   const filtering = filter.type !== null || filter.search.trim() !== "";
@@ -145,7 +155,7 @@ export function Grid({
           }}
         />
       )}
-      {view.stacks.map((stack) => (
+      {stacks.map((stack) => (
         <ItemTile
           key={stack.slot}
           stack={stack}

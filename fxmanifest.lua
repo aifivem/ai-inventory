@@ -20,8 +20,8 @@ dependencies {
 files {
 	'locales/*.json',
 	'dist/web/assets/*.svg',
-	'dist/web/assets/*.css',
 	'dist/web/assets/*.js',
+	'dist/web/assets/*.css',
 	'dist/web/assets/*.woff',
 	'dist/web/assets/*.woff2',
 	'dist/web/images/*.png',

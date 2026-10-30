@@ -98,6 +98,19 @@ const inventory = createSlice({
     otherClosed(state) {
       state.other = null;
     },
+    layoutSet(
+      state,
+      action: PayloadAction<{
+        id: string;
+        columns: number;
+        rows: number;
+        maxWeight: number;
+      }>,
+    ) {
+      const { id, ...layout } = action.payload;
+      if (state.player?.id === id) Object.assign(state.player, layout);
+      if (state.other?.id === id) Object.assign(state.other, layout);
+    },
     deltaApplied(
       state,
       action: PayloadAction<{
@@ -129,6 +142,7 @@ export const {
   closed,
   otherClosed,
   deltaApplied,
+  layoutSet,
   craftingSet,
   profileSet,
   hotbarSet,

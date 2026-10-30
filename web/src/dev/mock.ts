@@ -129,7 +129,7 @@ export const MOCK_OPEN = {
   other: OTHER[view] ?? null,
   shop: view === "shop" ? MOCK_SHOP : null,
   bench: view === "bench" ? MOCK_BENCH : null,
-  key: "F1",
+  key: "F2",
 };
 
 /** Browser preview: a character with some clothes worn, one taken off. */

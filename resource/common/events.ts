@@ -4,6 +4,8 @@ export const EVENTS = {
   player: "ai-inventory:client:player",
   /** Server -> viewers: (id, put: Stack[], remove: number[], maxWeight) changed stacks of an inventory they see. */
   delta: "ai-inventory:client:delta",
+  /** Server -> viewers: (id, columns, rows, maxWeight) the panel changed an inventory's layout (stacks re-laid as is). */
+  layout: "ai-inventory:client:layout",
   /** Server -> client: (view: InventoryView, panel: Panel | null) a script opened an inventory for the player. */
   forceOpen: "ai-inventory:client:forceOpen",
   /** Server -> client: () the second inventory went away (drop emptied, too far). */

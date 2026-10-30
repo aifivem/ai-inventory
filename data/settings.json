@@ -2,8 +2,8 @@
   "$schema": "./schemas/settings.schema.json",
   "columns": 8,
   "player": {
-    "rows": 6,
-    "maxWeight": 40000
+    "maxWeight": 40000,
+    "rows": 20
   },
   "drop": {
     "rows": 6,
@@ -11,12 +11,12 @@
     "despawnMinutes": 15
   },
   "trunk": {
-    "rows": 6,
-    "maxWeight": 80000
+    "maxWeight": 80000,
+    "rows": 5
   },
   "glovebox": {
-    "rows": 2,
-    "maxWeight": 10000
+    "maxWeight": 10000,
+    "rows": 2
   },
   "noWeaponWheel": true
 }
