@@ -4773,5 +4773,23 @@
     "close": false,
     "image": "",
     "aliases": []
+  },
+  "c4": {
+    "label": "C4 Charge",
+    "description": "Blows the rear doors of an armored truck.",
+    "weight": 1000,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 5,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [
+      "thermite"
+    ]
   }
 }
