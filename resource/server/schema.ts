@@ -1,25 +1,97 @@
-import type { DataSpec, PanelSchema, WidgetSpec } from "@aicore-fivem/shared";
+import type { DataSpec, PanelSchema, WidgetSpec } from "@aicore-fivem/shared"
 
 /** ai-inventory's panel: item definitions, shops, stashes, crafting benches and grid sizes. */
 
-const int = (min: number, max: number, optional = false): DataSpec => ({ type: "number", min, max, integer: true, optional });
-const num = (min: number, max: number, optional = false): DataSpec => ({ type: "number", min, max, optional });
-const text = (max: number, optional = false): DataSpec => ({ type: "text", min: 0, max, optional });
-const names: DataSpec = { type: "names", max: 30, itemMax: 48, pattern: "^[a-z0-9_-]{2,48}$" };
-const gridSpec = (extra: Record<string, DataSpec> = {}): DataSpec => ({ type: "object", fields: { rows: int(1, 50), maxWeight: int(0, 10_000_000), ...extra } });
-const KEY = "^[a-z0-9_-]{2,48}$";
+const int = (min: number, max: number, optional = false): DataSpec => ({
+  type: "number",
+  min,
+  max,
+  integer: true,
+  optional,
+})
+const num = (min: number, max: number, optional = false): DataSpec => ({
+  type: "number",
+  min,
+  max,
+  optional,
+})
+const text = (max: number, optional = false): DataSpec => ({
+  type: "text",
+  min: 0,
+  max,
+  optional,
+})
+const names: DataSpec = {
+  type: "names",
+  max: 30,
+  itemMax: 48,
+  pattern: "^[a-z0-9_-]{2,48}$",
+}
+const gridSpec = (extra: Record<string, DataSpec> = {}): DataSpec => ({
+  type: "object",
+  fields: { rows: int(1, 50), maxWeight: int(0, 10_000_000), ...extra },
+})
+const KEY = "^[a-z0-9_-]{2,48}$"
 
 const place = (labelKey: string): WidgetSpec[] => [
-  { widget: "text", path: "label", label: labelKey, placeholder: "ADMIN_P_LABEL" },
-  { widget: "point", path: "coords", label: "ADMIN_F_COORDS", hint: "ADMIN_H_COORDS", ground: true },
-  { widget: "number", path: "radius", label: "ADMIN_F_RADIUS", hint: "ADMIN_H_RADIUS", min: 0.5, max: 30, step: 0.5, unit: "m" },
-  { widget: "tags", lookup: "job", path: "jobs", label: "ADMIN_F_JOBS", hint: "ADMIN_H_JOBS", placeholder: "ADMIN_P_JOBS" },
-];
+  {
+    widget: "text",
+    path: "label",
+    label: labelKey,
+    placeholder: "ADMIN_P_LABEL",
+  },
+  {
+    widget: "point",
+    path: "coords",
+    label: "ADMIN_F_COORDS",
+    hint: "ADMIN_H_COORDS",
+    ground: true,
+  },
+  {
+    widget: "number",
+    path: "radius",
+    label: "ADMIN_F_RADIUS",
+    hint: "ADMIN_H_RADIUS",
+    min: 0.5,
+    max: 30,
+    step: 0.5,
+    unit: "m",
+  },
+  {
+    widget: "tags",
+    lookup: "job",
+    path: "jobs",
+    label: "ADMIN_F_JOBS",
+    hint: "ADMIN_H_JOBS",
+    placeholder: "ADMIN_P_JOBS",
+  },
+]
 const gridFields = (path: string): WidgetSpec[] => [
-  { widget: "number", path: `${path}rows`, label: "ADMIN_F_ROWS", hint: "ADMIN_H_ROWS", min: 1, max: 50 },
-  { widget: "number", path: `${path}maxWeight`, label: "ADMIN_F_MAX_WEIGHT", hint: "ADMIN_H_MAX_WEIGHT", min: 0, max: 10_000_000, step: 1000, unit: "g" },
-];
-const placeSections = { label: text(48), coords: { type: "vec3" } as DataSpec, radius: num(0.5, 30), jobs: names };
+  {
+    widget: "number",
+    path: `${path}rows`,
+    label: "ADMIN_F_ROWS",
+    hint: "ADMIN_H_ROWS",
+    min: 1,
+    max: 50,
+  },
+  {
+    widget: "number",
+    path: `${path}maxWeight`,
+    label: "ADMIN_F_MAX_WEIGHT",
+    hint: "ADMIN_H_MAX_WEIGHT",
+    min: 0,
+    max: 10_000_000,
+    step: 1000,
+    unit: "g",
+  },
+]
+const placeSections = {
+  label: text(48),
+  coords: { type: "vec3" } as DataSpec,
+  radius: num(0.5, 30),
+  jobs: names,
+}
 
 export const inventorySchema: PanelSchema = {
   title: "ADMIN_TITLE",
@@ -30,7 +102,19 @@ export const inventorySchema: PanelSchema = {
       sync: "all",
       keyPattern: KEY,
       labelPath: "label",
-      newRecord: { label: "", description: "", weight: 100, size: { w: 1, h: 1 }, stack: 10, type: "item", usable: false, consume: 0, close: false, image: "", aliases: [] },
+      newRecord: {
+        label: "",
+        description: "",
+        weight: 100,
+        size: { w: 1, h: 1 },
+        stack: 10,
+        type: "item",
+        usable: false,
+        consume: 0,
+        close: false,
+        image: "",
+        aliases: [],
+      },
       sections: {
         label: text(48),
         description: text(240, true),
@@ -47,45 +131,142 @@ export const inventorySchema: PanelSchema = {
           type: "object",
           optional: true,
           fields: {
-            anim: { type: "enum", values: ["none", "eat", "drink", "bandage", "armour"], optional: true },
+            anim: {
+              type: "enum",
+              values: ["none", "eat", "drink", "bandage", "armour"],
+              optional: true,
+            },
             time: int(0, 60_000, true),
-            status: { type: "object", optional: true, fields: { hunger: num(-100, 100, true), thirst: num(-100, 100, true), stress: num(-100, 100, true) } },
+            status: {
+              type: "object",
+              optional: true,
+              fields: {
+                hunger: num(-100, 100, true),
+                thirst: num(-100, 100, true),
+                stress: num(-100, 100, true),
+              },
+            },
           },
         },
-        weapon: { type: "object", optional: true, fields: { ammo: text(48, true), throwable: { type: "bool", optional: true } } },
-        component: { type: "object", optional: true, fields: { hashes: { type: "names", max: 20, itemMax: 64, pattern: "^[A-Za-z0-9_]{2,64}$", optional: true } } },
+        weapon: {
+          type: "object",
+          optional: true,
+          fields: {
+            ammo: text(48, true),
+            throwable: { type: "bool", optional: true },
+          },
+        },
+        component: {
+          type: "object",
+          optional: true,
+          fields: {
+            hashes: {
+              type: "names",
+              max: 20,
+              itemMax: 64,
+              pattern: "^[A-Za-z0-9_]{2,64}$",
+              optional: true,
+            },
+          },
+        },
       },
     },
     shops: {
       kind: "records",
       sync: "all",
       labelPath: "label",
-      newRecord: { label: "", coords: { x: 0, y: 0, z: 0 }, radius: 2, jobs: [], blip: true, accounts: ["cash", "bank"], items: [{ name: "water", price: 5 }] },
+      newRecord: {
+        label: "",
+        coords: { x: 0, y: 0, z: 0 },
+        radius: 2,
+        jobs: [],
+        blip: true,
+        accounts: ["cash", "bank"],
+        items: [{ name: "water", price: 5 }],
+      },
       sections: {
         ...placeSections,
         blip: { type: "bool" },
-        accounts: { type: "names", lookup: "account", max: 5, itemMax: 32, pattern: "^[a-z0-9_]{2,32}$" },
-        items: { type: "list", max: 100, of: { type: "object", fields: { name: { type: "text", lookup: "item", min: 2, max: 48, pattern: KEY }, price: int(0, 100_000_000) } } },
+        accounts: {
+          type: "names",
+          lookup: "account",
+          max: 5,
+          itemMax: 32,
+          pattern: "^[a-z0-9_]{2,32}$",
+        },
+        items: {
+          type: "list",
+          max: 100,
+          of: {
+            type: "object",
+            fields: {
+              name: {
+                type: "text",
+                lookup: "item",
+                min: 2,
+                max: 48,
+                pattern: KEY,
+              },
+              price: int(0, 100_000_000),
+            },
+          },
+        },
       },
     },
     stashes: {
       kind: "records",
       sync: "all",
       labelPath: "label",
-      newRecord: { label: "", coords: { x: 0, y: 0, z: 0 }, radius: 1.5, jobs: [], gangs: [], personal: false, rows: 6, maxWeight: 100_000 },
-      sections: { ...placeSections, gangs: names, personal: { type: "bool" }, rows: int(1, 50), maxWeight: int(0, 10_000_000) },
+      newRecord: {
+        label: "",
+        coords: { x: 0, y: 0, z: 0 },
+        radius: 1.5,
+        jobs: [],
+        gangs: [],
+        personal: false,
+        rows: 6,
+        maxWeight: 100_000,
+      },
+      sections: {
+        ...placeSections,
+        gangs: names,
+        personal: { type: "bool" },
+        rows: int(1, 50),
+        maxWeight: int(0, 10_000_000),
+      },
     },
     benches: {
       kind: "records",
       sync: "all",
       labelPath: "label",
-      newRecord: { label: "", coords: { x: 0, y: 0, z: 0 }, radius: 1.5, jobs: [], recipes: [{ result: "lockpick", count: 1, time: 5, ingredients: "scrapmetal:3" }] },
+      newRecord: {
+        label: "",
+        coords: { x: 0, y: 0, z: 0 },
+        radius: 1.5,
+        jobs: [],
+        recipes: [
+          {
+            result: "lockpick",
+            count: 1,
+            time: 5,
+            ingredients: "scrapmetal:3",
+          },
+        ],
+      },
       sections: {
         ...placeSections,
         recipes: {
           type: "list",
           max: 50,
-          of: { type: "object", fields: { result: { type: "text", min: 2, max: 48, pattern: KEY }, count: int(1, 1000), time: num(0, 600), ingredients: text(400) } },
+          of: {
+            type: "object",
+            fields: {
+              result: { type: "text", min: 2, max: 48, pattern: KEY },
+              count: int(1, 1000),
+              time: num(0, 600),
+              ingredients: text(400),
+            },
+          },
         },
       },
     },
@@ -118,8 +299,18 @@ export const inventorySchema: PanelSchema = {
           title: "ADMIN_C_ITEM",
           desc: "ADMIN_C_ITEM_DESC",
           fields: [
-            { widget: "text", path: "label", label: "ADMIN_F_LABEL", placeholder: "ADMIN_P_ITEM_LABEL" },
-            { widget: "text", path: "description", label: "ADMIN_F_DESCRIPTION", placeholder: "ADMIN_P_DESCRIPTION" },
+            {
+              widget: "text",
+              path: "label",
+              label: "ADMIN_F_LABEL",
+              placeholder: "ADMIN_P_ITEM_LABEL",
+            },
+            {
+              widget: "text",
+              path: "description",
+              label: "ADMIN_F_DESCRIPTION",
+              placeholder: "ADMIN_P_DESCRIPTION",
+            },
             {
               widget: "select",
               path: "type",
@@ -132,8 +323,20 @@ export const inventorySchema: PanelSchema = {
                 { value: "component", label: "ADMIN_O_COMPONENT" },
               ],
             },
-            { widget: "text", path: "image", label: "ADMIN_F_IMAGE", hint: "ADMIN_H_IMAGE", placeholder: "ADMIN_P_IMAGE" },
-            { widget: "tags", path: "aliases", label: "ADMIN_F_ALIASES", hint: "ADMIN_H_ALIASES", placeholder: "ADMIN_P_ALIASES" },
+            {
+              widget: "text",
+              path: "image",
+              label: "ADMIN_F_IMAGE",
+              hint: "ADMIN_H_IMAGE",
+              placeholder: "ADMIN_P_IMAGE",
+            },
+            {
+              widget: "tags",
+              path: "aliases",
+              label: "ADMIN_F_ALIASES",
+              hint: "ADMIN_H_ALIASES",
+              placeholder: "ADMIN_P_ALIASES",
+            },
           ],
         },
         {
@@ -141,10 +344,41 @@ export const inventorySchema: PanelSchema = {
           title: "ADMIN_C_SIZE",
           desc: "ADMIN_C_SIZE_DESC",
           fields: [
-            { widget: "number", path: "size.w", label: "ADMIN_F_WIDTH", hint: "ADMIN_H_WIDTH", min: 1, max: 8, unit: "ADMIN_U_CELLS" },
-            { widget: "number", path: "size.h", label: "ADMIN_F_HEIGHT", min: 1, max: 8, unit: "ADMIN_U_CELLS" },
-            { widget: "number", path: "weight", label: "ADMIN_F_WEIGHT", hint: "ADMIN_H_WEIGHT", min: 0, max: 1_000_000, step: 10, unit: "g" },
-            { widget: "number", path: "stack", label: "ADMIN_F_STACK", hint: "ADMIN_H_STACK", min: 1, max: 100_000 },
+            {
+              widget: "number",
+              path: "size.w",
+              label: "ADMIN_F_WIDTH",
+              hint: "ADMIN_H_WIDTH",
+              min: 1,
+              max: 8,
+              unit: "ADMIN_U_CELLS",
+            },
+            {
+              widget: "number",
+              path: "size.h",
+              label: "ADMIN_F_HEIGHT",
+              min: 1,
+              max: 8,
+              unit: "ADMIN_U_CELLS",
+            },
+            {
+              widget: "number",
+              path: "weight",
+              label: "ADMIN_F_WEIGHT",
+              hint: "ADMIN_H_WEIGHT",
+              min: 0,
+              max: 1_000_000,
+              step: 10,
+              unit: "g",
+            },
+            {
+              widget: "number",
+              path: "stack",
+              label: "ADMIN_F_STACK",
+              hint: "ADMIN_H_STACK",
+              min: 1,
+              max: 100_000,
+            },
           ],
         },
         {
@@ -152,9 +386,26 @@ export const inventorySchema: PanelSchema = {
           title: "ADMIN_C_USE",
           desc: "ADMIN_C_USE_DESC",
           fields: [
-            { widget: "switch", path: "usable", label: "ADMIN_F_USABLE", hint: "ADMIN_H_USABLE" },
-            { widget: "number", path: "consume", label: "ADMIN_F_CONSUME", hint: "ADMIN_H_CONSUME", min: 0, max: 1000 },
-            { widget: "switch", path: "close", label: "ADMIN_F_CLOSE", hint: "ADMIN_H_CLOSE" },
+            {
+              widget: "switch",
+              path: "usable",
+              label: "ADMIN_F_USABLE",
+              hint: "ADMIN_H_USABLE",
+            },
+            {
+              widget: "number",
+              path: "consume",
+              label: "ADMIN_F_CONSUME",
+              hint: "ADMIN_H_CONSUME",
+              min: 0,
+              max: 1000,
+            },
+            {
+              widget: "switch",
+              path: "close",
+              label: "ADMIN_F_CLOSE",
+              hint: "ADMIN_H_CLOSE",
+            },
             {
               widget: "select",
               path: "use.anim",
@@ -167,10 +418,38 @@ export const inventorySchema: PanelSchema = {
                 { value: "armour", label: "ADMIN_O_ANIM_ARMOUR" },
               ],
             },
-            { widget: "number", path: "use.time", label: "ADMIN_F_USE_TIME", hint: "ADMIN_H_USE_TIME", min: 0, max: 60_000, step: 250, unit: "ms" },
-            { widget: "number", path: "use.status.hunger", label: "ADMIN_F_HUNGER", hint: "ADMIN_H_STATUS", min: -100, max: 100 },
-            { widget: "number", path: "use.status.thirst", label: "ADMIN_F_THIRST", min: -100, max: 100 },
-            { widget: "number", path: "use.status.stress", label: "ADMIN_F_STRESS", min: -100, max: 100 },
+            {
+              widget: "number",
+              path: "use.time",
+              label: "ADMIN_F_USE_TIME",
+              hint: "ADMIN_H_USE_TIME",
+              min: 0,
+              max: 60_000,
+              step: 250,
+              unit: "ms",
+            },
+            {
+              widget: "number",
+              path: "use.status.hunger",
+              label: "ADMIN_F_HUNGER",
+              hint: "ADMIN_H_STATUS",
+              min: -100,
+              max: 100,
+            },
+            {
+              widget: "number",
+              path: "use.status.thirst",
+              label: "ADMIN_F_THIRST",
+              min: -100,
+              max: 100,
+            },
+            {
+              widget: "number",
+              path: "use.status.stress",
+              label: "ADMIN_F_STRESS",
+              min: -100,
+              max: 100,
+            },
           ],
         },
         {
@@ -178,9 +457,26 @@ export const inventorySchema: PanelSchema = {
           title: "ADMIN_C_WEAPON",
           desc: "ADMIN_C_WEAPON_DESC",
           fields: [
-            { widget: "text", path: "weapon.ammo", label: "ADMIN_F_AMMO", hint: "ADMIN_H_AMMO", placeholder: "ADMIN_P_AMMO" },
-            { widget: "switch", path: "weapon.throwable", label: "ADMIN_F_THROWABLE", hint: "ADMIN_H_THROWABLE" },
-            { widget: "tags", path: "component.hashes", label: "ADMIN_F_COMPONENTS", hint: "ADMIN_H_COMPONENTS", placeholder: "ADMIN_P_COMPONENTS" },
+            {
+              widget: "text",
+              path: "weapon.ammo",
+              label: "ADMIN_F_AMMO",
+              hint: "ADMIN_H_AMMO",
+              placeholder: "ADMIN_P_AMMO",
+            },
+            {
+              widget: "switch",
+              path: "weapon.throwable",
+              label: "ADMIN_F_THROWABLE",
+              hint: "ADMIN_H_THROWABLE",
+            },
+            {
+              widget: "tags",
+              path: "component.hashes",
+              label: "ADMIN_F_COMPONENTS",
+              hint: "ADMIN_H_COMPONENTS",
+              placeholder: "ADMIN_P_COMPONENTS",
+            },
           ],
         },
       ],
@@ -200,8 +496,20 @@ export const inventorySchema: PanelSchema = {
           desc: "ADMIN_C_SHOP_DESC",
           fields: [
             ...place("ADMIN_F_SHOP_LABEL"),
-            { widget: "switch", path: "blip", label: "ADMIN_F_BLIP", hint: "ADMIN_H_BLIP" },
-            { widget: "tags", lookup: "account", path: "accounts", label: "ADMIN_F_ACCOUNTS", hint: "ADMIN_H_ACCOUNTS", placeholder: "ADMIN_P_ACCOUNTS" },
+            {
+              widget: "switch",
+              path: "blip",
+              label: "ADMIN_F_BLIP",
+              hint: "ADMIN_H_BLIP",
+            },
+            {
+              widget: "tags",
+              lookup: "account",
+              path: "accounts",
+              label: "ADMIN_F_ACCOUNTS",
+              hint: "ADMIN_H_ACCOUNTS",
+              placeholder: "ADMIN_P_ACCOUNTS",
+            },
           ],
         },
         {
@@ -217,8 +525,21 @@ export const inventorySchema: PanelSchema = {
               max: 100,
               newRow: { name: "water", price: 5 },
               rows: [
-                { widget: "text", lookup: "item", path: "name", label: "ADMIN_F_ITEM", placeholder: "ADMIN_P_ITEM" },
-                { widget: "number", path: "price", label: "ADMIN_F_PRICE", min: 0, max: 100_000_000, unit: "$" },
+                {
+                  widget: "text",
+                  lookup: "item",
+                  path: "name",
+                  label: "ADMIN_F_ITEM",
+                  placeholder: "ADMIN_P_ITEM",
+                },
+                {
+                  widget: "number",
+                  path: "price",
+                  label: "ADMIN_F_PRICE",
+                  min: 0,
+                  max: 100_000_000,
+                  unit: "$",
+                },
               ],
             },
           ],
@@ -241,8 +562,20 @@ export const inventorySchema: PanelSchema = {
           desc: "ADMIN_C_STASH_DESC",
           fields: [
             ...place("ADMIN_F_STASH_LABEL"),
-            { widget: "tags", lookup: "gang", path: "gangs", label: "ADMIN_F_GANGS", hint: "ADMIN_H_GANGS", placeholder: "ADMIN_P_GANGS" },
-            { widget: "switch", path: "personal", label: "ADMIN_F_PERSONAL", hint: "ADMIN_H_PERSONAL" },
+            {
+              widget: "tags",
+              lookup: "gang",
+              path: "gangs",
+              label: "ADMIN_F_GANGS",
+              hint: "ADMIN_H_GANGS",
+              placeholder: "ADMIN_P_GANGS",
+            },
+            {
+              widget: "switch",
+              path: "personal",
+              label: "ADMIN_F_PERSONAL",
+              hint: "ADMIN_H_PERSONAL",
+            },
             ...gridFields(""),
           ],
         },
@@ -257,7 +590,12 @@ export const inventorySchema: PanelSchema = {
       createLabel: "ADMIN_NEW_BENCH",
       deleteLabel: "ADMIN_DELETE_BENCH",
       cards: [
-        { icon: "hammer", title: "ADMIN_C_BENCH", desc: "ADMIN_C_BENCH_DESC", fields: place("ADMIN_F_BENCH_LABEL") },
+        {
+          icon: "hammer",
+          title: "ADMIN_C_BENCH",
+          desc: "ADMIN_C_BENCH_DESC",
+          fields: place("ADMIN_F_BENCH_LABEL"),
+        },
         {
           icon: "flask",
           title: "ADMIN_C_RECIPES",
@@ -269,12 +607,40 @@ export const inventorySchema: PanelSchema = {
               label: "ADMIN_F_RECIPES",
               addLabel: "ADMIN_ADD_RECIPE",
               max: 50,
-              newRow: { result: "lockpick", count: 1, time: 5, ingredients: "scrapmetal:3" },
+              newRow: {
+                result: "lockpick",
+                count: 1,
+                time: 5,
+                ingredients: "scrapmetal:3",
+              },
               rows: [
-                { widget: "text", path: "result", label: "ADMIN_F_RESULT", placeholder: "ADMIN_P_ITEM" },
-                { widget: "number", path: "count", label: "ADMIN_F_COUNT", min: 1, max: 1000 },
-                { widget: "number", path: "time", label: "ADMIN_F_TIME", min: 0, max: 600, unit: "s" },
-                { widget: "text", path: "ingredients", label: "ADMIN_F_INGREDIENTS", placeholder: "ADMIN_P_INGREDIENTS" },
+                {
+                  widget: "text",
+                  path: "result",
+                  label: "ADMIN_F_RESULT",
+                  placeholder: "ADMIN_P_ITEM",
+                },
+                {
+                  widget: "number",
+                  path: "count",
+                  label: "ADMIN_F_COUNT",
+                  min: 1,
+                  max: 1000,
+                },
+                {
+                  widget: "number",
+                  path: "time",
+                  label: "ADMIN_F_TIME",
+                  min: 0,
+                  max: 600,
+                  unit: "s",
+                },
+                {
+                  widget: "text",
+                  path: "ingredients",
+                  label: "ADMIN_F_INGREDIENTS",
+                  placeholder: "ADMIN_P_INGREDIENTS",
+                },
               ],
             },
           ],
@@ -292,18 +658,53 @@ export const inventorySchema: PanelSchema = {
           icon: "table-cells",
           title: "ADMIN_C_GRID",
           desc: "ADMIN_C_GRID_DESC",
-          fields: [{ widget: "number", path: "columns", label: "ADMIN_F_COLUMNS", hint: "ADMIN_H_COLUMNS", min: 6, max: 14 }],
+          fields: [
+            {
+              widget: "number",
+              path: "columns",
+              label: "ADMIN_F_COLUMNS",
+              hint: "ADMIN_H_COLUMNS",
+              min: 6,
+              max: 14,
+            },
+          ],
         },
-        { icon: "user", title: "ADMIN_C_PLAYER", desc: "ADMIN_C_PLAYER_DESC", fields: gridFields("player.") },
+        {
+          icon: "user",
+          title: "ADMIN_C_PLAYER",
+          desc: "ADMIN_C_PLAYER_DESC",
+          fields: gridFields("player."),
+        },
         {
           icon: "box-open",
           title: "ADMIN_C_DROP",
           desc: "ADMIN_C_DROP_DESC",
-          fields: [...gridFields("drop."), { widget: "number", path: "drop.despawnMinutes", label: "ADMIN_F_DESPAWN", hint: "ADMIN_H_DESPAWN", min: 1, max: 240, unit: "min" }],
+          fields: [
+            ...gridFields("drop."),
+            {
+              widget: "number",
+              path: "drop.despawnMinutes",
+              label: "ADMIN_F_DESPAWN",
+              hint: "ADMIN_H_DESPAWN",
+              min: 1,
+              max: 240,
+              unit: "min",
+            },
+          ],
         },
-        { icon: "car", title: "ADMIN_C_TRUNK", desc: "ADMIN_C_TRUNK_DESC", fields: gridFields("trunk.") },
-        { icon: "car-side", title: "ADMIN_C_GLOVEBOX", desc: "ADMIN_C_GLOVEBOX_DESC", fields: gridFields("glovebox.") },
+        {
+          icon: "car",
+          title: "ADMIN_C_TRUNK",
+          desc: "ADMIN_C_TRUNK_DESC",
+          fields: gridFields("trunk."),
+        },
+        {
+          icon: "car-side",
+          title: "ADMIN_C_GLOVEBOX",
+          desc: "ADMIN_C_GLOVEBOX_DESC",
+          fields: gridFields("glovebox."),
+        },
       ],
     },
   ],
-};
+}

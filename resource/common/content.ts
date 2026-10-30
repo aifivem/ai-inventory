@@ -1,109 +1,134 @@
-import { bool, int, num, record, str } from "@aicore-fivem/lib/shared";
-import { ItemList } from "./items";
+import { bool, int, num, record, str } from "@aicore-fivem/lib/shared"
+import { ItemList } from "./items"
 
 /** Panel content (`data/*.json`): the server reads it from its AdminPanel, clients from the AdminWorld mirror. No natives. */
 
 export interface Point {
-  x: number;
-  y: number;
-  z: number;
+  x: number
+  y: number
+  z: number
 }
 
 export interface GridSize {
-  rows: number;
+  rows: number
   /** Grams. */
-  maxWeight: number;
+  maxWeight: number
 }
 
 export interface Settings {
   /** Cells per row in every inventory (the screens are drawn for this width). */
-  columns: number;
-  player: GridSize;
-  drop: GridSize & { despawnMinutes: number };
-  trunk: GridSize;
-  glovebox: GridSize;
+  columns: number
+  player: GridSize
+  drop: GridSize & { despawnMinutes: number }
+  trunk: GridSize
+  glovebox: GridSize
 }
 
 export interface Place extends Point {
-  id: string;
-  label: string;
+  id: string
+  label: string
   /** Metres from the point where it can be opened. */
-  radius: number;
+  radius: number
   /** Empty = everyone; otherwise one of these jobs (on duty not required). */
-  jobs: string[];
+  jobs: string[]
 }
 
 export interface Shop extends Place {
-  blip: boolean;
-  accounts: string[];
-  items: Array<{ name: string; price: number }>;
+  blip: boolean
+  accounts: string[]
+  items: Array<{ name: string; price: number }>
 }
 
 export interface Stash extends Place {
-  gangs: string[];
+  gangs: string[]
   /** Every character gets its own copy. */
-  personal: boolean;
-  size: GridSize;
+  personal: boolean
+  size: GridSize
   /** Lowest grade per job a script asked for (ox `groups = { police = 2 }`); missing = any grade. */
-  grades?: Record<string, number>;
+  grades?: Record<string, number>
   /** Only a server script may open it (no place in the world, or one fixed owner): the client `open` is refused. */
-  scriptOnly?: boolean;
+  scriptOnly?: boolean
 }
 
 export interface Recipe {
-  result: string;
-  count: number;
+  result: string
+  count: number
   /** Seconds. */
-  time: number;
-  ingredients: Array<{ name: string; count: number }>;
+  time: number
+  ingredients: Array<{ name: string; count: number }>
 }
 
 export interface Bench extends Place {
-  recipes: Recipe[];
+  recipes: Recipe[]
 }
 
-const names = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string" && x !== "") : []);
+const names = (v: unknown): string[] =>
+  Array.isArray(v)
+    ? v.filter((x): x is string => typeof x === "string" && x !== "")
+    : []
 const grid = (v: unknown, rows: number, weight: number): GridSize => {
-  const g = record(v);
-  return { rows: int(g.rows, rows, 1, 50), maxWeight: int(g.maxWeight, weight, 0, 10_000_000) };
-};
+  const g = record(v)
+  return {
+    rows: int(g.rows, rows, 1, 50),
+    maxWeight: int(g.maxWeight, weight, 0, 10_000_000),
+  }
+}
 
 export function readSettings(raw: unknown): Settings {
-  const s = record(raw);
-  const drop = record(s.drop);
+  const s = record(raw)
+  const drop = record(s.drop)
   return {
     columns: int(s.columns, 10, 6, 14),
     player: grid(s.player, 6, 40_000),
-    drop: { ...grid(s.drop, 6, 1_000_000), despawnMinutes: int(drop.despawnMinutes, 15, 1, 240) },
+    drop: {
+      ...grid(s.drop, 6, 1_000_000),
+      despawnMinutes: int(drop.despawnMinutes, 15, 1, 240),
+    },
     trunk: grid(s.trunk, 6, 80_000),
     glovebox: grid(s.glovebox, 2, 10_000),
-  };
+  }
 }
 
 /** `"water:2, bread"` -> `[{ water, 2 }, { bread, 1 }]` (the panel edits ingredients as one text). */
-export function parseIngredients(text: string): Array<{ name: string; count: number }> {
+export function parseIngredients(
+  text: string
+): Array<{ name: string; count: number }> {
   return text
     .split(",")
     .map((part) => part.trim())
     .filter(Boolean)
     .map((part) => {
-      const [name = "", count = "1"] = part.split(":").map((x) => x.trim());
-      return { name: name.toLowerCase(), count: Math.max(1, Math.floor(Number(count)) || 1) };
-    });
+      const [name = "", count = "1"] = part.split(":").map((x) => x.trim())
+      return {
+        name: name.toLowerCase(),
+        count: Math.max(1, Math.floor(Number(count)) || 1),
+      }
+    })
 }
 
 function readPlace(id: string, v: Record<string, unknown>): Place {
-  const c = record(v.coords);
-  return { id, label: str(v.label, id), x: num(c.x, 0), y: num(c.y, 0), z: num(c.z, 0), radius: num(v.radius, 2, 0.5, 30), jobs: names(v.jobs) };
+  const c = record(v.coords)
+  return {
+    id,
+    label: str(v.label, id),
+    x: num(c.x, 0),
+    y: num(c.y, 0),
+    z: num(c.z, 0),
+    radius: num(v.radius, 2, 0.5, 30),
+    jobs: names(v.jobs),
+  }
 }
 
-function readRecords<T>(raw: unknown, read: (id: string, v: Record<string, unknown>) => T | null): Map<string, T> {
-  const out = new Map<string, T>();
+function readRecords<T>(
+  raw: unknown,
+  read: (id: string, v: Record<string, unknown>) => T | null
+): Map<string, T> {
+  const out = new Map<string, T>()
   for (const [id, value] of Object.entries(record(raw))) {
-    const item = read(id, record(value));
-    if (item) out.set(id, item);
+    const item = read(id, record(value))
+    if (item) out.set(id, item)
   }
-  return out;
+  return out
 }
 
 export const readShops = (raw: unknown): Map<string, Shop> =>
@@ -112,68 +137,92 @@ export const readShops = (raw: unknown): Map<string, Shop> =>
     blip: bool(v.blip, true),
     accounts: names(v.accounts).length ? names(v.accounts) : ["cash", "bank"],
     items: (Array.isArray(v.items) ? v.items : []).flatMap((row) => {
-      const r = record(row);
-      const name = str(r.name, "").toLowerCase();
-      return name ? [{ name, price: int(r.price, 0, 0, 100_000_000) }] : [];
+      const r = record(row)
+      const name = str(r.name, "").toLowerCase()
+      return name ? [{ name, price: int(r.price, 0, 0, 100_000_000) }] : []
     }),
-  }));
+  }))
 
 export const readStashes = (raw: unknown): Map<string, Stash> =>
-  readRecords(raw, (id, v) => ({ ...readPlace(id, v), gangs: names(v.gangs), personal: bool(v.personal, false), size: grid(v, 6, 100_000) }));
+  readRecords(raw, (id, v) => ({
+    ...readPlace(id, v),
+    gangs: names(v.gangs),
+    personal: bool(v.personal, false),
+    size: grid(v, 6, 100_000),
+  }))
 
 export const readBenches = (raw: unknown): Map<string, Bench> =>
   readRecords(raw, (id, v) => ({
     ...readPlace(id, v),
     recipes: (Array.isArray(v.recipes) ? v.recipes : []).flatMap((row) => {
-      const r = record(row);
-      const result = str(r.result, "").toLowerCase();
-      if (!result) return [];
-      return [{ result, count: int(r.count, 1, 1, 1000), time: num(r.time, 5, 0, 600), ingredients: parseIngredients(str(r.ingredients, "", 400)) }];
+      const r = record(row)
+      const result = str(r.result, "").toLowerCase()
+      if (!result) return []
+      return [
+        {
+          result,
+          count: int(r.count, 1, 1, 1000),
+          time: num(r.time, 5, 0, 600),
+          ingredients: parseIngredients(str(r.ingredients, "", 400)),
+        },
+      ]
     }),
-  }));
+  }))
 
 /** Where the content comes from: the server's AdminPanel or a client's AdminWorld. */
 interface ContentSource {
-  get(file: string): unknown;
-  onChange(file: string, handler: () => void): void;
+  get(file: string): unknown
+  onChange(file: string, handler: () => void): void
 }
 
-export const FILES = ["items", "settings", "shops", "stashes", "benches"] as const;
-export type ContentFile = (typeof FILES)[number];
+export const FILES = [
+  "items",
+  "settings",
+  "shops",
+  "stashes",
+  "benches",
+] as const
+export type ContentFile = (typeof FILES)[number]
 
 /** Every panel file, parsed once and again after each change; `subscribe` hears which file changed. */
 export class InventoryContent {
-  items: ItemList;
-  settings: Settings;
-  shops: Map<string, Shop>;
-  stashes: Map<string, Stash>;
-  benches: Map<string, Bench>;
-  private readonly listeners: Array<(file: ContentFile) => void> = [];
+  items: ItemList
+  settings: Settings
+  shops: Map<string, Shop>
+  stashes: Map<string, Stash>
+  benches: Map<string, Bench>
+  private readonly listeners: Array<(file: ContentFile) => void> = []
 
   constructor(private readonly source: ContentSource) {
-    this.items = new ItemList(source.get("items"));
-    this.settings = readSettings(source.get("settings"));
-    this.shops = readShops(source.get("shops"));
-    this.stashes = readStashes(source.get("stashes"));
-    this.benches = readBenches(source.get("benches"));
-    for (const file of FILES) source.onChange(file, () => this.reload(file));
+    this.items = new ItemList(source.get("items"))
+    this.settings = readSettings(source.get("settings"))
+    this.shops = readShops(source.get("shops"))
+    this.stashes = readStashes(source.get("stashes"))
+    this.benches = readBenches(source.get("benches"))
+    for (const file of FILES) source.onChange(file, () => this.reload(file))
   }
 
   subscribe(listener: (file: ContentFile) => void): void {
-    this.listeners.push(listener);
+    this.listeners.push(listener)
   }
 
   private reload(file: ContentFile): void {
-    const raw = this.source.get(file);
-    if (file === "items") this.items = new ItemList(raw);
-    else if (file === "settings") this.settings = readSettings(raw);
-    else if (file === "shops") this.shops = readShops(raw);
-    else if (file === "stashes") this.stashes = readStashes(raw);
-    else this.benches = readBenches(raw);
-    for (const listener of this.listeners) listener(file);
+    const raw = this.source.get(file)
+    if (file === "items") this.items = new ItemList(raw)
+    else if (file === "settings") this.settings = readSettings(raw)
+    else if (file === "shops") this.shops = readShops(raw)
+    else if (file === "stashes") this.stashes = readStashes(raw)
+    else this.benches = readBenches(raw)
+    for (const listener of this.listeners) listener(file)
   }
 }
 
 /** Whether a point is within a place's radius (3D). */
-export const nearPlace = (place: Point & { radius: number }, x: number, y: number, z: number, slack = 1): boolean =>
-  Math.hypot(x - place.x, y - place.y, z - place.z) <= place.radius + slack;
+export const nearPlace = (
+  place: Point & { radius: number },
+  x: number,
+  y: number,
+  z: number,
+  slack = 1
+): boolean =>
+  Math.hypot(x - place.x, y - place.y, z - place.z) <= place.radius + slack

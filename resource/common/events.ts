@@ -46,6 +46,6 @@ export const EVENTS = {
   reload: "ai-inventory:reload",
   /** Callback: (slot, hash) -> ActionResult; take an attachment off a weapon. */
   detach: "ai-inventory:detach",
-} as const;
+} as const
 
-export type ActionResult = { ok: true } | { ok: false; error: string };
+export type ActionResult = { ok: true } | { ok: false; error: string }
