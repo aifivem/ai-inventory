@@ -13,7 +13,7 @@ const place = (labelKey: string): WidgetSpec[] => [
   { widget: "text", path: "label", label: labelKey, placeholder: "ADMIN_P_LABEL" },
   { widget: "point", path: "coords", label: "ADMIN_F_COORDS", hint: "ADMIN_H_COORDS", ground: true },
   { widget: "number", path: "radius", label: "ADMIN_F_RADIUS", hint: "ADMIN_H_RADIUS", min: 0.5, max: 30, step: 0.5, unit: "m" },
-  { widget: "tags", path: "jobs", label: "ADMIN_F_JOBS", hint: "ADMIN_H_JOBS", placeholder: "ADMIN_P_JOBS" },
+  { widget: "tags", lookup: "job", path: "jobs", label: "ADMIN_F_JOBS", hint: "ADMIN_H_JOBS", placeholder: "ADMIN_P_JOBS" },
 ];
 const gridFields = (path: string): WidgetSpec[] => [
   { widget: "number", path: `${path}rows`, label: "ADMIN_F_ROWS", hint: "ADMIN_H_ROWS", min: 1, max: 50 },
@@ -64,8 +64,8 @@ export const inventorySchema: PanelSchema = {
       sections: {
         ...placeSections,
         blip: { type: "bool" },
-        accounts: { type: "names", max: 5, itemMax: 32, pattern: "^[a-z0-9_]{2,32}$" },
-        items: { type: "list", max: 100, of: { type: "object", fields: { name: { type: "text", min: 2, max: 48, pattern: KEY }, price: int(0, 100_000_000) } } },
+        accounts: { type: "names", lookup: "account", max: 5, itemMax: 32, pattern: "^[a-z0-9_]{2,32}$" },
+        items: { type: "list", max: 100, of: { type: "object", fields: { name: { type: "text", lookup: "item", min: 2, max: 48, pattern: KEY }, price: int(0, 100_000_000) } } },
       },
     },
     stashes: {
@@ -201,7 +201,7 @@ export const inventorySchema: PanelSchema = {
           fields: [
             ...place("ADMIN_F_SHOP_LABEL"),
             { widget: "switch", path: "blip", label: "ADMIN_F_BLIP", hint: "ADMIN_H_BLIP" },
-            { widget: "tags", path: "accounts", label: "ADMIN_F_ACCOUNTS", hint: "ADMIN_H_ACCOUNTS", placeholder: "ADMIN_P_ACCOUNTS" },
+            { widget: "tags", lookup: "account", path: "accounts", label: "ADMIN_F_ACCOUNTS", hint: "ADMIN_H_ACCOUNTS", placeholder: "ADMIN_P_ACCOUNTS" },
           ],
         },
         {
@@ -217,7 +217,7 @@ export const inventorySchema: PanelSchema = {
               max: 100,
               newRow: { name: "water", price: 5 },
               rows: [
-                { widget: "text", path: "name", label: "ADMIN_F_ITEM", placeholder: "ADMIN_P_ITEM" },
+                { widget: "text", lookup: "item", path: "name", label: "ADMIN_F_ITEM", placeholder: "ADMIN_P_ITEM" },
                 { widget: "number", path: "price", label: "ADMIN_F_PRICE", min: 0, max: 100_000_000, unit: "$" },
               ],
             },
@@ -241,7 +241,7 @@ export const inventorySchema: PanelSchema = {
           desc: "ADMIN_C_STASH_DESC",
           fields: [
             ...place("ADMIN_F_STASH_LABEL"),
-            { widget: "tags", path: "gangs", label: "ADMIN_F_GANGS", hint: "ADMIN_H_GANGS", placeholder: "ADMIN_P_GANGS" },
+            { widget: "tags", lookup: "gang", path: "gangs", label: "ADMIN_F_GANGS", hint: "ADMIN_H_GANGS", placeholder: "ADMIN_P_GANGS" },
             { widget: "switch", path: "personal", label: "ADMIN_F_PERSONAL", hint: "ADMIN_H_PERSONAL" },
             ...gridFields(""),
           ],
