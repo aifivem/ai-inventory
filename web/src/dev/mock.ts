@@ -4,27 +4,27 @@ import type {
   ItemView,
   ShopView,
   Stack,
-} from "../../../resource/common/nui"
-import items from "../../../data/items.json"
-import shops from "../../../data/shops.json"
-import benches from "../../../data/benches.json"
-import en from "../../../locales/en.json"
+} from "../../../resource/common/nui";
+import items from "../../../data/items.json";
+import shops from "../../../data/shops.json";
+import benches from "../../../data/benches.json";
+import en from "../../../locales/en.json";
 
 /**
  * Browser preview only (`bun run webdev`): `?view=ground|stash|shop|bench`. fivem-nui-react hands these out only
  * outside the game. Module-level constants: a new object per render would fire the mock again.
  */
-const params = new URLSearchParams(window.location.search)
-const view = params.get("view") ?? "stash"
+const params = new URLSearchParams(window.location.search);
+const view = params.get("view") ?? "stash";
 
 const isObj = (v: unknown): v is Record<string, unknown> =>
-  typeof v === "object" && v !== null
+  typeof v === "object" && v !== null;
 
 export const MOCK_ITEMS: ItemView[] = Object.entries(items).map(
   ([name, raw]) => {
-    const d: Record<string, unknown> = isObj(raw) ? raw : {}
-    const size = isObj(d.size) ? d.size : {}
-    const component = isObj(d.component) ? d.component : {}
+    const d: Record<string, unknown> = isObj(raw) ? raw : {};
+    const size = isObj(d.size) ? d.size : {};
+    const component = isObj(d.component) ? d.component : {};
     return {
       name,
       label: typeof d.label === "string" ? d.label : name,
@@ -39,17 +39,17 @@ export const MOCK_ITEMS: ItemView[] = Object.entries(items).map(
       hashes: Array.isArray(component.hashes)
         ? component.hashes.filter((h): h is string => typeof h === "string")
         : [],
-    }
-  }
-)
+    };
+  },
+);
 
 const s = (
   slot: number,
   name: string,
   count: number,
   rotated = false,
-  metadata: Record<string, unknown> = {}
-): Stack => ({ slot, name, count, metadata, rotated })
+  metadata: Record<string, unknown> = {},
+): Stack => ({ slot, name, count, metadata, rotated });
 
 export const MOCK_PLAYER: InventoryView = {
   id: "player:1",
@@ -74,7 +74,7 @@ export const MOCK_PLAYER: InventoryView = {
     s(41, "lockpick", 4),
     s(42, "radio", 1),
   ],
-}
+};
 
 const OTHER: Record<string, InventoryView | null> = {
   stash: {
@@ -93,13 +93,13 @@ const OTHER: Record<string, InventoryView | null> = {
   ground: null,
   shop: null,
   bench: null,
-}
+};
 
 const MOCK_SHOP: ShopView = {
   id: "shop_innocence",
   label: shops.shop_innocence.label,
   items: shops.shop_innocence.items,
-}
+};
 const MOCK_BENCH: BenchView = {
   id: "workshop_bench",
   label: benches.workshop_bench.label,
@@ -117,11 +117,11 @@ const MOCK_BENCH: BenchView = {
       ingredients: [{ name: "paperbag", count: 1 }],
     },
   ],
-}
+};
 
-export const MOCK_SETUP = { texts: en, items: MOCK_ITEMS }
+export const MOCK_SETUP = { texts: en, items: MOCK_ITEMS };
 export const MOCK_OPEN = {
   other: OTHER[view] ?? null,
   shop: view === "shop" ? MOCK_SHOP : null,
   bench: view === "bench" ? MOCK_BENCH : null,
-}
+};

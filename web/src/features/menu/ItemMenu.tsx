@@ -1,58 +1,58 @@
-import { useEffect, useState } from "react"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowDown,
   faHandHolding,
   faHandPointer,
   faScissors,
   faXmark,
-} from "@fortawesome/free-solid-svg-icons"
-import { Button } from "../../components/ui/button"
-import { Dialog } from "../../components/ui/dialog"
+} from "@fortawesome/free-solid-svg-icons";
+import { Button } from "../../components/ui/button";
+import { Dialog } from "../../components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "../../components/ui/dropdown-menu"
-import { Input } from "../../components/ui/input"
-import { useLang } from "../../lib/lang"
-import { useAppSelector } from "../../store"
+} from "../../components/ui/dropdown-menu";
+import { Input } from "../../components/ui/input";
+import { useLang } from "../../lib/lang";
+import { useAppSelector } from "../../store";
 import {
   detachComponent,
   dropItem,
   giveItem,
   itemUse,
   splitItem,
-} from "../actions"
-import { ui, useUi, type AmountAction } from "../ui"
+} from "../actions";
+import { ui, useUi, type AmountAction } from "../ui";
 
 /** Right-click menu of a stack (right click opens it at the pointer; NUI gets no contextmenu event). */
 export function ItemMenu() {
-  const t = useLang()
-  const { menu } = useUi()
-  const state = useAppSelector((s) => s.inventory)
+  const t = useLang();
+  const { menu } = useUi();
+  const state = useAppSelector((s) => s.inventory);
   const view = menu
     ? state.player?.id === menu.inv
       ? state.player
       : state.other?.id === menu.inv
         ? state.other
         : null
-    : null
-  const stack = view?.stacks.find((s) => s.slot === menu?.slot)
-  const def = stack ? state.items[stack.name] : undefined
-  const own = view !== null && view === state.player
+    : null;
+  const stack = view?.stacks.find((s) => s.slot === menu?.slot);
+  const def = stack ? state.items[stack.name] : undefined;
+  const own = view !== null && view === state.player;
   const components =
     stack && Array.isArray(stack.metadata.components)
       ? stack.metadata.components.filter(
-          (c): c is string => typeof c === "string"
+          (c): c is string => typeof c === "string",
         )
-      : []
+      : [];
   const ask = (action: AmountAction) =>
     menu &&
     stack &&
-    ui.setAmount({ action, inv: menu.inv, slot: stack.slot, max: stack.count })
+    ui.setAmount({ action, inv: menu.inv, slot: stack.slot, max: stack.count });
 
   return (
     <DropdownMenu
@@ -128,47 +128,47 @@ export function ItemMenu() {
               {t(
                 "UI_DETACH",
                 Object.values(state.items).find((item) =>
-                  item.hashes.includes(hash)
-                )?.label ?? hash
+                  item.hashes.includes(hash),
+                )?.label ?? hash,
               )}
             </DropdownMenuItem>
           ))}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
 
 const TITLE: Record<AmountAction, "UI_GIVE" | "UI_DROP" | "UI_SPLIT"> = {
   give: "UI_GIVE",
   drop: "UI_DROP",
   split: "UI_SPLIT",
-}
+};
 
 /** Asks how many to give, drop or split off; Enter confirms. */
 export function AmountDialog() {
-  const t = useLang()
-  const { amount } = useUi()
-  const [value, setValue] = useState("1")
+  const t = useLang();
+  const { amount } = useUi();
+  const [value, setValue] = useState("1");
   useEffect(() => {
     if (amount)
       setValue(
-        amount.action === "split" ? String(Math.floor(amount.max / 2)) : "1"
-      )
-  }, [amount])
-  const count = Math.floor(Number(value))
+        amount.action === "split" ? String(Math.floor(amount.max / 2)) : "1",
+      );
+  }, [amount]);
+  const count = Math.floor(Number(value));
   const valid =
     amount !== null &&
     Number.isFinite(count) &&
     count >= 1 &&
-    count <= (amount.action === "split" ? amount.max - 1 : amount.max)
+    count <= (amount.action === "split" ? amount.max - 1 : amount.max);
 
   const confirm = () => {
-    if (!amount || !valid) return
-    if (amount.action === "give") giveItem(amount.slot, count)
-    else if (amount.action === "drop") dropItem(amount.inv, amount.slot, count)
-    else splitItem(amount.inv, amount.slot, count)
-    ui.setAmount(null)
-  }
+    if (!amount || !valid) return;
+    if (amount.action === "give") giveItem(amount.slot, count);
+    else if (amount.action === "drop") dropItem(amount.inv, amount.slot, count);
+    else splitItem(amount.inv, amount.slot, count);
+    ui.setAmount(null);
+  };
 
   return (
     <Dialog
@@ -179,8 +179,8 @@ export function AmountDialog() {
       <form
         className="flex flex-col gap-[1.2vh]"
         onSubmit={(event) => {
-          event.preventDefault()
-          confirm()
+          event.preventDefault();
+          confirm();
         }}
       >
         <div className="flex gap-[0.8vh]">
@@ -211,5 +211,5 @@ export function AmountDialog() {
         </div>
       </form>
     </Dialog>
-  )
+  );
 }

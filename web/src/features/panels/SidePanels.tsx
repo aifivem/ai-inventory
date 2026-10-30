@@ -1,39 +1,39 @@
-import { useState } from "react"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowDown,
   faBox,
   faMinus,
   faPlus,
-} from "@fortawesome/free-solid-svg-icons"
+} from "@fortawesome/free-solid-svg-icons";
 import type {
   BenchView,
   ItemView,
   ShopView,
-} from "../../../../resource/common/nui"
-import { Button } from "../../components/ui/button"
-import { VirtualList } from "../../components/VirtualList"
-import { imageUrl } from "../../lib/cell"
-import { useLang } from "../../lib/lang"
-import { cn } from "../../lib/utils"
-import { useAppSelector } from "../../store"
-import { buyItem, craftRecipe } from "../actions"
-import { useDrag } from "../grid/drag"
-import { PanelFrame, sideWidth } from "./InventoryPanel"
+} from "../../../../resource/common/nui";
+import { Button } from "../../components/ui/button";
+import { VirtualList } from "../../components/VirtualList";
+import { imageUrl } from "../../lib/cell";
+import { useLang } from "../../lib/lang";
+import { cn } from "../../lib/utils";
+import { useAppSelector } from "../../store";
+import { buyItem, craftRecipe } from "../actions";
+import { useDrag } from "../grid/drag";
+import { PanelFrame, sideWidth } from "./InventoryPanel";
 
 function Picture({
   def,
   className,
 }: {
-  def: ItemView | undefined
-  className?: string
+  def: ItemView | undefined;
+  className?: string;
 }) {
-  const src = def ? imageUrl(def.image) : null
+  const src = def ? imageUrl(def.image) : null;
   return (
     <div
       className={cn(
         "flex shrink-0 items-center justify-center rounded-[0.8vh] border border-white/8 bg-white/4 p-[0.5vh]",
-        className
+        className,
       )}
     >
       {src ? (
@@ -46,13 +46,13 @@ function Picture({
         <FontAwesomeIcon icon={faBox} className="text-[1.8vh] text-text-3" />
       )}
     </div>
-  )
+  );
 }
 
 /** Next to the player inventory when nothing else is open: drop target for putting items on the ground. */
 export function GroundPanel({ columns }: { columns: number }) {
-  const t = useLang()
-  const drag = useDrag()
+  const t = useLang();
+  const drag = useDrag();
   return (
     <PanelFrame title={t("UI_GROUND")} width={sideWidth(columns)}>
       <div
@@ -61,27 +61,27 @@ export function GroundPanel({ columns }: { columns: number }) {
           "flex h-[38.4vh] w-full flex-col items-center justify-center gap-[1.2vh] rounded-[1.4vh] border border-dashed bg-black/20 text-center transition-colors duration-150",
           drag?.ground
             ? "border-tgi-green bg-tgi-green-10 text-tgi-green"
-            : "border-white/15 text-text-2"
+            : "border-white/15 text-text-2",
         )}
       >
         <FontAwesomeIcon icon={faArrowDown} className="text-[3vh]" />
         <p className="max-w-[30vh] text-[1.4vh]">{t("UI_GROUND_HINT")}</p>
       </div>
     </PanelFrame>
-  )
+  );
 }
 
 function ShopRow({
   shop,
   row,
 }: {
-  shop: string
-  row: { name: string; price: number }
+  shop: string;
+  row: { name: string; price: number };
 }) {
-  const t = useLang()
-  const def = useAppSelector((state) => state.inventory.items[row.name])
-  const [count, setCount] = useState(1)
-  const max = Math.max(1, Math.min(100, def?.stack ?? 1))
+  const t = useLang();
+  const def = useAppSelector((state) => state.inventory.items[row.name]);
+  const [count, setCount] = useState(1);
+  const max = Math.max(1, Math.min(100, def?.stack ?? 1));
   return (
     <div className="flex h-[7.2vh] items-center gap-[1.2vh] rounded-[1vh] border border-white/8 bg-white/3 px-[1vh] transition-colors duration-150 hover:bg-white/6">
       <Picture def={def} className="size-[5.4vh]" />
@@ -118,17 +118,17 @@ function ShopRow({
         {t("UI_BUY")}
       </Button>
     </div>
-  )
+  );
 }
 
 export function ShopPanel({
   shop,
   columns,
 }: {
-  shop: ShopView
-  columns: number
+  shop: ShopView;
+  columns: number;
 }) {
-  const t = useLang()
+  const t = useLang();
   return (
     <PanelFrame
       title={shop.label}
@@ -150,22 +150,24 @@ export function ShopPanel({
         />
       )}
     </PanelFrame>
-  )
+  );
 }
 
 function RecipeRow({ bench, index }: { bench: BenchView; index: number }) {
-  const t = useLang()
-  const recipe = bench.recipes[index]
-  const items = useAppSelector((state) => state.inventory.items)
-  const stacks = useAppSelector((state) => state.inventory.player?.stacks ?? [])
-  const crafting = useAppSelector((state) => state.inventory.crafting)
-  if (!recipe) return null
+  const t = useLang();
+  const recipe = bench.recipes[index];
+  const items = useAppSelector((state) => state.inventory.items);
+  const stacks = useAppSelector(
+    (state) => state.inventory.player?.stacks ?? [],
+  );
+  const crafting = useAppSelector((state) => state.inventory.crafting);
+  if (!recipe) return null;
   const have = (name: string) =>
-    stacks.reduce((sum, s) => sum + (s.name === name ? s.count : 0), 0)
+    stacks.reduce((sum, s) => sum + (s.name === name ? s.count : 0), 0);
   const ready = recipe.ingredients.every(
-    (part) => have(part.name) >= part.count
-  )
-  const busy = crafting?.index === index
+    (part) => have(part.name) >= part.count,
+  );
+  const busy = crafting?.index === index;
   return (
     <div className="flex h-[7.2vh] items-center gap-[1.2vh] rounded-[1vh] border border-white/8 bg-white/3 px-[1vh] transition-colors duration-150 hover:bg-white/6">
       <Picture def={items[recipe.result]} className="size-[5.4vh]" />
@@ -174,7 +176,7 @@ function RecipeRow({ bench, index }: { bench: BenchView; index: number }) {
           {t(
             "UI_PART",
             recipe.count,
-            items[recipe.result]?.label ?? recipe.result
+            items[recipe.result]?.label ?? recipe.result,
           )}
         </span>
         <span className="truncate text-[1.2vh] text-text-3">
@@ -204,17 +206,17 @@ function RecipeRow({ bench, index }: { bench: BenchView; index: number }) {
         {t("UI_CRAFT")}
       </Button>
     </div>
-  )
+  );
 }
 
 export function BenchPanel({
   bench,
   columns,
 }: {
-  bench: BenchView
-  columns: number
+  bench: BenchView;
+  columns: number;
 }) {
-  const t = useLang()
+  const t = useLang();
   return (
     <PanelFrame
       title={bench.label}
@@ -236,5 +238,5 @@ export function BenchPanel({
         />
       )}
     </PanelFrame>
-  )
+  );
 }

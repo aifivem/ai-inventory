@@ -1,46 +1,46 @@
-import { cache, Keybind, onServerEvent } from "@aicore-fivem/lib/client"
-import { Locale } from "common"
-import { EVENTS } from "common/events"
-import { toPanel, type OpenTarget } from "common/nui"
-import { drops } from "./drops"
-import { screen } from "./screen"
-import { state, toView } from "./state"
-import { useItem } from "./use"
+import { cache, Keybind, onServerEvent } from "@aicore-fivem/lib/client";
+import { Locale } from "common";
+import { EVENTS } from "common/events";
+import { toPanel, type OpenTarget } from "common/nui";
+import { drops } from "./drops";
+import { screen } from "./screen";
+import { state, toView } from "./state";
+import { useItem } from "./use";
 
 /** How close to a vehicle's back the trunk opens. */
-const TRUNK_REACH = 1.6
+const TRUNK_REACH = 1.6;
 
 /** The networked vehicle whose back the player stands at, or null. */
 function trunkInReach(): number | null {
-  const [x = 0, y = 0, z = 0] = GetEntityCoords(cache.ped, false)
+  const [x = 0, y = 0, z = 0] = GetEntityCoords(cache.ped, false);
   for (const vehicle of GetGamePool("CVehicle") as number[]) {
-    const [vx = 0, vy = 0, vz = 0] = GetEntityCoords(vehicle, false)
+    const [vx = 0, vy = 0, vz = 0] = GetEntityCoords(vehicle, false);
     if (
       Math.hypot(vx - x, vy - y, vz - z) > 8 ||
       !NetworkGetEntityIsNetworked(vehicle)
     )
-      continue
-    const [min] = GetModelDimensions(GetEntityModel(vehicle))
+      continue;
+    const [min] = GetModelDimensions(GetEntityModel(vehicle));
     const [bx = 0, by = 0, bz = 0] = GetOffsetFromEntityInWorldCoords(
       vehicle,
       0,
       (min?.[1] ?? -2) - 0.4,
-      0
-    )
-    if (Math.hypot(bx - x, by - y, bz - z) <= TRUNK_REACH) return vehicle
+      0,
+    );
+    if (Math.hypot(bx - x, by - y, bz - z) <= TRUNK_REACH) return vehicle;
   }
-  return null
+  return null;
 }
 
 /** What the inventory key opens next to the player's own: glovebox, a drop, a trunk, or nothing. */
 function contextTarget(): OpenTarget {
-  if (cache.vehicle !== false) return { kind: "glovebox" }
-  const drop = drops.nearest(2)
-  if (drop) return { kind: "drop", id: drop }
-  const vehicle = trunkInReach()
+  if (cache.vehicle !== false) return { kind: "glovebox" };
+  const drop = drops.nearest(2);
+  if (drop) return { kind: "drop", id: drop };
+  const vehicle = trunkInReach();
   if (vehicle && GetVehicleDoorLockStatus(vehicle) < 2)
-    return { kind: "trunk", netId: NetworkGetNetworkIdFromEntity(vehicle) }
-  return { kind: "self" }
+    return { kind: "trunk", netId: NetworkGetNetworkIdFromEntity(vehicle) };
+  return { kind: "self" };
 }
 
 new Keybind({
@@ -48,10 +48,10 @@ new Keybind({
   description: Locale("KEYBIND_OPEN"),
   defaultKey: "TAB",
   onPressed: () => {
-    if (screen.isOpen) return screen.close()
-    void screen.open(contextTarget())
+    if (screen.isOpen) return screen.close();
+    void screen.open(contextTarget());
   },
-})
+});
 
 /** Keys 1-5 use whatever covers the first five cells of the top row. */
 for (let i = 1; i <= 5; i++) {
@@ -60,11 +60,11 @@ for (let i = 1; i <= 5; i++) {
     description: Locale("KEYBIND_HOTBAR", i),
     defaultKey: String(i),
     onPressed: () => {
-      if (screen.isOpen || IsPauseMenuActive()) return
-      const stack = state.stackAtCell(i - 1)
-      if (stack) void useItem(stack.slot)
+      if (screen.isOpen || IsPauseMenuActive()) return;
+      const stack = state.stackAtCell(i - 1);
+      if (stack) void useItem(stack.slot);
     },
-  })
+  });
 }
 
 onServerEvent(
@@ -76,6 +76,6 @@ onServerEvent(
         panel == null ? null : toPanel(panel),
       ] as const,
   },
-  (view, panel) => screen.show(view, panel)
-)
-onServerEvent(EVENTS.forceClose, () => screen.otherClosed())
+  (view, panel) => screen.show(view, panel),
+);
+onServerEvent(EVENTS.forceClose, () => screen.otherClosed());

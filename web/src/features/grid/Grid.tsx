@@ -1,49 +1,49 @@
-import { memo, useMemo, type ReactNode } from "react"
-import { Occupancy } from "../../../../resource/common/grid"
-import type { InventoryView, ItemView } from "../../../../resource/common/nui"
-import { CELL_GAP_VH, CELL_VH } from "../../lib/cell"
-import { cn } from "../../lib/utils"
-import { useAppSelector } from "../../store"
-import { useDrag, type DragState } from "./drag"
-import { ItemTile } from "./ItemTile"
+import { memo, useMemo, type ReactNode } from "react";
+import { Occupancy } from "../../../../resource/common/grid";
+import type { InventoryView, ItemView } from "../../../../resource/common/nui";
+import { CELL_GAP_VH, CELL_VH } from "../../lib/cell";
+import { cn } from "../../lib/utils";
+import { useAppSelector } from "../../store";
+import { useDrag, type DragState } from "./drag";
+import { ItemTile } from "./ItemTile";
 
-type Fit = "free" | "merge" | "swap" | "blocked"
+type Fit = "free" | "merge" | "swap" | "blocked";
 
 /** Search text and item kind of a side's toolbar; stacks that do not match are dimmed. */
 export interface StackFilter {
-  search: string
-  type: string | null
+  search: string;
+  type: string | null;
 }
 
 const sizeOf = (def: ItemView | undefined, rotated: boolean) => {
-  const w = def?.w ?? 1
-  const h = def?.h ?? 1
-  return rotated ? { w: h, h: w } : { w, h }
-}
+  const w = def?.w ?? 1;
+  const h = def?.h ?? 1;
+  return rotated ? { w: h, h: w } : { w, h };
+};
 
 /** How the dragged item would land at the target: the same rules the server applies (weight aside). */
 function fitAt(
   view: InventoryView,
   grid: Occupancy,
   drag: DragState,
-  items: Record<string, ItemView>
+  items: Record<string, ItemView>,
 ): { fit: Fit; slot: number; w: number; h: number } | null {
-  if (!drag.target || drag.target.inv !== view.id) return null
-  const def = items[drag.name]
-  const { w, h } = sizeOf(def, drag.rotated)
-  const slot = drag.target.slot
-  const x = (slot - 1) % view.columns
-  const y = Math.floor((slot - 1) / view.columns)
+  if (!drag.target || drag.target.inv !== view.id) return null;
+  const def = items[drag.name];
+  const { w, h } = sizeOf(def, drag.rotated);
+  const slot = drag.target.slot;
+  const x = (slot - 1) % view.columns;
+  const y = Math.floor((slot - 1) / view.columns);
   if (x + w > view.columns || y + h > view.rows)
-    return { fit: "blocked", slot, w, h }
-  const covered = grid.covered(slot, w, h)
-  if (drag.from === view.id && drag.whole) covered.delete(drag.slot)
-  if (covered.size === 0) return { fit: "free", slot, w, h }
-  if (covered.size > 1) return { fit: "blocked", slot, w, h }
-  const target = view.stacks.find((s) => s.slot === [...covered][0])
+    return { fit: "blocked", slot, w, h };
+  const covered = grid.covered(slot, w, h);
+  if (drag.from === view.id && drag.whole) covered.delete(drag.slot);
+  if (covered.size === 0) return { fit: "free", slot, w, h };
+  if (covered.size > 1) return { fit: "blocked", slot, w, h };
+  const target = view.stacks.find((s) => s.slot === [...covered][0]);
   if (target && target.name === drag.name && (def?.stack ?? 1) > 1)
-    return { fit: "merge", slot, w, h }
-  return { fit: drag.whole ? "swap" : "blocked", slot, w, h }
+    return { fit: "merge", slot, w, h };
+  return { fit: drag.whole ? "swap" : "blocked", slot, w, h };
 }
 
 const FIT_STYLE: Record<Fit, string> = {
@@ -51,37 +51,37 @@ const FIT_STYLE: Record<Fit, string> = {
   merge: "border-warn bg-warn/15",
   swap: "border-warn bg-warn/15",
   blocked: "border-danger bg-danger-bg",
-}
+};
 
 const matches = (
   def: ItemView | undefined,
   name: string,
-  filter: StackFilter
+  filter: StackFilter,
 ): boolean => {
   if (filter.type !== null && (def?.type ?? "item") !== filter.type)
-    return false
-  const search = filter.search.trim().toLowerCase()
+    return false;
+  const search = filter.search.trim().toLowerCase();
   return (
     !search ||
     (def?.label ?? name).toLowerCase().includes(search) ||
     name.includes(search)
-  )
-}
+  );
+};
 
 /** The free cells as rounded boxes (covered cells are left out so a big stack's box shows no cell lines); quick slot numbers 1-5 on the player grid. */
 const EmptyCells = memo(function EmptyCells({
   grid,
   own,
 }: {
-  grid: Occupancy
-  own: boolean
+  grid: Occupancy;
+  own: boolean;
 }) {
-  const half = CELL_GAP_VH / 2
-  const cells: ReactNode[] = []
+  const half = CELL_GAP_VH / 2;
+  const cells: ReactNode[] = [];
   grid.cells.forEach((anchor, i) => {
-    if (anchor !== 0) return
-    const x = i % grid.columns
-    const y = Math.floor(i / grid.columns)
+    if (anchor !== 0) return;
+    const x = i % grid.columns;
+    const y = Math.floor(i / grid.columns);
     cells.push(
       <div
         key={i}
@@ -94,11 +94,11 @@ const EmptyCells = memo(function EmptyCells({
         }}
       >
         {own && i < 5 ? i + 1 : null}
-      </div>
-    )
-  })
-  return <>{cells}</>
-})
+      </div>,
+    );
+  });
+  return <>{cells}</>;
+});
 
 /** An inventory grid: empty cells, the drop highlight while dragging, and the stacks. Quick slots numbered on the player grid. */
 export function Grid({
@@ -106,12 +106,12 @@ export function Grid({
   own,
   filter,
 }: {
-  view: InventoryView
-  own: boolean
-  filter: StackFilter
+  view: InventoryView;
+  own: boolean;
+  filter: StackFilter;
 }) {
-  const items = useAppSelector((state) => state.inventory.items)
-  const drag = useDrag()
+  const items = useAppSelector((state) => state.inventory.items);
+  const drag = useDrag();
   const grid = useMemo(
     () =>
       Occupancy.of(
@@ -120,12 +120,12 @@ export function Grid({
         view.stacks.map((s) => ({
           slot: s.slot,
           ...sizeOf(items[s.name], s.rotated),
-        }))
+        })),
       ),
-    [view, items]
-  )
-  const fit = drag ? fitAt(view, grid, drag, items) : null
-  const filtering = filter.type !== null || filter.search.trim() !== ""
+    [view, items],
+  );
+  const fit = drag ? fitAt(view, grid, drag, items) : null;
+  const filtering = filter.type !== null || filter.search.trim() !== "";
 
   return (
     <div
@@ -143,7 +143,7 @@ export function Grid({
         <div
           className={cn(
             "pointer-events-none absolute z-10 rounded-[0.9vh] border transition-[left,top] duration-75",
-            FIT_STYLE[fit.fit]
+            FIT_STYLE[fit.fit],
           )}
           style={{
             left: `${((fit.slot - 1) % view.columns) * CELL_VH + CELL_GAP_VH / 2}vh`,
@@ -165,5 +165,5 @@ export function Grid({
         />
       ))}
     </div>
-  )
+  );
 }

@@ -1,5 +1,5 @@
-import { useState, type ReactNode } from "react"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import { useState, type ReactNode } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBullseye,
   faCubes,
@@ -8,22 +8,22 @@ import {
   faPuzzlePiece,
   faWeightHanging,
   type IconDefinition,
-} from "@fortawesome/free-solid-svg-icons"
-import type { InventoryView } from "../../../../resource/common/nui"
-import { ScrollArea } from "../../components/ui/scroll-area"
+} from "@fortawesome/free-solid-svg-icons";
+import type { InventoryView } from "../../../../resource/common/nui";
+import { ScrollArea } from "../../components/ui/scroll-area";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "../../components/ui/tooltip"
-import { CELL_VH, kg } from "../../lib/cell"
-import { useLang } from "../../lib/lang"
-import { cn } from "../../lib/utils"
-import { useAppSelector } from "../../store"
-import { Grid, type StackFilter } from "../grid/Grid"
+} from "../../components/ui/tooltip";
+import { CELL_VH, kg } from "../../lib/cell";
+import { useLang } from "../../lib/lang";
+import { cn } from "../../lib/utils";
+import { useAppSelector } from "../../store";
+import { Grid, type StackFilter } from "../grid/Grid";
 
 /** Width of a side of the screen: one grid of `columns` cells. */
-export const sideWidth = (columns: number): string => `${columns * CELL_VH}vh`
+export const sideWidth = (columns: number): string => `${columns * CELL_VH}vh`;
 
 /** One side of the screen: green dot + name (+ kind), optional weight, the bar line under it, then the body. No outer box. */
 export function PanelFrame({
@@ -34,12 +34,12 @@ export function PanelFrame({
   width,
   children,
 }: {
-  title: string
-  kind?: string
-  weight?: ReactNode
-  bar?: ReactNode
-  width: string
-  children: ReactNode
+  title: string;
+  kind?: string;
+  weight?: ReactNode;
+  bar?: ReactNode;
+  width: string;
+  children: ReactNode;
 }) {
   return (
     <section
@@ -63,16 +63,16 @@ export function PanelFrame({
       </header>
       {children}
     </section>
-  )
+  );
 }
 
 function Weight({ view }: { view: InventoryView }) {
-  const t = useLang()
-  const items = useAppSelector((state) => state.inventory.items)
+  const t = useLang();
+  const items = useAppSelector((state) => state.inventory.items);
   const weight = view.stacks.reduce(
     (sum, s) => sum + (items[s.name]?.weight ?? 0) * s.count,
-    0
-  )
+    0,
+  );
   return (
     <span className="flex shrink-0 items-center gap-[0.8vh] text-[1.6vh] tabular-nums">
       {view.maxWeight > 0
@@ -80,29 +80,29 @@ function Weight({ view }: { view: InventoryView }) {
         : t("UI_KG", kg(weight))}
       <FontAwesomeIcon icon={faWeightHanging} className="text-[1.8vh]" />
     </span>
-  )
+  );
 }
 
 /** The weight bar under the header: a thin track, green fill (red when nearly full). */
 function WeightBar({ view }: { view: InventoryView }) {
-  const items = useAppSelector((state) => state.inventory.items)
-  if (view.maxWeight <= 0) return null
+  const items = useAppSelector((state) => state.inventory.items);
+  if (view.maxWeight <= 0) return null;
   const weight = view.stacks.reduce(
     (sum, s) => sum + (items[s.name]?.weight ?? 0) * s.count,
-    0
-  )
-  const ratio = Math.min(1, weight / view.maxWeight)
+    0,
+  );
+  const ratio = Math.min(1, weight / view.maxWeight);
   return (
     <div className="h-[0.3vh] overflow-hidden rounded-full bg-white/4">
       <div
         className={cn(
           "h-full rounded-full transition-[width] duration-300 ease-out",
-          ratio > 0.9 ? "bg-danger" : "bg-tgi-green"
+          ratio > 0.9 ? "bg-danger" : "bg-tgi-green",
         )}
         style={{ width: `${ratio * 100}%` }}
       />
     </div>
-  )
+  );
 }
 
 const FILTERS: Array<{ type: string; icon: IconDefinition; label: string }> = [
@@ -110,18 +110,18 @@ const FILTERS: Array<{ type: string; icon: IconDefinition; label: string }> = [
   { type: "ammo", icon: faBullseye, label: "ADMIN_O_AMMO" },
   { type: "component", icon: faPuzzlePiece, label: "ADMIN_O_COMPONENT" },
   { type: "item", icon: faCubes, label: "ADMIN_O_ITEM" },
-]
+];
 
 /** Narrower grids than this show the kind filters as icons with a tooltip; wider ones show icon and label. */
-const LABELLED_COLUMNS = 9
+const LABELLED_COLUMNS = 9;
 
 const filterButton = (active: boolean) =>
   cn(
     "flex h-[3.6vh] min-w-[3.6vh] shrink-0 items-center justify-center gap-[0.7vh] rounded-full border bg-white/2 text-[1.5vh] transition-[background-color,border-color,color] duration-150 active:[transform:scale(0.94)]",
     active
       ? "border-dashed border-tgi-green text-tgi-green"
-      : "border-white/10 text-text-3 hover:border-tgi-green hover:text-white"
-  )
+      : "border-white/10 text-text-3 hover:border-tgi-green hover:text-white",
+  );
 
 /** Search pill and item kind filters: stacks that do not match are dimmed in place (the grid keeps its layout). */
 function Toolbar({
@@ -129,17 +129,17 @@ function Toolbar({
   labelled,
   onChange,
 }: {
-  filter: StackFilter
-  labelled: boolean
-  onChange: (filter: StackFilter) => void
+  filter: StackFilter;
+  labelled: boolean;
+  onChange: (filter: StackFilter) => void;
 }) {
-  const t = useLang()
+  const t = useLang();
   return (
     <div className="flex items-center gap-[0.6vh]">
       <label
         className={cn(
           "flex h-[3.6vh] min-w-[12vh] flex-1 items-center gap-[0.6vh] rounded-full border bg-[#2222224D] px-[1.4vh] transition-colors duration-150 focus-within:border-tgi-green-40",
-          filter.search ? "border-dashed border-tgi-green" : "border-white/8"
+          filter.search ? "border-dashed border-tgi-green" : "border-white/8",
         )}
       >
         <input
@@ -160,7 +160,7 @@ function Toolbar({
           aria-pressed={filter.type === null}
           className={cn(
             filterButton(filter.type === null),
-            "px-[1.3vh] text-[1.3vh] font-medium"
+            "px-[1.3vh] text-[1.3vh] font-medium",
           )}
           onClick={() => onChange({ ...filter, type: null })}
         >
@@ -175,7 +175,7 @@ function Toolbar({
               aria-pressed={filter.type === f.type}
               className={cn(
                 filterButton(filter.type === f.type),
-                labelled && "pr-[1.3vh] pl-[1.1vh] text-[1.3vh] font-medium"
+                labelled && "pr-[1.3vh] pl-[1.1vh] text-[1.3vh] font-medium",
               )}
               onClick={() =>
                 onChange({
@@ -190,7 +190,7 @@ function Toolbar({
               />
               {labelled && t(f.label)}
             </button>
-          )
+          );
           return labelled ? (
             button
           ) : (
@@ -203,11 +203,11 @@ function Toolbar({
                 {t(f.label)}
               </TooltipContent>
             </Tooltip>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }
 
 const KIND_KEY = {
@@ -218,20 +218,20 @@ const KIND_KEY = {
   glovebox: "UI_KIND_GLOVEBOX",
   temp: "UI_KIND_TEMP",
   other: "UI_KIND_OTHER",
-} as const
+} as const;
 
 /** An inventory with its weight, search and filters; the grid scrolls when it is taller than the screen. */
 export function InventoryPanel({
   view,
   own,
 }: {
-  view: InventoryView
-  own: boolean
+  view: InventoryView;
+  own: boolean;
 }) {
-  const t = useLang()
-  const [filter, setFilter] = useState<StackFilter>({ search: "", type: null })
-  const title = own ? t("UI_INVENTORY") : view.label || t(KIND_KEY[view.kind])
-  const kind = own || !view.label ? undefined : t(KIND_KEY[view.kind])
+  const t = useLang();
+  const [filter, setFilter] = useState<StackFilter>({ search: "", type: null });
+  const title = own ? t("UI_INVENTORY") : view.label || t(KIND_KEY[view.kind]);
+  const kind = own || !view.label ? undefined : t(KIND_KEY[view.kind]);
   return (
     <PanelFrame
       title={title}
@@ -249,5 +249,5 @@ export function InventoryPanel({
         <Grid view={view} own={own} filter={filter} />
       </ScrollArea>
     </PanelFrame>
-  )
+  );
 }

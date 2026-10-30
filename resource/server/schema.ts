@@ -1,4 +1,4 @@
-import type { DataSpec, PanelSchema, WidgetSpec } from "@aicore-fivem/shared"
+import type { DataSpec, PanelSchema, WidgetSpec } from "@aicore-fivem/shared";
 
 /** ai-inventory's panel: item definitions, shops, stashes, crafting benches and grid sizes. */
 
@@ -8,30 +8,30 @@ const int = (min: number, max: number, optional = false): DataSpec => ({
   max,
   integer: true,
   optional,
-})
+});
 const num = (min: number, max: number, optional = false): DataSpec => ({
   type: "number",
   min,
   max,
   optional,
-})
+});
 const text = (max: number, optional = false): DataSpec => ({
   type: "text",
   min: 0,
   max,
   optional,
-})
+});
 const names: DataSpec = {
   type: "names",
   max: 30,
   itemMax: 48,
   pattern: "^[a-z0-9_-]{2,48}$",
-}
+};
 const gridSpec = (extra: Record<string, DataSpec> = {}): DataSpec => ({
   type: "object",
   fields: { rows: int(1, 50), maxWeight: int(0, 10_000_000), ...extra },
-})
-const KEY = "^[a-z0-9_-]{2,48}$"
+});
+const KEY = "^[a-z0-9_-]{2,48}$";
 
 const place = (labelKey: string): WidgetSpec[] => [
   {
@@ -65,7 +65,7 @@ const place = (labelKey: string): WidgetSpec[] => [
     hint: "ADMIN_H_JOBS",
     placeholder: "ADMIN_P_JOBS",
   },
-]
+];
 const gridFields = (path: string): WidgetSpec[] => [
   {
     widget: "number",
@@ -85,13 +85,13 @@ const gridFields = (path: string): WidgetSpec[] => [
     step: 1000,
     unit: "g",
   },
-]
+];
 const placeSections = {
   label: text(48),
   coords: { type: "vec3" } as DataSpec,
   radius: num(0.5, 30),
   jobs: names,
-}
+};
 
 export const inventorySchema: PanelSchema = {
   title: "ADMIN_TITLE",
@@ -707,4 +707,4 @@ export const inventorySchema: PanelSchema = {
       ],
     },
   ],
-}
+};

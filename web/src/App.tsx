@@ -1,10 +1,10 @@
-import { useEffect } from "react"
-import { useNuiEvent } from "fivem-nui-react"
-import type { NuiMessage } from "../../resource/common/nui"
-import { TooltipProvider } from "./components/ui/tooltip"
-import { MOCK_OPEN, MOCK_PLAYER, MOCK_SETUP } from "./dev/mock"
-import { setTexts } from "./lib/lang"
-import { store, useAppSelector } from "./store"
+import { useEffect } from "react";
+import { useNuiEvent } from "fivem-nui-react";
+import type { NuiMessage } from "../../resource/common/nui";
+import { TooltipProvider } from "./components/ui/tooltip";
+import { MOCK_OPEN, MOCK_PLAYER, MOCK_SETUP } from "./dev/mock";
+import { setTexts } from "./lib/lang";
+import { store, useAppSelector } from "./store";
 import {
   closed,
   deltaApplied,
@@ -12,55 +12,55 @@ import {
   opened,
   otherClosed,
   playerSet,
-} from "./store/inventory"
-import { closeScreen } from "./features/actions"
-import { Ghost } from "./features/grid/Ghost"
-import { AmountDialog, ItemMenu } from "./features/menu/ItemMenu"
-import { Header } from "./features/panels/Header"
-import { InventoryPanel } from "./features/panels/InventoryPanel"
+} from "./store/inventory";
+import { closeScreen } from "./features/actions";
+import { Ghost } from "./features/grid/Ghost";
+import { AmountDialog, ItemMenu } from "./features/menu/ItemMenu";
+import { Header } from "./features/panels/Header";
+import { InventoryPanel } from "./features/panels/InventoryPanel";
 import {
   BenchPanel,
   GroundPanel,
   ShopPanel,
-} from "./features/panels/SidePanels"
-import { ui } from "./features/ui"
+} from "./features/panels/SidePanels";
+import { ui } from "./features/ui";
 
 type Data<A extends NuiMessage["action"]> = Extract<
   NuiMessage,
   { action: A }
->["data"]
+>["data"];
 
 // The client is this resource's own code: its messages are trusted in shape (types from common/nui).
 const onSetup = (data: Data<"setup">) => {
-  setTexts(data.texts)
-  store.dispatch(itemsSet(data.items))
-}
-const onItems = (data: Data<"items">) => store.dispatch(itemsSet(data))
-const onPlayer = (data: Data<"player">) => store.dispatch(playerSet(data))
-const onOpen = (data: Data<"open">) => store.dispatch(opened(data))
-const onDelta = (data: Data<"delta">) => store.dispatch(deltaApplied(data))
+  setTexts(data.texts);
+  store.dispatch(itemsSet(data.items));
+};
+const onItems = (data: Data<"items">) => store.dispatch(itemsSet(data));
+const onPlayer = (data: Data<"player">) => store.dispatch(playerSet(data));
+const onOpen = (data: Data<"open">) => store.dispatch(opened(data));
+const onDelta = (data: Data<"delta">) => store.dispatch(deltaApplied(data));
 const onClose = () => {
-  ui.setMenu(null)
-  ui.setAmount(null)
-  store.dispatch(closed())
-}
-const onOtherClosed = () => store.dispatch(otherClosed())
+  ui.setMenu(null);
+  ui.setAmount(null);
+  store.dispatch(closed());
+};
+const onOtherClosed = () => store.dispatch(otherClosed());
 
-const SETUP_MOCK = { mockData: MOCK_SETUP }
-const PLAYER_MOCK = { mockData: MOCK_PLAYER, mockDelay: 50 }
-const OPEN_MOCK = { mockData: MOCK_OPEN, mockDelay: 100 }
+const SETUP_MOCK = { mockData: MOCK_SETUP };
+const PLAYER_MOCK = { mockData: MOCK_PLAYER, mockDelay: 50 };
+const OPEN_MOCK = { mockData: MOCK_OPEN, mockDelay: 100 };
 
 /** Root: listens to the client; while open shows the player inventory next to the second inventory, a shop, a bench or the ground. */
 export function App() {
-  const state = useAppSelector((s) => s.inventory)
+  const state = useAppSelector((s) => s.inventory);
 
-  useNuiEvent("setup", onSetup, SETUP_MOCK)
-  useNuiEvent("items", onItems)
-  useNuiEvent("player", onPlayer, PLAYER_MOCK)
-  useNuiEvent("open", onOpen, OPEN_MOCK)
-  useNuiEvent("delta", onDelta)
-  useNuiEvent("close", onClose)
-  useNuiEvent("otherClosed", onOtherClosed)
+  useNuiEvent("setup", onSetup, SETUP_MOCK);
+  useNuiEvent("items", onItems);
+  useNuiEvent("player", onPlayer, PLAYER_MOCK);
+  useNuiEvent("open", onOpen, OPEN_MOCK);
+  useNuiEvent("delta", onDelta);
+  useNuiEvent("close", onClose);
+  useNuiEvent("otherClosed", onOtherClosed);
 
   // Escape or Tab closes the screen (the game's Tab bind does not fire while the NUI has focus); dialogs close first.
   useEffect(() => {
@@ -71,13 +71,13 @@ export function App() {
         ui.menu ||
         ui.amount
       )
-        return
-      event.preventDefault()
-      closeScreen()
-    }
-    window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
-  }, [])
+        return;
+      event.preventDefault();
+      closeScreen();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   return (
     <TooltipProvider>
@@ -105,5 +105,5 @@ export function App() {
         </div>
       )}
     </TooltipProvider>
-  )
+  );
 }
