@@ -1,5 +1,10 @@
 import { type PlacePed } from "@aicore-fivem/lib/shared";
-import { Points } from "@aicore-fivem/lib/client";
+import {
+  hasJob,
+  inGang,
+  onMembershipChange,
+  Points,
+} from "@aicore-fivem/lib/client";
 import { Locale } from "common";
 import type { Place } from "common/content";
 import { content } from "./content";
@@ -21,6 +26,17 @@ const SHOP_BLIP = { sprite: 52, color: 2, scale: 0.7 };
 /** Shops, stashes and crafting benches from the panel, a map blip for shops that want one. Rebuilt when the panel changes them. */
 const points = new Points();
 
+/** The server's access rule (`server/access.ts`) on the client: a locked place shows only to who may open it. */
+function mayUse(
+  place: Place & { gangs?: string[]; grades?: Record<string, number> },
+): boolean {
+  const gangs = place.gangs ?? [];
+  if (place.jobs.length === 0 && gangs.length === 0) return true;
+  if (gangs.length > 0 && inGang(gangs)) return true;
+  const grades = place.grades ?? {};
+  return place.jobs.some((job) => hasJob([job], grades[job] ?? 0));
+}
+
 function add(
   kind: Kind,
   place: Place,
@@ -34,6 +50,7 @@ function add(
     radius: place.radius,
     ped: ped ?? undefined,
     blip: blip ? { ...SHOP_BLIP, label: place.label } : undefined,
+    canShow: () => mayUse(place),
     onPressed: () => screen.open({ kind, id: place.id }),
   });
 }
@@ -47,6 +64,7 @@ function rebuild(): void {
 }
 
 rebuild();
+onMembershipChange(() => points.refresh());
 content.subscribe((file) => {
   if (file === "shops" || file === "stashes" || file === "benches") rebuild();
 });

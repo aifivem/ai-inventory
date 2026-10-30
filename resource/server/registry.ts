@@ -5,6 +5,7 @@ import { content } from "./content";
 import { Inventory } from "./inventory";
 import { log } from "./log";
 import { loadInventories, saveInventories } from "./repo";
+import { ResourceName } from "common";
 
 export interface InventoryShape {
   kind: InventoryKind;
@@ -223,5 +224,5 @@ every(
 );
 on("txAdmin:events:serverShuttingDown", () => saveNow("shutdown"));
 on("onResourceStop", (resource: string) => {
-  if (resource === GetCurrentResourceName()) saveNow("resource stop");
+  if (resource === ResourceName) saveNow("resource stop");
 });

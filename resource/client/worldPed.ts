@@ -1,4 +1,5 @@
 import { cache, TickLoop } from "@aicore-fivem/lib/client";
+import { ResourceName } from "common";
 
 /** The screen area (0 - 1) the equipment column keeps for the character. */
 export interface PedArea {
@@ -228,5 +229,5 @@ class WorldPed {
 export const worldPed = new WorldPed();
 
 on("onResourceStop", (resource: string) => {
-  if (resource === GetCurrentResourceName()) worldPed.hide();
+  if (resource === ResourceName) worldPed.hide();
 });

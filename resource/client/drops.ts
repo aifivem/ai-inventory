@@ -6,7 +6,7 @@ import {
   Zones,
 } from "@aicore-fivem/lib/client";
 import { isRecord, readFinite } from "@aicore-fivem/lib/shared";
-import { Locale } from "common";
+import { Locale, ResourceName } from "common";
 import { EVENTS } from "common/events";
 import type { DropPoint } from "common/nui";
 import { screen } from "./screen";
@@ -125,5 +125,5 @@ onServerEvent(
   (put, remove, reset) => drops.apply(put, remove, reset),
 );
 on("onResourceStop", (resource: string) => {
-  if (resource === GetCurrentResourceName()) drops.cleanup();
+  if (resource === ResourceName) drops.cleanup();
 });
