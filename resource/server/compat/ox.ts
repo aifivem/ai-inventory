@@ -1,4 +1,4 @@
-import { isRecord } from "@aicore-fivem/lib/shared";
+import { isRecord, readVec3 } from "@aicore-fivem/lib/shared";
 import { provideExport } from "@aicore-fivem/lib/server";
 import {
   addItem,
@@ -162,10 +162,8 @@ const exportsMap: Record<string, (...args: unknown[]) => unknown> = {
     if (inventory && typeof weight === "number") inventory.maxWeight = weight;
   },
   RegisterStash: (name, label, slots, maxWeight, owner, groups, coords) => {
-    const c =
-      isRecord(coords) && typeof coords.x === "number"
-        ? { x: coords.x, y: Number(coords.y), z: Number(coords.z) }
-        : undefined;
+    // An object or a Lua vector3 (arrives as an array).
+    const c = readVec3(coords) ?? undefined;
     const fixedOwner =
       typeof owner === "string" || typeof owner === "number"
         ? String(owner)

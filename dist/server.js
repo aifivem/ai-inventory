@@ -49,13 +49,43 @@ function record(value) {
 	return typeof value == "object" && value && !Array.isArray(value) ? value : {};
 }
 // ../../../packages/lib/src/shared/strict.ts
+function readFinite(value) {
+	return typeof value == "number" && Number.isFinite(value) ? value : null;
+}
 function readInt(value, min, max) {
 	return Number.isInteger(value) && value >= min && value <= max ? value : null;
 }
 const readId = (value) => readInt(value, 1, 2147483647), oneArg = (read) => ([value]) => {
 	let parsed = read(value);
 	return parsed === null ? null : [parsed];
-}, fail = (error) => ({
+};
+function parts(value) {
+	if (Array.isArray(value)) return value;
+	if (typeof value != "object" || !value) return null;
+	let v = value;
+	return [
+		v.x,
+		v.y,
+		v.z,
+		v.heading ?? v.w
+	];
+}
+function readVec3(value) {
+	let p = parts(value);
+	if (!p) return null;
+	let [x, y, z] = [
+		readFinite(p[0]),
+		readFinite(p[1]),
+		readFinite(p[2])
+	];
+	return x !== null && y !== null && z !== null ? {
+		x,
+		y,
+		z
+	} : null;
+}
+// ../../../packages/lib/src/shared/action.ts
+const fail = (error) => ({
 	ok: !1,
 	error
 }), isObject = (value) => typeof value == "object" && !!value && !Array.isArray(value);
@@ -1008,6 +1038,10 @@ var OnlinePlayers = class {
 	}
 	character(source) {
 		return this.start(), this.players.get(source)?.character ?? null;
+	}
+	name(source, options = {}) {
+		let c = this.character(source);
+		return c ? `${c.firstname} ${c.lastname}` : options.fallback === !1 ? "" : GetPlayerName(String(source));
 	}
 	jobs(source) {
 		return this.start(), this.players.get(source)?.jobNames ?? [];
@@ -18074,11 +18108,7 @@ const exportsMap$1 = {
 		inventory && typeof weight == "number" && (inventory.maxWeight = weight);
 	},
 	RegisterStash: (name, label, slots, maxWeight, owner, groups, coords) => {
-		let c = isRecord(coords) && typeof coords.x == "number" ? {
-			x: coords.x,
-			y: Number(coords.y),
-			z: Number(coords.z)
-		} : void 0, fixedOwner = typeof owner == "string" || typeof owner == "number" ? String(owner) : void 0;
+		let c = readVec3(coords) ?? void 0, fixedOwner = typeof owner == "string" || typeof owner == "number" ? String(owner) : void 0;
 		registerStash(String(name), String(label ?? name), Number(slots) || 50, Number(maxWeight) || 1e5, {
 			groups: groupsOf(groups),
 			personal: owner === !0,
