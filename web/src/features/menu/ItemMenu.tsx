@@ -30,25 +30,25 @@ export function ItemMenu() {
       <DropdownMenuContent align="start">
         {own && def?.usable && (
           <DropdownMenuItem onSelect={() => stack && itemUse(stack.slot)}>
-            <FontAwesomeIcon icon={faHandPointer} className="w-[1.4vh] text-text-3" />
+            <FontAwesomeIcon icon={faHandPointer} className="w-[1.6vh] text-[1.4vh] text-white/60" />
             {t("UI_USE")}
           </DropdownMenuItem>
         )}
         {own && (
           <DropdownMenuItem onSelect={() => (stack && stack.count > 1 ? ask("give") : stack && giveItem(stack.slot, 1))}>
-            <FontAwesomeIcon icon={faHandHolding} className="w-[1.4vh] text-text-3" />
+            <FontAwesomeIcon icon={faHandHolding} className="w-[1.6vh] text-[1.4vh] text-white/60" />
             {t("UI_GIVE")}
           </DropdownMenuItem>
         )}
         {(stack?.count ?? 0) > 1 && (
           <DropdownMenuItem onSelect={() => ask("split")}>
-            <FontAwesomeIcon icon={faScissors} className="w-[1.4vh] text-text-3" />
+            <FontAwesomeIcon icon={faScissors} className="w-[1.6vh] text-[1.4vh] text-white/60" />
             {t("UI_SPLIT")}
           </DropdownMenuItem>
         )}
         {view?.kind !== "drop" && (
           <DropdownMenuItem onSelect={() => (stack && stack.count > 1 ? ask("drop") : menu && stack && dropItem(menu.inv, stack.slot, 1))}>
-            <FontAwesomeIcon icon={faArrowDown} className="w-[1.4vh] text-text-3" />
+            <FontAwesomeIcon icon={faArrowDown} className="w-[1.6vh] text-[1.4vh] text-white/60" />
             {t("UI_DROP")}
           </DropdownMenuItem>
         )}
@@ -56,7 +56,7 @@ export function ItemMenu() {
         {own &&
           components.map((hash) => (
             <DropdownMenuItem key={hash} onSelect={() => stack && detachComponent(stack.slot, hash)}>
-              <FontAwesomeIcon icon={faXmark} className="w-[1.4vh] text-text-3" />
+              <FontAwesomeIcon icon={faXmark} className="w-[1.6vh] text-[1.4vh] text-white/60" />
               {t("UI_DETACH", Object.values(state.items).find((item) => item.hashes.includes(hash))?.label ?? hash)}
             </DropdownMenuItem>
           ))}
@@ -98,14 +98,14 @@ export function AmountDialog() {
         <div className="flex gap-[0.8vh]">
           <Input autoFocus type="number" min={1} max={amount?.max} value={value} aria-label={t("UI_AMOUNT")} aria-invalid={!valid} onChange={(e) => setValue(e.target.value)} />
           {amount?.action !== "split" && (
-            <Button size="sm" className="h-[3.6vh]" onClick={() => setValue(String(amount?.max ?? 1))}>
+            <Button variant="grey" onClick={() => setValue(String(amount?.max ?? 1))}>
               {t("UI_ALL")}
             </Button>
           )}
         </div>
         <div className="flex justify-end gap-[0.8vh]">
           <Button onClick={() => ui.setAmount(null)}>{t("UI_CANCEL")}</Button>
-          <Button type="submit" variant="filled" disabled={!valid}>
+          <Button type="submit" variant="primary" disabled={!valid}>
             {t("UI_CONFIRM")}
           </Button>
         </div>

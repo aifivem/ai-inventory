@@ -29,6 +29,7 @@ Grid inventory: items have a size in cells and can be turned; player inventory, 
 
 - Bun cannot resolve tsconfig path aliases under a folder named `[ai]`: the bench is bundled by `bench/run.ts` (`bun run bench`) with `common/*` resolved there.
 - oxlint finds no files in a resource without its own `.git`: it applies the server repo's `.gitignore`, which ignores `resources/[ai]/`.
+- NUI grid maths uses only the cell pitch `CELL_VH` (`web/src/lib/cell.ts`); boxes are drawn inset by half of `CELL_GAP_VH`, so the drag grab point is measured from the cell corner (tile rect + inset), not from the visible box. Empty cell boxes are drawn only for free cells, so a big stack shows no cell lines through it.
 - The NUI gets no `contextmenu` event: the item menu opens on `mouseup` with button 2. The game's Tab bind does not fire while the NUI has focus; the NUI closes on Tab / Escape itself.
 
 ## Entry points

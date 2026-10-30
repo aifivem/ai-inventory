@@ -18,7 +18,8 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
   },
   server: {
-    fs: { allow: [".."] },
+    // The resource folder plus the workspace root: bun keeps the packages (fonts) in its store there.
+    fs: { allow: ["..", "../../../../node_modules"] },
   },
   // Old FiveM CEF (Chromium ~103): no oklch, color-mix or @media (hover: hover).
   css: {

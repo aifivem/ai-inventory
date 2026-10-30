@@ -2,7 +2,7 @@ import type { ComponentProps } from "react";
 import { DropdownMenu as MenuPrimitive } from "radix-ui";
 import { cn } from "../../lib/utils";
 
-/** Radix dropdown menu in Dark Minimal (docs/design.md): panel surface, hairline, raised row on hover / focus. */
+/** Radix dropdown menu, TGIANN floating surface (tgiann-ui components.md): #161616, ring, ambient shadow, white-alpha row on hover. */
 export const DropdownMenu = MenuPrimitive.Root;
 export const DropdownMenuTrigger = MenuPrimitive.Trigger;
 
@@ -12,7 +12,7 @@ export function DropdownMenuContent({ className, sideOffset = 4, ...props }: Com
       <MenuPrimitive.Content
         sideOffset={sideOffset}
         className={cn(
-          "z-[85] min-w-[18vh] animate-fade rounded-[0.8vh] border border-line bg-panel p-[0.4vh] [box-shadow:0_1.2vh_3.2vh_rgba(0,0,0,0.5)]",
+          "z-[85] min-w-[18vh] animate-fade rounded-[1vh] bg-float p-[0.4vh] [box-shadow:0_0_0_1px_rgba(255,255,255,0.08),0_0.8vh_2.4vh_rgba(0,0,0,0.5)]",
           className,
         )}
         {...props}
@@ -25,7 +25,7 @@ export function DropdownMenuItem({ className, ...props }: ComponentProps<typeof 
   return (
     <MenuPrimitive.Item
       className={cn(
-        "flex h-[3.4vh] cursor-pointer items-center gap-[1vh] rounded-[0.6vh] px-[1.2vh] text-[1.35vh] text-text-2 outline-none transition-colors duration-150 data-[disabled]:pointer-events-none data-[disabled]:opacity-40 data-[highlighted]:bg-raised data-[highlighted]:text-text",
+        "flex h-[3.2vh] cursor-pointer items-center gap-[0.8vh] rounded-[0.6vh] px-[0.8vh] text-[1.3vh] text-text-2 outline-none transition-colors duration-150 data-[disabled]:pointer-events-none data-[disabled]:opacity-40 data-[highlighted]:bg-white/6 data-[highlighted]:text-white",
         className,
       )}
       {...props}
@@ -34,5 +34,5 @@ export function DropdownMenuItem({ className, ...props }: ComponentProps<typeof 
 }
 
 export function DropdownMenuSeparator({ className, ...props }: ComponentProps<typeof MenuPrimitive.Separator>) {
-  return <MenuPrimitive.Separator className={cn("my-[0.4vh] h-px bg-line", className)} {...props} />;
+  return <MenuPrimitive.Separator className={cn("my-[0.4vh] h-px bg-white/8", className)} {...props} />;
 }

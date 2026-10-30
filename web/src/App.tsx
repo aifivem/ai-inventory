@@ -9,6 +9,7 @@ import { closed, deltaApplied, itemsSet, opened, otherClosed, playerSet } from "
 import { closeScreen } from "./features/actions";
 import { Ghost } from "./features/grid/Ghost";
 import { AmountDialog, ItemMenu } from "./features/menu/ItemMenu";
+import { Header } from "./features/panels/Header";
 import { InventoryPanel } from "./features/panels/InventoryPanel";
 import { BenchPanel, GroundPanel, ShopPanel } from "./features/panels/SidePanels";
 import { ui } from "./features/ui";
@@ -61,18 +62,22 @@ export function App() {
   return (
     <TooltipProvider>
       {state.open && state.player && (
-        <div className="fixed inset-0 flex animate-fade items-center justify-center bg-[rgba(var(--bg-rgb),0.55)]" onContextMenu={(e) => e.preventDefault()}>
-          <div className="flex items-start gap-[2.4vh]">
-          <InventoryPanel view={state.player} own />
-          {state.other ? (
-            <InventoryPanel view={state.other} own={false} />
-          ) : state.shop ? (
-            <ShopPanel shop={state.shop} />
-          ) : state.bench ? (
-            <BenchPanel bench={state.bench} />
-          ) : (
-            <GroundPanel />
-          )}
+        <div
+          className="fixed inset-0 flex animate-fade flex-col gap-[3.2vh] bg-[radial-gradient(circle,rgba(0,0,0,0.3)_0%,rgba(0,0,0,0.4)_8%,rgba(0,0,0,0.55)_19%,rgba(0,0,0,0.7)_29%,rgba(0,0,0,0.75)_40%,rgba(0,0,0,0.8)_60%)] px-[3.2vh] pb-[3vh] pt-[3vh]"
+          onContextMenu={(e) => e.preventDefault()}
+        >
+          <Header />
+          <div className="flex min-h-0 flex-1 items-start justify-between gap-[3.2vh]">
+            <InventoryPanel view={state.player} own />
+            {state.other ? (
+              <InventoryPanel view={state.other} own={false} />
+            ) : state.shop ? (
+              <ShopPanel shop={state.shop} columns={state.player.columns} />
+            ) : state.bench ? (
+              <BenchPanel bench={state.bench} columns={state.player.columns} />
+            ) : (
+              <GroundPanel columns={state.player.columns} />
+            )}
           </div>
           <Ghost />
           <ItemMenu />
