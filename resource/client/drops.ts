@@ -1,4 +1,4 @@
-import { cache, hidePrompt, onPromptPressed, onServerEvent, requestModel, showPrompt, Zones } from "@aicore-fivem/lib/client";
+import { cache, onServerEvent, Points, requestModel, Zones } from "@aicore-fivem/lib/client";
 import { Locale } from "common";
 import { EVENTS } from "common/events";
 import type { DropPoint } from "common/nui";
@@ -12,13 +12,14 @@ const toPoint = (v: unknown): DropPoint | null =>
   isObj(v) && typeof v.id === "string" && typeof v.x === "number" && typeof v.y === "number" && typeof v.z === "number" ? { id: v.id, x: v.x, y: v.y, z: v.z } : null;
 
 /**
- * Drops on this client: two zones each (a wide one that spawns a local bag prop, a small one with ai-core's prompt),
- * from the server's snapshot and put / remove events. Nothing runs per frame.
+ * Drops on this client: a wide zone each that spawns a local bag prop, and an interaction point at the bag, from the
+ * server's snapshot and put / remove events. Nothing runs per frame.
  */
 class Drops {
   private readonly points = new Map<string, DropPoint>();
   private readonly props = new Map<string, number>();
   private readonly zones = new Zones();
+  private readonly use = new Points();
 
   set(list: DropPoint[]): void {
     for (const id of this.points.keys()) this.remove(id);
@@ -29,20 +30,14 @@ class Drops {
     this.points.set(point.id, point);
     const center = { x: point.x, y: point.y, z: point.z };
     this.zones.add(`${point.id}:show`, { shape: { type: "sphere", center, radius: SHOW_RANGE }, interval: 1000, onEnter: () => void this.spawn(point), onExit: () => this.despawn(point.id) });
-    this.zones.add(`${point.id}:use`, {
-      shape: { type: "sphere", center, radius: 1.5 },
-      interval: 250,
-      onEnter: () => showPrompt(point.id, Locale("PROMPT_DROP")),
-      onExit: () => hidePrompt(point.id),
-    });
+    this.use.add(point.id, { coords: center, label: Locale("PROMPT_DROP"), icon: "bag-shopping", radius: 1.5, interval: 250, onPressed: () => screen.open({ kind: "drop", id: point.id }) });
   }
 
   remove(id: string): void {
     this.points.delete(id);
     this.zones.remove(`${id}:show`);
-    this.zones.remove(`${id}:use`);
+    this.use.remove(id);
     this.despawn(id);
-    hidePrompt(id);
   }
 
   /** The id of the closest drop within `range` metres. */
@@ -85,9 +80,6 @@ export const drops = new Drops();
 onServerEvent(EVENTS.drops, { args: ([raw]) => (Array.isArray(raw) ? [raw.map(toPoint).filter((p): p is DropPoint => p !== null)] : null) }, (list) => drops.set(list));
 onServerEvent(EVENTS.dropPut, { args: ([raw]) => { const p = toPoint(raw); return p ? [p] : null; } }, (point) => drops.put(point));
 onServerEvent(EVENTS.dropRemove, { args: ([id]) => (typeof id === "string" ? [id] : null) }, (id) => drops.remove(id));
-onPromptPressed((id) => {
-  if (id.startsWith("drop:")) void screen.open({ kind: "drop", id });
-});
 on("onResourceStop", (resource: string) => {
   if (resource === GetCurrentResourceName()) drops.cleanup();
 });

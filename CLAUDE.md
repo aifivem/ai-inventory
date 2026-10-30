@@ -36,6 +36,6 @@ Grid inventory: items have a size in cells and can be turned; player inventory, 
 
 - Grid rules: `resource/common/grid.ts`; one inventory `server/inventory.ts`; loading, saving, viewers `server/registry.ts`.
 - Moving and swapping: `server/move.ts`; move / drop / give callbacks `server/actions.ts`; use, weapons `server/use.ts`, `server/weapons.ts`; shops and crafting `server/shop.ts`; opening `server/open.ts`.
-- Client: screen and NUI messages `client/screen.ts`, Tab key and context `client/open.ts`, zones and prompts `client/places.ts`, ground bags `client/drops.ts`, held weapon `client/weapons.ts`.
+- Client: screen and NUI messages `client/screen.ts`, Tab key and context `client/open.ts`, shop / stash / bench points `client/places.ts` (lib `Points`, a blip for shops that want one), ground bags `client/drops.ts` (a `Zones` area spawns the bag prop, a `Points` entry opens it), held weapon `client/weapons.ts`.
 - NUI: root `web/src/App.tsx`, grid and drag `web/src/features/grid/`, panels `web/src/features/panels/`; browser preview `bun run webdev` with `?view=stash|ground|shop|bench`.
 - Scale numbers: `bun run bench` (`bench/inventory.bench.ts`).

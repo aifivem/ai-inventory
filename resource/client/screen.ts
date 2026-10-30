@@ -1,4 +1,4 @@
-import { loadLocaleTexts, notify, triggerServerCallback } from "@aicore-fivem/lib/client";
+import { cache, loadLocaleTexts, notify, triggerServerCallback } from "@aicore-fivem/lib/client";
 import { EVENTS, type ActionResult } from "common/events";
 import { toPanel, type InventoryView, type NuiMessage, type OpenTarget, type Panel } from "common/nui";
 import { benchView, content, itemViews, shopView } from "./content";
@@ -34,7 +34,7 @@ class Screen {
 
   /** Asks the server for the second inventory (or a shop / bench) and opens the screen with it. */
   async open(target: OpenTarget): Promise<void> {
-    if (!state.player || IsPauseMenuActive() || IsEntityDead(PlayerPedId())) return;
+    if (!state.player || IsPauseMenuActive() || IsEntityDead(cache.ped)) return;
     const raw: unknown = await triggerServerCallback(EVENTS.open, [target]).catch(() => null);
     const result = toResult(raw);
     if (!result.ok) return toast(result.error);
