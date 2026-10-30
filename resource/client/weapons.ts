@@ -1,6 +1,7 @@
 import {
   cache,
   callAction,
+  every,
   Keybind,
   onCache,
   onServerEvent,
@@ -38,7 +39,10 @@ class ClientWeapons {
   current: EquippedWeapon | null = null;
   private hash = 0;
   private reported = 0;
-  private timer: ReturnType<typeof setInterval> | null = null;
+  private readonly reporter = every(500, () => this.report(), {
+    active: false,
+    name: "weaponAmmo",
+  });
 
   apply(weapon: EquippedWeapon | null): void {
     const ped = cache.ped;
@@ -53,7 +57,7 @@ class ClientWeapons {
     this.current = weapon;
     this.hash = hash;
     this.reported = weapon.ammo;
-    this.timer ??= setInterval(() => this.report(), 500);
+    this.reporter.set(true);
   }
 
   holster(): void {
@@ -61,8 +65,7 @@ class ClientWeapons {
     SetCurrentPedWeapon(cache.ped, UNARMED, true);
     this.current = null;
     this.hash = 0;
-    if (this.timer) clearInterval(this.timer);
-    this.timer = null;
+    this.reporter.set(false);
   }
 
   setComponents(hash: number, components: string[]): void {

@@ -2,46 +2,10 @@ import { footprint, isHotbarSlot, Occupancy } from "common/grid";
 import type { ItemDef } from "common/items";
 import type { InventoryKind, InventoryView, Metadata, Stack } from "common/nui";
 import { EVENTS } from "common/events";
+import { planAdd, type AddStep } from "./addPlan";
 import { content } from "./content";
-
-/** JSON text with the keys of every object sorted, at every depth (equal data gives equal text whatever the key order). */
-function canonical(value: unknown): string {
-  if (Array.isArray(value))
-    return `[${value.map((v) => (v === undefined || typeof v === "function" ? "null" : canonical(v))).join(",")}]`;
-  if (value !== null && typeof value === "object") {
-    const parts: string[] = [];
-    for (const key of Object.keys(value).sort()) {
-      const v = (value as Record<string, unknown>)[key];
-      if (v !== undefined && typeof v !== "function")
-        parts.push(`${JSON.stringify(key)}:${canonical(v)}`);
-    }
-    return `{${parts.join(",")}}`;
-  }
-  return JSON.stringify(value) ?? "null";
-}
-
-/** Stable text of metadata for "same stack" checks: nested objects count, key order does not ("" = none). */
-export function metaKey(metadata: Metadata): string {
-  const text = canonical(metadata);
-  return text === "{}" ? "" : text;
-}
-
-/** A serial ties the held weapon to its stack while it moves around the grid. */
-export function ensureSerial(
-  def: ItemDef,
-  metadata: Record<string, unknown>,
-): void {
-  if (
-    def.type === "weapon" &&
-    !def.weapon?.throwable &&
-    typeof metadata.serial !== "string"
-  ) {
-    metadata.serial = Math.random().toString(36).slice(2, 10).toUpperCase();
-  }
-}
-
-const sizeOf = (def: ItemDef | undefined): { w: number; h: number } =>
-  def?.size ?? { w: 1, h: 1 };
+import { SlotDeltas } from "./deltas";
+import { ensureSerial, metaKey, sizeOf } from "./stacks";
 
 /**
  * One inventory in server memory: stacks by anchor slot, the cell occupancy, the weight and who sees it. Every change
@@ -56,8 +20,7 @@ export class Inventory {
   /** Kept in memory while idle (stashes a script registered: its exports must find them). */
   pinned = false;
   lastUsed = Date.now();
-  private readonly touched = new Set<number>();
-  private flushQueued = false;
+  private readonly deltas: SlotDeltas = new SlotDeltas(this);
 
   constructor(
     readonly id: string,
@@ -248,67 +211,8 @@ export class Inventory {
     count: number,
     metadata: Metadata,
     slot?: number,
-  ): Array<{
-    slot: number;
-    add: number;
-    rotated: boolean;
-    fresh: boolean;
-  }> | null {
-    if (!this.weightAllows(def, count)) return null;
-    const steps: Array<{
-      slot: number;
-      add: number;
-      rotated: boolean;
-      fresh: boolean;
-    }> = [];
-    let left = count;
-    const key = metaKey(metadata);
-    if (def.stack > 1) {
-      for (const stack of this.stacks.values()) {
-        if (left === 0) break;
-        if (
-          stack.name !== def.name ||
-          stack.count >= def.stack ||
-          metaKey(stack.metadata) !== key
-        )
-          continue;
-        if (slot !== undefined && stack.slot !== slot) continue;
-        const add = Math.min(left, def.stack - stack.count);
-        steps.push({
-          slot: stack.slot,
-          add,
-          rotated: stack.rotated,
-          fresh: false,
-        });
-        left -= add;
-      }
-    }
-    if (left === 0) return steps;
-    const scratch = new Occupancy(this.columns, this.rows);
-    scratch.cells.set(this.grid.cells);
-    while (left > 0) {
-      let place: { slot: number; rotated: boolean } | null = null;
-      if (
-        slot !== undefined &&
-        steps.length === 0 &&
-        !this.stacks.has(slot) &&
-        scratch.fits(slot, def.size.w, def.size.h)
-      )
-        place = { slot, rotated: false };
-      place ??= scratch.findPlace(def.size);
-      if (!place) return null;
-      const { w, h } = footprint(def.size, place.rotated);
-      scratch.mark(place.slot, w, h, place.slot);
-      const add = Math.min(left, def.stack);
-      steps.push({
-        slot: place.slot,
-        add,
-        rotated: place.rotated,
-        fresh: true,
-      });
-      left -= add;
-    }
-    return steps;
+  ): AddStep[] | null {
+    return planAdd(this, def, count, metadata, slot);
   }
 
   /** Adds an item all-or-nothing; false when it does not fit. */
@@ -381,27 +285,8 @@ export class Inventory {
   }
 
   private touch(slot: number): void {
-    this.touched.add(slot);
     this.dirty = true;
     this.lastUsed = Date.now();
-    if (this.flushQueued) return;
-    this.flushQueued = true;
-    queueMicrotask(() => this.flush());
-  }
-
-  /** One delta of every slot touched since the last one, to the viewers only. */
-  private flush(): void {
-    this.flushQueued = false;
-    if (this.touched.size === 0) return;
-    const put: Stack[] = [];
-    const remove: number[] = [];
-    for (const slot of this.touched) {
-      const stack = this.stacks.get(slot);
-      if (stack) put.push(stack);
-      else remove.push(slot);
-    }
-    this.touched.clear();
-    for (const viewer of this.viewers)
-      emitNet(EVENTS.delta, viewer, this.id, put, remove, this.maxWeight);
+    this.deltas.touch(slot);
   }
 }

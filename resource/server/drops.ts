@@ -1,4 +1,4 @@
-import { Cooldowns, isNear } from "@aicore-fivem/lib/server";
+import { Cooldowns, every, isNear } from "@aicore-fivem/lib/server";
 import type { DropPoint } from "common/nui";
 import { charIdOf, setReach } from "./access";
 import { content } from "./content";
@@ -149,7 +149,11 @@ class Drops {
 
 export const drops = new Drops();
 
-setInterval(() => drops.sweep(), 60_000);
-setInterval(() => {
-  if (drops.size > 0) drops.followAll();
-}, FOLLOW_MS);
+every(60_000, () => drops.sweep(), { name: "dropSweep" });
+every(
+  FOLLOW_MS,
+  () => {
+    if (drops.size > 0) drops.followAll();
+  },
+  { name: "dropFollow" },
+);

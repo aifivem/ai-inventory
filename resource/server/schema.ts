@@ -1,21 +1,8 @@
-import { PLACE_PED_SPEC, placePedFields } from "@aicore-fivem/lib/shared";
+import { PLACE_PED_SPEC, placePedFields, spec } from "@aicore-fivem/lib/shared";
 import type { DataSpec, PanelSchema, WidgetSpec } from "@aicore-fivem/shared";
 
 /** ai-inventory's panel: item definitions, shops, stashes, crafting benches and grid sizes. */
 
-const int = (min: number, max: number, optional = false): DataSpec => ({
-  type: "number",
-  min,
-  max,
-  integer: true,
-  optional,
-});
-const num = (min: number, max: number, optional = false): DataSpec => ({
-  type: "number",
-  min,
-  max,
-  optional,
-});
 const text = (max: number, optional = false): DataSpec => ({
   type: "text",
   min: 0,
@@ -30,7 +17,7 @@ const names: DataSpec = {
 };
 const gridSpec = (extra: Record<string, DataSpec> = {}): DataSpec => ({
   type: "object",
-  fields: { rows: int(1, 50), maxWeight: int(0, 10_000_000), ...extra },
+  fields: { rows: spec.int(1, 50), maxWeight: spec.int(0, 10_000_000), ...extra },
 });
 const KEY = "^[a-z0-9_-]{2,48}$";
 
@@ -90,7 +77,7 @@ const gridFields = (path: string): WidgetSpec[] => [
 const placeSections = {
   label: text(48),
   coords: { type: "vec3" } as DataSpec,
-  radius: num(0.5, 30),
+  radius: spec.num(0.5, 30),
   jobs: names,
 };
 
@@ -130,12 +117,12 @@ export const inventorySchema: PanelSchema = {
       sections: {
         label: text(48),
         description: text(240, true),
-        weight: int(0, 1_000_000),
-        size: { type: "object", fields: { w: int(1, 8), h: int(1, 8) } },
-        stack: int(1, 100_000),
+        weight: spec.int(0, 1_000_000),
+        size: { type: "object", fields: { w: spec.int(1, 8), h: spec.int(1, 8) } },
+        stack: spec.int(1, 100_000),
         type: { type: "enum", values: ["item", "weapon", "ammo", "component"] },
         usable: { type: "bool" },
-        consume: int(0, 1000),
+        consume: spec.int(0, 1000),
         close: { type: "bool" },
         image: text(200),
         aliases: names,
@@ -155,14 +142,14 @@ export const inventorySchema: PanelSchema = {
               values: ["none", "eat", "drink", "bandage", "armour"],
               optional: true,
             },
-            time: int(0, 60_000, true),
+            time: spec.int(0, 60_000, true),
             status: {
               type: "object",
               optional: true,
               fields: {
-                hunger: num(-100, 100, true),
-                thirst: num(-100, 100, true),
-                stress: num(-100, 100, true),
+                hunger: spec.num(-100, 100, true),
+                thirst: spec.num(-100, 100, true),
+                stress: spec.num(-100, 100, true),
               },
             },
           },
@@ -227,7 +214,7 @@ export const inventorySchema: PanelSchema = {
                 max: 48,
                 pattern: KEY,
               },
-              price: int(0, 100_000_000),
+              price: spec.int(0, 100_000_000),
             },
           },
         },
@@ -251,8 +238,8 @@ export const inventorySchema: PanelSchema = {
         ...placeSections,
         gangs: names,
         personal: { type: "bool" },
-        rows: int(1, 50),
-        maxWeight: int(0, 10_000_000),
+        rows: spec.int(1, 50),
+        maxWeight: spec.int(0, 10_000_000),
       },
     },
     benches: {
@@ -282,8 +269,8 @@ export const inventorySchema: PanelSchema = {
             type: "object",
             fields: {
               result: { type: "text", min: 2, max: 48, pattern: KEY },
-              count: int(1, 1000),
-              time: num(0, 600),
+              count: spec.int(1, 1000),
+              time: spec.num(0, 600),
               ingredients: text(400),
             },
           },
@@ -294,11 +281,11 @@ export const inventorySchema: PanelSchema = {
       kind: "settings",
       sync: "all",
       sections: {
-        columns: int(6, 14),
+        columns: spec.int(6, 14),
         player: gridSpec(),
         drop: gridSpec({
-          despawnMinutes: int(1, 240),
-          maxPerPlayer: int(1, 100, true),
+          despawnMinutes: spec.int(1, 240),
+          maxPerPlayer: spec.int(1, 100, true),
         }),
         trunk: gridSpec(),
         glovebox: gridSpec(),

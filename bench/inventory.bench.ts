@@ -38,7 +38,7 @@ const { content } = await import("../resource/server/content");
 const { inventories } = await import("../resource/server/registry");
 const { moveStack } = await import("../resource/server/move");
 const { drops } = await import("../resource/server/drops");
-const { metaKey } = await import("../resource/server/inventory");
+const { metaKey } = await import("../resource/server/stacks");
 
 const defs = [...content.items.byName.values()];
 const pick = (i: number) => defs[i % defs.length]!;

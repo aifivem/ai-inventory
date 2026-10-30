@@ -1,11 +1,9 @@
-import { online, PlayerMap, resourceExport } from "@aicore-fivem/lib/server";
+import { online, PlayerMap } from "@aicore-fivem/lib/server";
 import type { Place } from "common/content";
 import { inventories } from "./registry";
 import type { Inventory } from "./inventory";
 
-const core = resourceExport("ai-core");
-
-/** Whether the player's character has one of the jobs (or gangs); an empty list lets everyone in. */
+/** Whether the player's character has one of the jobs (at its minimum grade) or gangs; an empty list lets everyone in. */
 export function allowed(
   source: number,
   place: Place & { gangs?: string[]; grades?: Record<string, number> },
@@ -14,14 +12,11 @@ export function allowed(
   if (place.jobs.length === 0 && gangs.length === 0) return true;
   if (gangs.length > 0 && online.gangs(source).some((g) => gangs.includes(g)))
     return true;
-  const jobs = online.jobs(source).filter((job) => place.jobs.includes(job));
-  if (jobs.length === 0) return false;
   const grades = place.grades ?? {};
-  if (jobs.some((job) => (grades[job] ?? 0) <= 0)) return true;
-  // Grades are not in lib `online`: ai-core is asked only when a matching job needs one (script stashes).
-  return (core.GetJobs(source) ?? []).some(
-    (m) => jobs.includes(m.job) && m.grade >= (grades[m.job] ?? 0),
-  );
+  return place.jobs.some((job) => {
+    const grade = online.jobGrade(source, job);
+    return grade !== null && grade >= (grades[job] ?? 0);
+  });
 }
 
 export const charIdOf = (source: number): number | null =>

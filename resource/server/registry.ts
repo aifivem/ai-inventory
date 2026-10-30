@@ -1,3 +1,4 @@
+import { every } from "@aicore-fivem/lib/server";
 import type { InventoryKind, Stack } from "common/nui";
 import { EVENTS } from "common/events";
 import { content } from "./content";
@@ -208,14 +209,18 @@ const saveNow = (why: string): void => {
     );
 };
 
-setInterval(() => {
-  saveNow("interval");
-  inventories
-    .sweep()
-    .catch((error: unknown) =>
-      log.error("unloading idle inventories failed", error),
-    );
-}, FLUSH_MS);
+every(
+  FLUSH_MS,
+  () => {
+    saveNow("interval");
+    inventories
+      .sweep()
+      .catch((error: unknown) =>
+        log.error("unloading idle inventories failed", error),
+      );
+  },
+  { name: "flush" },
+);
 on("txAdmin:events:serverShuttingDown", () => saveNow("shutdown"));
 on("onResourceStop", (resource: string) => {
   if (resource === GetCurrentResourceName()) saveNow("resource stop");

@@ -3,7 +3,8 @@ import type { ActionResult } from "common/events";
 import type { MoveInput, Stack } from "common/nui";
 import { isHotbarSlot } from "common/grid";
 import { content } from "./content";
-import { metaKey, type Inventory } from "./inventory";
+import type { Inventory } from "./inventory";
+import { metaKey } from "./stacks";
 
 const OK: ActionResult = { ok: true };
 

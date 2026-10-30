@@ -16,10 +16,8 @@ import { useItem } from "./use";
 /** How close to a vehicle's back the trunk opens. */
 const TRUNK_REACH = 1.6;
 
-/** The nearest networked vehicle (8 m) when the player stands at its back, or null. */
-function trunkInReach(): number | null {
-  const vehicle = nearestVehicle(8, { networked: true });
-  if (!vehicle) return null;
+/** Whether the player stands at the vehicle's back (its trunk). */
+function atBack(vehicle: number): boolean {
   const [x = 0, y = 0, z = 0] = GetEntityCoords(cache.ped, false);
   const [min] = GetModelDimensions(GetEntityModel(vehicle));
   const [bx = 0, by = 0, bz = 0] = GetOffsetFromEntityInWorldCoords(
@@ -28,7 +26,12 @@ function trunkInReach(): number | null {
     (min?.[1] ?? -2) - 0.4,
     0,
   );
-  return Math.hypot(bx - x, by - y, bz - z) <= TRUNK_REACH ? vehicle : null;
+  return Math.hypot(bx - x, by - y, bz - z) <= TRUNK_REACH;
+}
+
+/** The nearest networked vehicle (8 m) whose back the player stands at (nose to tail, the one behind wins), or null. */
+function trunkInReach(): number | null {
+  return nearestVehicle(8, { networked: true, filter: atBack }) || null;
 }
 
 /** What the inventory key opens next to the player's own: glovebox, a drop, a trunk, or nothing. */
