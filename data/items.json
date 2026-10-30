@@ -4690,5 +4690,24 @@
     "close": true,
     "image": "",
     "aliases": []
+  },
+  "coral": {
+    "label": "Coral",
+    "description": "Picked from a reef. The diving shop buys it.",
+    "weight": 300,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 20,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": [
+      "dendrogyra_coral",
+      "antipatharia_coral"
+    ]
   }
 }
