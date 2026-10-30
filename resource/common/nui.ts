@@ -133,6 +133,8 @@ export type NuiMessage =
   /** The quick slots bar at the bottom while the inventory is closed (Tab). */
   | { action: "hotbar"; data: boolean }
   | { action: "otherClosed"; data: null }
+  /** The drop the player just made replaces the ground panel (snapshot; deltas follow). */
+  | { action: "ground"; data: InventoryView }
   /** The panel changed an inventory's columns, rows or weight limit. */
   | {
       action: "layout";

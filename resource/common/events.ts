@@ -8,6 +8,8 @@ export const EVENTS = {
   layout: "ai-inventory:client:layout",
   /** Server -> client: (view: InventoryView, panel: Panel | null) a script opened an inventory for the player. */
   forceOpen: "ai-inventory:client:forceOpen",
+  /** Server -> client: (view: InventoryView) the player dropped onto the ground panel; the drop shows in its place. */
+  ground: "ai-inventory:client:ground",
   /** Server -> client: () the second inventory went away (drop emptied, too far). */
   forceClose: "ai-inventory:client:forceClose",
   /** Server -> everyone: (drops: DropPoint[]) snapshot at join; then put / remove. */

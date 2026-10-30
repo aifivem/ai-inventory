@@ -34,8 +34,7 @@ async function open(source: number, target: OpenTarget): Promise<OpenResult> {
       const drop = drops.get(target.id);
       if (!drop) return { ok: false, error: "INV_ERR_GONE" };
       if (distanceTo(source, drop.x, drop.y, drop.z) > 3) return FAR;
-      inventories.watch(source, drop.inventory);
-      setReach(source, () => distanceTo(source, drop.x, drop.y, drop.z) <= 4);
+      drops.watch(source, drop);
       return { ok: true, other: drop.inventory.view(), panel: null };
     }
     case "stash": {

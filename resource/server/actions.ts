@@ -72,6 +72,11 @@ onClientCallback(
     }
     inventory.setCount(slot, stack.count - count);
     weapons.check(source);
+    // Nothing open next to the player's own (the ground panel): he now sees the drop, snapshot first, deltas after.
+    if (!inventories.openOf(source)) {
+      drops.watch(source, drop);
+      emitNet(EVENTS.ground, source, drop.inventory.view());
+    }
     aiLog("drops", `dropped ${count}x ${def.name}`, {
       source,
       metadata: { item: def.name, count, drop: drop.id },

@@ -55,6 +55,8 @@ class Screen {
   openKey: () => string = () => "";
 
   isOpen = false;
+  /** A shop or bench shows next to the player inventory. */
+  private panel = false;
   private setupSent = false;
 
   private setup(): void {
@@ -86,6 +88,7 @@ class Screen {
     if (!state.player) return;
     this.setup();
     state.otherId = other?.id ?? null;
+    this.panel = panel !== null;
     send({ action: "player", data: state.player });
     send({
       action: "open",
@@ -113,6 +116,14 @@ class Screen {
     worldPed.hide();
     send({ action: "close", data: null });
     emitNet(EVENTS.close);
+  }
+
+  /** The server shows the player's new drop in place of the ground panel; a shop or bench keeps its place. */
+  groundOpened(view: InventoryView): void {
+    if (!this.isOpen || state.otherId !== null) return;
+    if (this.panel) return emitNet(EVENTS.close);
+    state.otherId = view.id;
+    send({ action: "ground", data: view });
   }
 
   /** The server took the second inventory away (drop emptied, out of reach). */

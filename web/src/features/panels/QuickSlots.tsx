@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { hotbarSlot, HOTBAR_SIZE } from "../../../../resource/common/grid";
 import type { Stack } from "../../../../resource/common/nui";
-import { CELL_VH, imageUrl, tint, vh } from "../../lib/cell";
+import { imageUrl, tint } from "../../lib/cell";
 import { cn } from "../../lib/utils";
 import { useAppSelector } from "../../store";
 import { itemUse } from "../actions";
@@ -32,7 +32,7 @@ export function QuickSlots() {
   const dragging = useDrag();
   const slots = useQuickStacks();
   return (
-    <div className="flex gap-[0.6vh]">
+    <div data-quick-slots className="flex gap-[0.6vh]">
       {slots.map((stack, i) => {
         const slot = hotbarSlot(i);
         const def = stack ? items[stack.name] : undefined;
@@ -69,8 +69,8 @@ export function QuickSlots() {
                 : event.ctrlKey
                   ? 1
                   : stack.count;
-              // The ghost hangs from its first cell's centre (the slot is not a grid cell).
-              const half = vh(CELL_VH) / 2;
+              const w = def?.w ?? 1;
+              const h = def?.h ?? 1;
               drag.start(
                 {
                   from: inv,
@@ -79,8 +79,8 @@ export function QuickSlots() {
                   count,
                   whole: count === stack.count,
                   rotated: stack.rotated,
-                  grabX: half,
-                  grabY: half,
+                  w: stack.rotated ? h : w,
+                  h: stack.rotated ? w : h,
                 },
                 event.clientX,
                 event.clientY,

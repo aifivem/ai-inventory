@@ -98,6 +98,10 @@ const inventory = createSlice({
     otherClosed(state) {
       state.other = null;
     },
+    groundOpened(state, action: PayloadAction<InventoryView>) {
+      if (state.open && !state.shop && !state.bench)
+        state.other = action.payload;
+    },
     layoutSet(
       state,
       action: PayloadAction<{
@@ -141,6 +145,7 @@ export const {
   opened,
   closed,
   otherClosed,
+  groundOpened,
   deltaApplied,
   layoutSet,
   craftingSet,

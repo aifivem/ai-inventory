@@ -60,7 +60,7 @@ RegisterNuiCallback(NUI.clothes, (data: unknown, cb: NuiReply) => {
   cb({ ok: true });
   const done = wardrobe.toggle(id);
   sendProfile();
-  worldPed.refresh();
+  // The piece changes after the animation: only then does the copy change.
   void done.then(() => {
     sendProfile();
     worldPed.refresh();

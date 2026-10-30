@@ -13,6 +13,7 @@ import {
   itemsSet,
   opened,
   otherClosed,
+  groundOpened,
   playerSet,
   profileSet,
   hotbarSet,
@@ -58,6 +59,7 @@ const onClose = () => {
   store.dispatch(closed());
 };
 const onOtherClosed = () => store.dispatch(otherClosed());
+const onGround = (data: Data<"ground">) => store.dispatch(groundOpened(data));
 const onProfile = (data: Data<"profile">) => store.dispatch(profileSet(data));
 const onHotbar = (data: Data<"hotbar">) => store.dispatch(hotbarSet(data));
 
@@ -77,6 +79,7 @@ export function App() {
   useNuiEvent("delta", onDelta);
   useNuiEvent("close", onClose);
   useNuiEvent("otherClosed", onOtherClosed);
+  useNuiEvent("ground", onGround);
   useNuiEvent("profile", onProfile, PROFILE_MOCK);
   useNuiEvent("hotbar", onHotbar);
   useNuiEvent("layout", onLayout);

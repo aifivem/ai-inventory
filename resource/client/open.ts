@@ -8,6 +8,7 @@ import { hotbar, screen } from "./screen";
 import { state, toView } from "./state";
 import { useItem } from "./use";
 
+
 /** How close to a vehicle's back the trunk opens. */
 const TRUNK_REACH = 1.6;
 
@@ -78,8 +79,7 @@ for (let i = 1; i <= 5; i++) {
     onPressed: () => {
       if (screen.isOpen || IsPauseMenuActive()) return;
       const slot = hotbarSlot(i - 1);
-      if (state.player?.stacks.some((s) => s.slot === slot))
-        void useItem(slot);
+      if (state.player?.stacks.some((s) => s.slot === slot)) void useItem(slot);
     },
   });
 }
@@ -96,3 +96,13 @@ onServerEvent(
   (view, panel) => screen.show(view, panel),
 );
 onServerEvent(EVENTS.forceClose, () => screen.otherClosed());
+onServerEvent(
+  EVENTS.ground,
+  {
+    args: ([raw]) => {
+      const view = toView(raw);
+      return view ? [view] : null;
+    },
+  },
+  (view) => screen.groundOpened(view),
+);

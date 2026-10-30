@@ -376,7 +376,7 @@ function toPatch(value) {
 		default: return null;
 	}
 }
-const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(value)), core$10 = resourceExport(CORE.resource), ERR = {
+const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(value)), core$11 = resourceExport(CORE.resource), ERR = {
 	type: "ADMIN_ERR_TYPE",
 	range: "ADMIN_ERR_RANGE",
 	length: "ADMIN_ERR_LENGTH",
@@ -390,7 +390,7 @@ const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(va
 		if (cached && Date.now() - cached.at < 2e3) return cached.values.size > 0 ? cached.values : null;
 		let list = [];
 		try {
-			list = core$10.GetLookupValues(source);
+			list = core$11.GetLookupValues(source);
 		} catch {}
 		let values = new Set(Array.isArray(list) ? list.filter((v) => typeof v == "string") : []);
 		return this.lists.set(source, {
@@ -592,7 +592,7 @@ function writeSchema(resource, name, text, log) {
 	(0, node_fs_promises.mkdir)(dir, { recursive: !0 }).then(() => (0, node_fs_promises.writeFile)(`${dir}/${name}.schema.json`, text, "utf8")).catch((error) => log.error(`writing ${resource}/${path} failed`, error));
 }
 // ../../../packages/lib/src/server/admin/panel.ts
-const core$9 = resourceExport(CORE.resource), DEFAULT_KEY = "^[a-z0-9_]{2,32}$";
+const core$10 = resourceExport(CORE.resource), DEFAULT_KEY = "^[a-z0-9_]{2,32}$";
 function imported(spec, value) {
 	let base = clone(spec.newRecord ?? {}), out = {};
 	for (let name of Object.keys(spec.sections)) {
@@ -613,7 +613,7 @@ var AdminPanel = class {
 	constructor(schema) {
 		this.schema = schema;
 		for (let [name, spec] of Object.entries(schema.files)) this.load(name, spec);
-		registerExport("AdminPanelSnapshot", () => this.snapshot()), registerExport("AdminPanelApply", (admin, patch) => this.apply(admin, patch)), onClientCallback(ADMIN.worldChangesCallback(this.resource), () => Object.fromEntries(this.worldChanges)), setImmediate(() => core$9.RegisterAdminPanel(this.resource));
+		registerExport("AdminPanelSnapshot", () => this.snapshot()), registerExport("AdminPanelApply", (admin, patch) => this.apply(admin, patch)), onClientCallback(ADMIN.worldChangesCallback(this.resource), () => Object.fromEntries(this.worldChanges)), setImmediate(() => core$10.RegisterAdminPanel(this.resource));
 	}
 	get(file) {
 		return this.data.get(file) ?? {};
@@ -706,7 +706,7 @@ var AdminPanel = class {
 		let spec = this.schema.files[file], data = this.get(file), value = key === void 0 ? data : data[key] ?? null;
 		this.dataFiles.get(file)?.write(data);
 		for (let handler of this.handlers.get(file) ?? []) handler(key, value);
-		if (core$9.AdminPanelChanged({
+		if (core$10.AdminPanelChanged({
 			resource: this.resource,
 			file,
 			key,
@@ -736,7 +736,7 @@ function aiLogChannels(channels) {
 }
 resourceExport(CORE.resource);
 // ../../../packages/lib/src/server/online.ts
-const core$7 = resourceExport(CORE.resource);
+const core$8 = resourceExport(CORE.resource);
 var OnlinePlayers = class {
 	players = new Map();
 	onDuty = new Map();
@@ -745,7 +745,7 @@ var OnlinePlayers = class {
 		if (this.started) return;
 		this.started = !0;
 		let load = (source, character) => {
-			this.put(source, character, (core$7.GetJobs(source) ?? []).map((m) => m.job), (core$7.GetGangs(source) ?? []).map((m) => m.gang)), this.setDuty(source, core$7.GetDutyJob(source));
+			this.put(source, character, (core$8.GetJobs(source) ?? []).map((m) => m.job), (core$8.GetGangs(source) ?? []).map((m) => m.gang)), this.setDuty(source, core$8.GetDutyJob(source));
 		};
 		on(CORE.playerLoadedEvent, load), on(CORE.playerUnloadedEvent, (source) => this.drop(source)), on(CORE.jobsChangedEvent, (source, jobs) => {
 			let player = this.players.get(source);
@@ -754,8 +754,8 @@ var OnlinePlayers = class {
 			let player = this.players.get(source);
 			player && (player.gangs = gangs.map((m) => m.gang));
 		}), on(CORE.dutyChangedEvent, (source, job) => this.setDuty(source, job));
-		for (let source of core$7.GetLoadedSources()) {
-			let character = core$7.GetCharacter(source);
+		for (let source of core$8.GetLoadedSources()) {
+			let character = core$8.GetCharacter(source);
 			character && load(source, character);
 		}
 	}
@@ -15192,7 +15192,7 @@ var Mirror = class {
 		DoesEntityExist(entity) && (Entity(entity).state.set(this.key, value ?? null, !0), this.put(entity, value));
 	}
 };
-resourceExport(CORE.resource), resourceExport(CORE.resource), createLocale();
+resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), createLocale();
 // resource/common/resource.ts
 const ResourceName = GetCurrentResourceName();
 IsDuplicityVersion();
@@ -15202,6 +15202,7 @@ const log = createLogger(ResourceName), EVENTS = {
 	delta: "ai-inventory:client:delta",
 	layout: "ai-inventory:client:layout",
 	forceOpen: "ai-inventory:client:forceOpen",
+	ground: "ai-inventory:client:ground",
 	forceClose: "ai-inventory:client:forceClose",
 	drops: "ai-inventory:client:drops",
 	dropPut: "ai-inventory:client:dropPut",
@@ -16616,6 +16617,37 @@ setInterval(() => {
 }, 3e4), on("txAdmin:events:serverShuttingDown", () => saveNow("shutdown")), on("onResourceStop", (resource) => {
 	resource === GetCurrentResourceName() && saveNow("resource stop");
 });
+// resource/server/access.ts
+const core$2 = resourceExport("ai-core");
+function pedCoords(source) {
+	let [x = 0, y = 0, z = 0] = GetEntityCoords(GetPlayerPed(String(source)));
+	return {
+		x,
+		y,
+		z
+	};
+}
+function distanceTo(source, x, y, z) {
+	let p = pedCoords(source);
+	return Math.hypot(p.x - x, p.y - y, p.z - z);
+}
+function allowed(source, place) {
+	let gangs = place.gangs ?? [];
+	if (place.jobs.length === 0 && gangs.length === 0) return !0;
+	let grades = place.grades ?? {};
+	return place.jobs.length && (core$2.GetJobs(source) ?? []).some((m) => place.jobs.includes(m.job) && m.grade >= (grades[m.job] ?? 0)) ? !0 : gangs.length > 0 && (core$2.GetGangs(source) ?? []).some((m) => gangs.includes(m.gang));
+}
+const charIdOf = (source) => core$2.GetCharacter(source)?.id ?? null, reach = new Map();
+function setReach(source, check) {
+	reach.set(source, check);
+}
+function reachable(source, id) {
+	let own = inventories.playerOf(source);
+	if (own?.id === id) return own;
+	let open = inventories.openOf(source);
+	return !open || open.id !== id ? null : reach.get(source)?.() === !1 ? (inventories.close(source), null) : open;
+}
+on("playerDropped", () => reach.delete(Number(globalThis.source)));
 var Drop = class {
 	id;
 	x;
@@ -16651,6 +16683,9 @@ const drops = new class {
 		}, []), drop = new Drop(id, x, y, z - .95, inventory);
 		return this.byId.set(id, drop), emitNet(EVENTS.dropPut, -1, drop.point()), drop;
 	}
+	watch(source, drop) {
+		inventories.watch(source, drop.inventory), setReach(source, () => distanceTo(source, drop.x, drop.y, drop.z) <= 4);
+	}
 	check(inventory) {
 		inventory?.kind === "drop" && inventory.stacks.size === 0 && this.remove(inventory.id);
 	}
@@ -16669,37 +16704,6 @@ const drops = new class {
 	}
 }();
 setInterval(() => drops.sweep(), 6e4);
-// resource/server/access.ts
-const core$2 = resourceExport("ai-core");
-function pedCoords(source) {
-	let [x = 0, y = 0, z = 0] = GetEntityCoords(GetPlayerPed(String(source)));
-	return {
-		x,
-		y,
-		z
-	};
-}
-function distanceTo(source, x, y, z) {
-	let p = pedCoords(source);
-	return Math.hypot(p.x - x, p.y - y, p.z - z);
-}
-function allowed(source, place) {
-	let gangs = place.gangs ?? [];
-	if (place.jobs.length === 0 && gangs.length === 0) return !0;
-	let grades = place.grades ?? {};
-	return place.jobs.length && (core$2.GetJobs(source) ?? []).some((m) => place.jobs.includes(m.job) && m.grade >= (grades[m.job] ?? 0)) ? !0 : gangs.length > 0 && (core$2.GetGangs(source) ?? []).some((m) => gangs.includes(m.gang));
-}
-const charIdOf = (source) => core$2.GetCharacter(source)?.id ?? null, reach = new Map();
-function setReach(source, check) {
-	reach.set(source, check);
-}
-function reachable(source, id) {
-	let own = inventories.playerOf(source);
-	if (own?.id === id) return own;
-	let open = inventories.openOf(source);
-	return !open || open.id !== id ? null : reach.get(source)?.() === !1 ? (inventories.close(source), null) : open;
-}
-on("playerDropped", () => reach.delete(Number(globalThis.source)));
 // resource/server/shop.ts
 const core$1 = resourceExport("ai-core"), fail$4 = (error) => ({
 	ok: !1,
@@ -17115,7 +17119,7 @@ async function open(source, target) {
 		};
 		case "drop": {
 			let drop = drops.get(target.id);
-			return drop ? distanceTo(source, drop.x, drop.y, drop.z) > 3 ? FAR : (inventories.watch(source, drop.inventory), setReach(source, () => distanceTo(source, drop.x, drop.y, drop.z) <= 4), {
+			return drop ? distanceTo(source, drop.x, drop.y, drop.z) > 3 ? FAR : (drops.watch(source, drop), {
 				ok: !0,
 				other: drop.inventory.view(),
 				panel: null
@@ -17307,7 +17311,7 @@ onClientCallback(EVENTS.move, {
 	if (!def) return fail("INV_ERR_GONE");
 	if (GetVehiclePedIsIn(GetPlayerPed(String(source)), !1)) return fail("INV_ERR_IN_VEHICLE");
 	let p = pedCoords(source), drop = drops.at(p.x, p.y, p.z);
-	return drop.inventory.add(def, count, stack.metadata) ? (inventory.setCount(slot, stack.count - count), weapons.check(source), aiLog("drops", `dropped ${count}x ${def.name}`, {
+	return drop.inventory.add(def, count, stack.metadata) ? (inventory.setCount(slot, stack.count - count), weapons.check(source), inventories.openOf(source) || (drops.watch(source, drop), emitNet(EVENTS.ground, source, drop.inventory.view())), aiLog("drops", `dropped ${count}x ${def.name}`, {
 		source,
 		metadata: {
 			item: def.name,

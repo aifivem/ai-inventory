@@ -5,7 +5,7 @@
   "description": "Grid inventory: drops, stashes, trunks, shops, crafting, weapons; ox_inventory and qb-inventory compatible",
   "license": "GPL-3.0-only",
   "author": {
-    "name": "ai-core"
+    "name": "TGIANN"
   },
   "repository": "github:TGIANN/ai-inventory",
   "type": "module",

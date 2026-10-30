@@ -1,5 +1,6 @@
 import { EVENTS } from "common/events";
 import type { DropPoint } from "common/nui";
+import { distanceTo, setReach } from "./access";
 import { content } from "./content";
 import type { Inventory } from "./inventory";
 import { inventories } from "./registry";
@@ -50,6 +51,12 @@ class Drops {
     this.byId.set(id, drop);
     emitNet(EVENTS.dropPut, -1, drop.point());
     return drop;
+  }
+
+  /** The player sees the drop next to his own inventory while he stays within reach of it. */
+  watch(source: number, drop: Drop): void {
+    inventories.watch(source, drop.inventory);
+    setReach(source, () => distanceTo(source, drop.x, drop.y, drop.z) <= 4);
   }
 
   /** Removes the drop when it became empty (called after every action that took from one). */

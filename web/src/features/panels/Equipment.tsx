@@ -18,6 +18,7 @@ import { useLang } from "../../lib/lang";
 import { cn } from "../../lib/utils";
 import { useAppSelector } from "../../store";
 import { setWorldPed, toggleClothes } from "../actions";
+import { PedSilhouette } from "./PedSilhouette";
 import { QuickSlots, SLOT_VH } from "./QuickSlots";
 
 const ICONS: Record<ClothesId, string> = {
@@ -84,7 +85,9 @@ function PedArea() {
   };
   return (
     <div className="flex min-w-0 flex-1 flex-col items-center">
-      <div ref={ref} className="min-h-0 w-full flex-1" />
+      <div ref={ref} className="relative min-h-0 w-full flex-1">
+        {!shown && <PedSilhouette />}
+      </div>
       <button
         type="button"
         onClick={toggle}

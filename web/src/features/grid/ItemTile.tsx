@@ -120,14 +120,11 @@ export const ItemTile = memo(function ItemTile({
           onPointerDown={(event) => {
             if (event.button !== 0) return;
             event.preventDefault();
-            const rect = event.currentTarget.getBoundingClientRect();
             const count = event.shiftKey
               ? Math.max(1, Math.floor(stack.count / 2))
               : event.ctrlKey
                 ? 1
                 : stack.count;
-            // The grab point is measured from the cell corner, not the inset box, so the drop cell maths stays the same.
-            const inset = (half * window.innerHeight) / 100;
             drag.start(
               {
                 from: inv,
@@ -136,8 +133,8 @@ export const ItemTile = memo(function ItemTile({
                 count,
                 whole: count === stack.count,
                 rotated: stack.rotated,
-                grabX: event.clientX - rect.left + inset,
-                grabY: event.clientY - rect.top + inset,
+                w,
+                h,
               },
               event.clientX,
               event.clientY,
