@@ -1,6 +1,6 @@
 # ai-inventory
 
-Grid inventory: items have a size in cells and can be turned; player inventory, ground drops, stashes, vehicle trunk and glovebox, shops, crafting benches, weapons (ammo in metadata, basic attachments), usable items. Depends on ai-core (characters, money, jobs, gangs, prompts, admin panel) and its own table through `@aicore-fivem/mysql`. Stands in for `ox_inventory` and `qb-inventory`. Research and decisions: `docs/research/ai-inventory.md`.
+Grid inventory: items have a size in cells and can be turned; player inventory, ground drops, stashes, vehicle trunk and glovebox, shops, crafting benches, weapons (ammo in metadata, basic attachments), usable items. Depends on ai-core (characters, money, jobs, gangs, prompts, admin panel) and its own table through `@aicore-fivem/mysql`. Stands in for `ox_inventory` and `qb-inventory`.
 
 ## Decisions
 
