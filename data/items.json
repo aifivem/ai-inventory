@@ -4709,5 +4709,69 @@
       "dendrogyra_coral",
       "antipatharia_coral"
     ]
+  },
+  "weed_seed": {
+    "label": "Weed Seed",
+    "description": "Plant it outside and come back in an hour.",
+    "weight": 10,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 50,
+    "type": "item",
+    "usable": true,
+    "consume": 0,
+    "close": true,
+    "image": "",
+    "aliases": []
+  },
+  "weed_bud": {
+    "label": "Weed Bud",
+    "description": "Strangers on the street pay for it.",
+    "weight": 20,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 50,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": []
+  },
+  "coke_baggy": {
+    "label": "Bag of Coke",
+    "description": "Strangers on the street pay for it.",
+    "weight": 20,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 50,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": []
+  },
+  "meth_baggy": {
+    "label": "Bag of Meth",
+    "description": "Strangers on the street pay for it.",
+    "weight": 20,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 50,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": false,
+    "image": "",
+    "aliases": []
   }
 }
