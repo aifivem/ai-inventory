@@ -8,7 +8,7 @@
       "description": "This file's JSON Schema (for editors)."
     },
     "columns": {
-      "description": "Columns: Cells per row in every inventory. Changing it with items stored can push items out of place.",
+      "description": "Columns: Cells per row in every inventory. Items that no longer fit move to free cells; an inventory too full for that gets extra rows to hold them.",
       "type": "integer",
       "minimum": 6,
       "maximum": 14
@@ -54,6 +54,12 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 240
+        },
+        "maxPerPlayer": {
+          "description": "Bags per player: How many bags one character may have on the ground at a time. Dropping next to an own bag adds to it.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
         }
       },
       "required": [

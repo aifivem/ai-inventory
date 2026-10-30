@@ -51,13 +51,15 @@ export class Occupancy {
     return grid;
   }
 
-  /** Writes `value` into the cells `w x h` from `slot` covers (no bounds check: callers checked `fits`). */
+  /** Writes `value` into the cells `w x h` from `slot` covers; cells outside the grid are skipped (never wrapped into the next row). */
   mark(slot: number, w: number, h: number, value: number): void {
+    if (slot < 1) return;
     const x0 = (slot - 1) % this.columns;
     const y0 = Math.floor((slot - 1) / this.columns);
-    for (let y = y0; y < y0 + h; y++)
-      for (let x = x0; x < x0 + w; x++)
-        this.cells[y * this.columns + x] = value;
+    const x1 = Math.min(x0 + w, this.columns);
+    const y1 = Math.min(y0 + h, this.rows);
+    for (let y = y0; y < y1; y++)
+      for (let x = x0; x < x1; x++) this.cells[y * this.columns + x] = value;
   }
 
   /** Whether `w x h` at `slot` stays inside the grid and covers only empty cells or cells of `ignore` (a moving stack). */

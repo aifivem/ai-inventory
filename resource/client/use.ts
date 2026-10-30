@@ -1,13 +1,9 @@
-import {
-  onServerEvent,
-  progress,
-  triggerServerCallback,
-} from "@aicore-fivem/lib/client";
+import { callAction, onServerEvent, progress } from "@aicore-fivem/lib/client";
+import { isRecord, readFinite, readId } from "@aicore-fivem/lib/shared";
 import { Locale } from "common";
 import { EVENTS } from "common/events";
 import type { PendingUse } from "common/nui";
 import { content } from "./content";
-import { toast, toResult } from "./screen";
 import { state } from "./state";
 import { weapons } from "./weapons";
 
@@ -40,10 +36,7 @@ export async function useItem(slot: number): Promise<void> {
           DoesWeaponTakeWeaponComponent(weaponHash, GetHashKey(h)),
         )
       : undefined;
-  const result = toResult(
-    await triggerServerCallback(EVENTS.use, [slot, hash]).catch(() => null),
-  );
-  if (!result.ok) toast(result.error);
+  await callAction(EVENTS.use, [slot, hash], { fallback: "INV_ERR_GONE" });
 }
 
 /** Plays the use animation with ai-core's progress bar (getting into a vehicle or dying cancels), then reports it. */
@@ -54,34 +47,29 @@ async function play(use: PendingUse): Promise<void> {
     anim: ANIMS[use.anim],
   });
   if (!done) return void emitNet(EVENTS.cancelUse);
-  const result = toResult(
-    await triggerServerCallback(EVENTS.finishUse, [use.token]).catch(
-      () => null,
-    ),
-  );
-  if (!result.ok) toast(result.error);
+  await callAction(EVENTS.finishUse, [use.token], {
+    fallback: "INV_ERR_GONE",
+  });
 }
-
-const isObj = (v: unknown): v is Record<string, unknown> =>
-  typeof v === "object" && v !== null && !Array.isArray(v);
 
 onServerEvent(
   EVENTS.startUse,
   {
-    args: ([raw]) =>
-      isObj(raw) &&
-      typeof raw.token === "number" &&
-      typeof raw.name === "string" &&
-      typeof raw.time === "number"
-        ? [
+    args: ([raw]) => {
+      if (!isRecord(raw) || typeof raw.name !== "string") return null;
+      const token = readId(raw.token);
+      const time = readFinite(raw.time);
+      return token === null || time === null
+        ? null
+        : [
             {
-              token: raw.token,
+              token,
               name: raw.name,
               anim: typeof raw.anim === "string" ? raw.anim : "none",
-              time: raw.time,
+              time,
             },
-          ]
-        : null,
+          ];
+    },
   },
   (use) => void play(use),
 );

@@ -1,4 +1,9 @@
-import { cache, Keybind, onServerEvent } from "@aicore-fivem/lib/client";
+import {
+  cache,
+  Keybind,
+  nearestVehicle,
+  onServerEvent,
+} from "@aicore-fivem/lib/client";
 import { Locale } from "common";
 import { EVENTS } from "common/events";
 import { hotbarSlot } from "common/grid";
@@ -8,30 +13,22 @@ import { hotbar, screen } from "./screen";
 import { state, toView } from "./state";
 import { useItem } from "./use";
 
-
 /** How close to a vehicle's back the trunk opens. */
 const TRUNK_REACH = 1.6;
 
-/** The networked vehicle whose back the player stands at, or null. */
+/** The nearest networked vehicle (8 m) when the player stands at its back, or null. */
 function trunkInReach(): number | null {
+  const vehicle = nearestVehicle(8, { networked: true });
+  if (!vehicle) return null;
   const [x = 0, y = 0, z = 0] = GetEntityCoords(cache.ped, false);
-  for (const vehicle of GetGamePool("CVehicle") as number[]) {
-    const [vx = 0, vy = 0, vz = 0] = GetEntityCoords(vehicle, false);
-    if (
-      Math.hypot(vx - x, vy - y, vz - z) > 8 ||
-      !NetworkGetEntityIsNetworked(vehicle)
-    )
-      continue;
-    const [min] = GetModelDimensions(GetEntityModel(vehicle));
-    const [bx = 0, by = 0, bz = 0] = GetOffsetFromEntityInWorldCoords(
-      vehicle,
-      0,
-      (min?.[1] ?? -2) - 0.4,
-      0,
-    );
-    if (Math.hypot(bx - x, by - y, bz - z) <= TRUNK_REACH) return vehicle;
-  }
-  return null;
+  const [min] = GetModelDimensions(GetEntityModel(vehicle));
+  const [bx = 0, by = 0, bz = 0] = GetOffsetFromEntityInWorldCoords(
+    vehicle,
+    0,
+    (min?.[1] ?? -2) - 0.4,
+    0,
+  );
+  return Math.hypot(bx - x, by - y, bz - z) <= TRUNK_REACH ? vehicle : null;
 }
 
 /** What the inventory key opens next to the player's own: glovebox, a drop, a trunk, or nothing. */

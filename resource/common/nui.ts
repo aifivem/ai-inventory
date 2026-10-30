@@ -1,3 +1,5 @@
+import { isRecord, readId, readInt } from "@aicore-fivem/lib/shared";
+import type { ActionResult } from "@aicore-fivem/shared";
 import type { ClothesState } from "./clothes";
 /** Wire and NUI contract of ai-inventory: shapes sent between server, client and the screen. No natives. */
 
@@ -37,9 +39,10 @@ export type OpenTarget =
   | { kind: "shop"; id: string }
   | { kind: "bench"; id: string };
 
-export type OpenResult =
-  | { ok: true; other: InventoryView | null; panel: Panel | null }
-  | { ok: false; error: string };
+export type OpenResult = ActionResult<{
+  other: InventoryView | null;
+  panel: Panel | null;
+}>;
 
 export interface MoveInput {
   from: string;
@@ -156,12 +159,6 @@ export const NUI = {
 } as const;
 
 /** Parsers for boundary data. */
-const isObj = (v: unknown): v is Record<string, unknown> =>
-  typeof v === "object" && v !== null && !Array.isArray(v);
-const int = (v: unknown, min: number, max: number): number | null =>
-  typeof v === "number" && Number.isInteger(v) && v >= min && v <= max
-    ? v
-    : null;
 const id = (v: unknown): string | null =>
   typeof v === "string" && v.length > 0 && v.length <= 96 ? v : null;
 
@@ -169,7 +166,7 @@ const id = (v: unknown): string | null =>
 export function toPedArea(
   v: unknown,
 ): { x: number; top: number; bottom: number } | null {
-  if (!isObj(v) || v.show !== true) return null;
+  if (!isRecord(v) || v.show !== true) return null;
   const share = (n: unknown): number | null =>
     typeof n === "number" && n >= 0 && n <= 1 ? n : null;
   const x = share(v.x);
@@ -181,12 +178,12 @@ export function toPedArea(
 }
 
 export function toMoveInput(v: unknown): MoveInput | null {
-  if (!isObj(v)) return null;
+  if (!isRecord(v)) return null;
   const from = id(v.from);
   const to = id(v.to);
-  const fromSlot = int(v.fromSlot, 1, 10_000);
-  const toSlot = int(v.toSlot, 1, 10_000);
-  const count = int(v.count, 1, 1_000_000);
+  const fromSlot = readInt(v.fromSlot, 1, 10_000);
+  const toSlot = readInt(v.toSlot, 1, 10_000);
+  const count = readInt(v.count, 1, 1_000_000);
   if (
     !from ||
     !to ||
@@ -200,7 +197,7 @@ export function toMoveInput(v: unknown): MoveInput | null {
 }
 
 export function toOpenTarget(v: unknown): OpenTarget | null {
-  if (!isObj(v)) return null;
+  if (!isRecord(v)) return null;
   switch (v.kind) {
     case "self":
     case "glovebox":
@@ -213,7 +210,7 @@ export function toOpenTarget(v: unknown): OpenTarget | null {
       return key ? { kind: v.kind, id: key } : null;
     }
     case "trunk": {
-      const netId = int(v.netId, 1, 0xffff_ffff);
+      const netId = readId(v.netId);
       return netId === null ? null : { kind: "trunk", netId };
     }
     default:
@@ -222,7 +219,7 @@ export function toOpenTarget(v: unknown): OpenTarget | null {
 }
 
 export function toPanel(v: unknown): Panel | null {
-  if (!isObj(v) || (v.kind !== "shop" && v.kind !== "bench")) return null;
+  if (!isRecord(v) || (v.kind !== "shop" && v.kind !== "bench")) return null;
   const key = id(v.id);
   return key ? { kind: v.kind, id: key } : null;
 }

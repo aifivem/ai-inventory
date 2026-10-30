@@ -25,6 +25,8 @@ class Inventories {
   private readonly byId = new Map<string, Inventory>();
   private readonly loading = new Map<string, Promise<Inventory>>();
   private readonly players = new Map<number, Inventory>();
+  /** Player inventory id -> how many sources hold it (it leaves memory at 0). */
+  private readonly holders = new Map<string, number>();
   /** source -> id of the second inventory the player has open. */
   private readonly open = new Map<number, string>();
 
@@ -98,6 +100,7 @@ class Inventories {
     if (!stillCurrent() || this.players.has(source)) return;
     inventory.viewers.add(source);
     this.players.set(source, inventory);
+    this.holders.set(inventory.id, (this.holders.get(inventory.id) ?? 0) + 1);
     emitNet(EVENTS.player, source, inventory.view());
   }
 
@@ -107,9 +110,12 @@ class Inventories {
     if (!inventory) return;
     this.players.delete(source);
     inventory.viewers.delete(source);
+    const held = (this.holders.get(inventory.id) ?? 1) - 1;
+    if (held > 0) this.holders.set(inventory.id, held);
+    else this.holders.delete(inventory.id);
     if (inventory.dirty) await this.save([inventory]);
-    if (![...this.players.values()].includes(inventory))
-      this.byId.delete(inventory.id);
+    // Nobody took it again during the save: forget it (a script that had it open is told).
+    if (!this.holders.has(inventory.id)) this.remove(inventory.id);
   }
 
   /** The player now sees `inventory` next to his own (closing what he had open). */

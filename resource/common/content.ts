@@ -27,7 +27,8 @@ export interface Settings {
   /** Cells per row in every inventory (the screens are drawn for this width). */
   columns: number;
   player: GridSize;
-  drop: GridSize & { despawnMinutes: number };
+  /** `maxPerPlayer`: live drops one character may have made at a time. */
+  drop: GridSize & { despawnMinutes: number; maxPerPlayer: number };
   trunk: GridSize;
   glovebox: GridSize;
   /** GTA's weapon wheel and scroll weapon switching stay off (weapons come from the inventory's quick slots). */
@@ -95,6 +96,7 @@ export function readSettings(raw: unknown): Settings {
     drop: {
       ...grid(s.drop, 6, 1_000_000),
       despawnMinutes: int(drop.despawnMinutes, 15, 1, 240),
+      maxPerPlayer: int(drop.maxPerPlayer, 10, 1, 100),
     },
     trunk: grid(s.trunk, 6, 80_000),
     glovebox: grid(s.glovebox, 2, 10_000),

@@ -1,7 +1,7 @@
-import { aiLogChannels, createDatabaseTables } from "@aicore-fivem/lib/server";
-import { ResourceName } from "common";
+import { aiLogChannels } from "@aicore-fivem/lib/server";
+import { prepareDatabase } from "./repo";
 import { log } from "./log";
-import { restoreOnline } from "./session";
+import "./session";
 import "./open";
 import "./actions";
 import "./use";
@@ -18,6 +18,6 @@ aiLogChannels({
   crafting: {},
 });
 
-createDatabaseTables(ResourceName, "sql/main.sql")
-  .then(restoreOnline)
-  .catch((error: unknown) => log.error("database setup failed", error));
+prepareDatabase().catch((error: unknown) =>
+  log.error("database setup failed", error),
+);

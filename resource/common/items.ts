@@ -1,3 +1,4 @@
+import { isRecord } from "@aicore-fivem/lib/shared";
 import type { Size } from "./grid";
 
 /** Item definitions (`data/items.json`, panel records): read on the server from the panel store, on clients from the world mirror. No natives. */
@@ -35,8 +36,6 @@ const KEY = /^[a-z0-9_-]{2,48}$/;
 const TYPES: ItemType[] = ["item", "weapon", "ammo", "component"];
 const ANIMS: UseAnim[] = ["none", "eat", "drink", "bandage", "armour"];
 
-const isObj = (v: unknown): v is Record<string, unknown> =>
-  typeof v === "object" && v !== null && !Array.isArray(v);
 const n = (v: unknown, fallback: number, min: number, max: number): number =>
   typeof v === "number" && Number.isFinite(v)
     ? Math.min(max, Math.max(min, v))
@@ -51,18 +50,18 @@ const names = (v: unknown): string[] =>
     : [];
 
 export function readItem(name: string, raw: unknown): ItemDef | null {
-  if (!KEY.test(name) || !isObj(raw)) return null;
-  const size = isObj(raw.size) ? raw.size : {};
-  const use = isObj(raw.use) ? raw.use : {};
+  if (!KEY.test(name) || !isRecord(raw)) return null;
+  const size = isRecord(raw.size) ? raw.size : {};
+  const use = isRecord(raw.use) ? raw.use : {};
   const type = TYPES.includes(raw.type as ItemType)
     ? (raw.type as ItemType)
     : "item";
   const status: Record<string, number> = {};
-  if (isObj(use.status))
+  if (isRecord(use.status))
     for (const [key, value] of Object.entries(use.status))
       if (typeof value === "number") status[key] = value;
-  const weapon = isObj(raw.weapon) ? raw.weapon : {};
-  const component = isObj(raw.component) ? raw.component : {};
+  const weapon = isRecord(raw.weapon) ? raw.weapon : {};
+  const component = isRecord(raw.component) ? raw.component : {};
   return {
     name,
     label: s(raw.label, name),
@@ -113,7 +112,7 @@ export class ItemList {
   private readonly alias = new Map<string, string>();
 
   constructor(raw: unknown) {
-    if (!isObj(raw)) return;
+    if (!isRecord(raw)) return;
     for (const [name, value] of Object.entries(raw)) {
       const item = readItem(name, value);
       if (!item) continue;

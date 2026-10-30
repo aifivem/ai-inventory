@@ -36,7 +36,7 @@ var SourceLock = class {
 function num$1(value, fallback, min = -Infinity, max = Infinity) {
 	return typeof value == "number" && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
 }
-function int$5(value, fallback, min = -Infinity, max = Infinity) {
+function int$1(value, fallback, min = -Infinity, max = Infinity) {
 	return Math.round(num$1(value, fallback, min, max));
 }
 function bool(value, fallback) {
@@ -48,8 +48,17 @@ function str(value, fallback, max = 64) {
 function record(value) {
 	return typeof value == "object" && value && !Array.isArray(value) ? value : {};
 }
-// ../../../packages/lib/src/shared/records.ts
-const isObject = (value) => typeof value == "object" && !!value && !Array.isArray(value);
+// ../../../packages/lib/src/shared/strict.ts
+function readInt(value, min, max) {
+	return Number.isInteger(value) && value >= min && value <= max ? value : null;
+}
+const readId = (value) => readInt(value, 1, 2147483647), oneArg = (read) => ([value]) => {
+	let parsed = read(value);
+	return parsed === null ? null : [parsed];
+}, fail = (error) => ({
+	ok: !1,
+	error
+}), isObject = (value) => typeof value == "object" && !!value && !Array.isArray(value);
 function readRecords$1(raw, readOne) {
 	let out = new Map();
 	if (!isObject(raw)) return out;
@@ -297,7 +306,7 @@ const CORE = {
 	clientPlayerLoadedEvent: "ai-core:client:playerLoaded",
 	clientPlayerUnloadedEvent: "ai-core:client:playerUnloaded",
 	clientCharacterPortraitEvent: "ai-core:client:characterPortrait",
-	clientCharacterLookEvent: "ai-core:client:characterLook",
+	characterLooksEvent: "ai-core:client:characterLooks",
 	clientPromptPressedEvent: "ai-core:client:promptPressed",
 	clientCacheEvent: "ai-core:client:cache",
 	clientHudVisibleEvent: "ai-core:client:hudVisible",
@@ -367,6 +376,20 @@ function loadLocaleTexts(resource = GetCurrentResourceName()) {
 }
 // ../../../packages/lib/src/fivem/callbackNames.ts
 const requestEvent = (name) => `aicore:cb:${name}`, responseEvent = (resource) => `aicore:cbr:${resource}`;
+// ../../../packages/lib/src/server/position.ts
+function entityCoords(entity) {
+	let [x = 0, y = 0, z = 0] = GetEntityCoords(entity);
+	return {
+		x,
+		y,
+		z
+	};
+}
+const coordsOf = (source) => entityCoords(GetPlayerPed(String(source)));
+function isNear(source, point, metres) {
+	let [x = 0, y = 0, z = 0] = GetEntityCoords(GetPlayerPed(String(source))), dx = x - point.x, dy = y - point.y, dz = z - point.z;
+	return dx * dx + dy * dy + dz * dz <= metres * metres;
+}
 resourceExport(CORE.resource);
 const log$6 = createLogger(GetCurrentResourceName()), gates = new Set();
 on("playerDropped", () => {
@@ -943,8 +966,112 @@ var OnlinePlayers = class {
 		return this.start(), this.onDuty.get(job) ?? EMPTY;
 	}
 };
-const EMPTY = new Set();
-new OnlinePlayers(), resourceExport(CORE.resource), resourceExport(CORE.resource), createLogger(GetCurrentResourceName());
+const EMPTY = new Set(), online = new OnlinePlayers();
+resourceExport(CORE.resource);
+// ../../../packages/lib/src/server/vehicle.ts
+function vehicleFromNet(netId) {
+	if (readId(netId) === null) return 0;
+	let entity = NetworkGetEntityFromNetworkId(netId);
+	return entity && DoesEntityExist(entity) && GetEntityType(entity) === 2 ? entity : 0;
+}
+resourceExport(CORE.resource);
+// ../../../packages/lib/src/server/players.ts
+const log$4 = createLogger(GetCurrentResourceName()), dropped = new Set();
+let listening = !1;
+function onDropped(fn) {
+	listening || (listening = !0, on("playerDropped", () => {
+		let source = Number(globalThis.source);
+		for (let handler of dropped) handler(source);
+	})), dropped.add(fn);
+}
+var PlayerMap = class extends Map {
+	constructor(options = {}) {
+		super(), onDropped((source) => {
+			if (!this.has(source)) return;
+			let value = this.get(source);
+			this.delete(source), options.onDrop?.(source, value);
+		});
+	}
+}, Cooldowns = class {
+	until = new PlayerMap();
+	ready(source) {
+		return this.left(source) === 0;
+	}
+	start(source, ms) {
+		this.until.set(source, GetGameTimer() + ms);
+	}
+	take(source, ms) {
+		return this.ready(source) ? (this.start(source, ms), !0) : !1;
+	}
+	left(source) {
+		let until = this.until.get(source);
+		if (until === void 0) return 0;
+		let left = until - GetGameTimer();
+		return left > 0 ? left : (this.until.delete(source), 0);
+	}
+	clear(source) {
+		this.until.delete(source);
+	}
+};
+function onCharacter(handlers) {
+	let live = new Map(), deliver = (source, character) => {
+		if (live.set(source, character.id), handlers.loaded) try {
+			let result = handlers.loaded(source, character);
+			result instanceof Promise && result.catch((error) => log$4.error(`character loaded handler failed for ${source}`, error));
+		} catch (error) {
+			log$4.error(`character loaded handler failed for ${source}`, error);
+		}
+	}, end = (source, charId) => {
+		if (live.delete(source)) try {
+			handlers.unloaded?.(source, charId);
+		} catch (error) {
+			log$4.error(`character unloaded handler failed for ${source}`, error);
+		}
+	};
+	on(CORE.playerLoadedEvent, (source, character) => {
+		let previous = live.get(source);
+		previous !== void 0 && end(source, previous), deliver(source, character);
+	}), on(CORE.playerUnloadedEvent, (source, charId) => end(source, charId)), onDropped((source) => setImmediate(() => {
+		let charId = live.get(source);
+		charId !== void 0 && end(source, charId);
+	})), setImmediate(() => {
+		for (let source of online.sources()) {
+			if (live.has(source)) continue;
+			let character = online.character(source);
+			character && deliver(source, character);
+		}
+	});
+}
+// ../../../packages/lib/src/server/pending.ts
+var PendingActions = class {
+	actions = new PlayerMap();
+	minRatio;
+	next = 0;
+	constructor(options = {}) {
+		this.minRatio = options.minRatio ?? .8;
+	}
+	start(source, data, durationMs) {
+		return this.next = this.next >= 2147483647 ? 1 : this.next + 1, this.actions.set(source, {
+			token: this.next,
+			data,
+			startedAt: GetGameTimer(),
+			durationMs
+		}), this.next;
+	}
+	take(source, token) {
+		let action = this.actions.get(source);
+		return !action || action.token !== token ? null : (this.actions.delete(source), GetGameTimer() - action.startedAt >= action.durationMs * this.minRatio ? action.data : null);
+	}
+	peek(source) {
+		return this.actions.get(source)?.data ?? null;
+	}
+	cancel(source) {
+		this.actions.delete(source);
+	}
+	get size() {
+		return this.actions.size;
+	}
+};
 // ../../../packages/lib/src/server/command.ts
 const resource$3 = GetCurrentResourceName();
 createLogger(resource$3), new class {
@@ -15337,38 +15464,67 @@ var Mirror = class {
 		DoesEntityExist(entity) && (Entity(entity).state.set(this.key, value ?? null, !0), this.put(entity, value));
 	}
 };
-resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), createLocale();
+resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), createLocale();
 // resource/common/resource.ts
 const ResourceName = GetCurrentResourceName();
 IsDuplicityVersion();
 // resource/server/log.ts
-const log = createLogger(ResourceName), EVENTS = {
-	player: "ai-inventory:client:player",
-	delta: "ai-inventory:client:delta",
-	layout: "ai-inventory:client:layout",
-	forceOpen: "ai-inventory:client:forceOpen",
-	ground: "ai-inventory:client:ground",
-	forceClose: "ai-inventory:client:forceClose",
-	drops: "ai-inventory:client:drops",
-	dropPut: "ai-inventory:client:dropPut",
-	dropRemove: "ai-inventory:client:dropRemove",
-	weapon: "ai-inventory:client:weapon",
-	startUse: "ai-inventory:client:startUse",
-	components: "ai-inventory:client:components",
-	close: "ai-inventory:close",
-	cancelUse: "ai-inventory:cancelUse",
-	ammo: "ai-inventory:ammo",
-	open: "ai-inventory:open",
-	move: "ai-inventory:move",
-	use: "ai-inventory:use",
-	finishUse: "ai-inventory:finishUse",
-	give: "ai-inventory:give",
-	drop: "ai-inventory:drop",
-	buy: "ai-inventory:buy",
-	craft: "ai-inventory:craft",
-	reload: "ai-inventory:reload",
-	detach: "ai-inventory:detach"
-}, KEY$1 = /^[a-z0-9_-]{2,48}$/, TYPES = [
+const log = createLogger(ResourceName);
+// resource/server/repo.ts
+let setup = null;
+const prepareDatabase = () => setup ??= createDatabaseTables(ResourceName, "sql/main.sql");
+function decode(id, text) {
+	try {
+		let parsed = JSON.parse(text);
+		if (typeof parsed != "object" || !parsed || !("s" in parsed) || !Array.isArray(parsed.s)) return [];
+		let stacks = [];
+		for (let row of parsed.s) {
+			if (!Array.isArray(row)) continue;
+			let [slot, name, count, metadata, rotated] = row;
+			if (typeof slot != "number" || typeof name != "string" || typeof count != "number" || count <= 0) continue;
+			let meta = typeof metadata == "object" && metadata && !Array.isArray(metadata) ? metadata : {};
+			stacks.push({
+				slot,
+				name,
+				count,
+				metadata: meta,
+				rotated: rotated === !0
+			});
+		}
+		return stacks;
+	} catch (error) {
+		return log.error(`inventory ${id} has broken stored data`, error), [];
+	}
+}
+const encode = (stacks) => JSON.stringify({
+	v: 1,
+	s: [...stacks].map((s) => [
+		s.slot,
+		s.name,
+		s.count,
+		s.metadata,
+		s.rotated
+	])
+});
+async function loadInventories(ids) {
+	let found = new Map();
+	if (ids.length === 0) return found;
+	await prepareDatabase();
+	let rows = await mysql.query("SELECT id, items FROM ai_inventory_inventories WHERE id IN (?)", [ids]);
+	for (let row of rows) found.set(row.id, decode(row.id, row.items));
+	return found;
+}
+async function saveInventories(list) {
+	if (list.length !== 0) {
+		await prepareDatabase();
+		for (let i = 0; i < list.length; i += 200) {
+			let chunk = list.slice(i, i + 200), values = chunk.flatMap((inv) => [inv.id, encode(inv.stacks)]);
+			await mysql.query(`INSERT INTO ai_inventory_inventories (id, items) VALUES ${chunk.map(() => "(?, ?)").join(", ")} ON DUPLICATE KEY UPDATE items = VALUES(items)`, values);
+		}
+	}
+}
+// resource/common/items.ts
+const KEY$1 = /^[a-z0-9_-]{2,48}$/, TYPES = [
 	"item",
 	"weapon",
 	"ammo",
@@ -15379,12 +15535,12 @@ const log = createLogger(ResourceName), EVENTS = {
 	"drink",
 	"bandage",
 	"armour"
-], isObj$1 = (v) => typeof v == "object" && !!v && !Array.isArray(v), n = (v, fallback, min, max) => typeof v == "number" && Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : fallback, s = (v, fallback = "") => typeof v == "string" ? v : fallback, names$2 = (v) => Array.isArray(v) ? v.filter((x) => typeof x == "string").map((x) => x.toLowerCase()) : [];
+], n = (v, fallback, min, max) => typeof v == "number" && Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : fallback, s = (v, fallback = "") => typeof v == "string" ? v : fallback, names$2 = (v) => Array.isArray(v) ? v.filter((x) => typeof x == "string").map((x) => x.toLowerCase()) : [];
 function readItem(name, raw) {
-	if (!KEY$1.test(name) || !isObj$1(raw)) return null;
-	let size = isObj$1(raw.size) ? raw.size : {}, use = isObj$1(raw.use) ? raw.use : {}, type = TYPES.includes(raw.type) ? raw.type : "item", status = {};
-	if (isObj$1(use.status)) for (let [key, value] of Object.entries(use.status)) typeof value == "number" && (status[key] = value);
-	let weapon = isObj$1(raw.weapon) ? raw.weapon : {}, component = isObj$1(raw.component) ? raw.component : {};
+	if (!KEY$1.test(name) || !isRecord(raw)) return null;
+	let size = isRecord(raw.size) ? raw.size : {}, use = isRecord(raw.use) ? raw.use : {}, type = TYPES.includes(raw.type) ? raw.type : "item", status = {};
+	if (isRecord(use.status)) for (let [key, value] of Object.entries(use.status)) typeof value == "number" && (status[key] = value);
+	let weapon = isRecord(raw.weapon) ? raw.weapon : {}, component = isRecord(raw.component) ? raw.component : {};
 	return {
 		name,
 		label: s(raw.label, name),
@@ -15418,7 +15574,7 @@ var ItemList = class {
 	byName = new Map();
 	alias = new Map();
 	constructor(raw) {
-		if (isObj$1(raw)) for (let [name, value] of Object.entries(raw)) {
+		if (isRecord(raw)) for (let [name, value] of Object.entries(raw)) {
 			let item = readItem(name, value);
 			if (item) {
 				this.byName.set(name, item);
@@ -15436,18 +15592,19 @@ var ItemList = class {
 const names$1 = (v) => Array.isArray(v) ? v.filter((x) => typeof x == "string" && x !== "") : [], grid = (v, rows, weight) => {
 	let g = record(v);
 	return {
-		rows: int$5(g.rows, rows, 1, 50),
-		maxWeight: int$5(g.maxWeight, weight, 0, 1e7)
+		rows: int$1(g.rows, rows, 1, 50),
+		maxWeight: int$1(g.maxWeight, weight, 0, 1e7)
 	};
 };
 function readSettings(raw) {
 	let s = record(raw), drop = record(s.drop);
 	return {
-		columns: int$5(s.columns, 8, 6, 14),
+		columns: int$1(s.columns, 8, 6, 14),
 		player: grid(s.player, 6, 4e4),
 		drop: {
 			...grid(s.drop, 6, 1e6),
-			despawnMinutes: int$5(drop.despawnMinutes, 15, 1, 240)
+			despawnMinutes: int$1(drop.despawnMinutes, 15, 1, 240),
+			maxPerPlayer: int$1(drop.maxPerPlayer, 10, 1, 100)
 		},
 		trunk: grid(s.trunk, 6, 8e4),
 		glovebox: grid(s.glovebox, 2, 1e4),
@@ -15492,7 +15649,7 @@ const readShops = (raw) => readRecords(raw, (id, v) => ({
 		let r = record(row), name = str(r.name, "").toLowerCase();
 		return name ? [{
 			name,
-			price: int$5(r.price, 0, 0, 1e8)
+			price: int$1(r.price, 0, 0, 1e8)
 		}] : [];
 	})
 })), readStashes = (raw) => readRecords(raw, (id, v) => ({
@@ -15506,7 +15663,7 @@ const readShops = (raw) => readRecords(raw, (id, v) => ({
 		let r = record(row), result = str(r.result, "").toLowerCase();
 		return result ? [{
 			result,
-			count: int$5(r.count, 1, 1, 1e3),
+			count: int$1(r.count, 1, 1, 1e3),
 			time: num$1(r.time, 5, 0, 600),
 			ingredients: parseIngredients(str(r.ingredients, "", 400))
 		}] : [];
@@ -15551,7 +15708,7 @@ var InventoryContent = class {
 		for (let listener of this.listeners) listener(file);
 	}
 };
-const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - place.y, z - place.z) <= place.radius + slack, int$4 = (min, max, optional = !1) => ({
+const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - place.y, z - place.z) <= place.radius + slack, int = (min, max, optional = !1) => ({
 	type: "number",
 	min,
 	max,
@@ -15575,8 +15732,8 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 }, gridSpec = (extra = {}) => ({
 	type: "object",
 	fields: {
-		rows: int$4(1, 50),
-		maxWeight: int$4(0, 1e7),
+		rows: int(1, 50),
+		maxWeight: int(0, 1e7),
 		...extra
 	}
 }), KEY = "^[a-z0-9_-]{2,48}$", place = (labelKey) => [
@@ -15679,15 +15836,15 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 			sections: {
 				label: text(48),
 				description: text(240, !0),
-				weight: int$4(0, 1e6),
+				weight: int(0, 1e6),
 				size: {
 					type: "object",
 					fields: {
-						w: int$4(1, 8),
-						h: int$4(1, 8)
+						w: int(1, 8),
+						h: int(1, 8)
 					}
 				},
-				stack: int$4(1, 1e5),
+				stack: int(1, 1e5),
 				type: {
 					type: "enum",
 					values: [
@@ -15698,7 +15855,7 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 					]
 				},
 				usable: { type: "bool" },
-				consume: int$4(0, 1e3),
+				consume: int(0, 1e3),
 				close: { type: "bool" },
 				image: text(200),
 				aliases: names,
@@ -15724,7 +15881,7 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 							],
 							optional: !0
 						},
-						time: int$4(0, 6e4, !0),
+						time: int(0, 6e4, !0),
 						status: {
 							type: "object",
 							optional: !0,
@@ -15804,7 +15961,7 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 								max: 48,
 								pattern: KEY
 							},
-							price: int$4(0, 1e8)
+							price: int(0, 1e8)
 						}
 					}
 				}
@@ -15832,8 +15989,8 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 				...placeSections,
 				gangs: names,
 				personal: { type: "bool" },
-				rows: int$4(1, 50),
-				maxWeight: int$4(0, 1e7)
+				rows: int(1, 50),
+				maxWeight: int(0, 1e7)
 			}
 		},
 		benches: {
@@ -15870,7 +16027,7 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 								max: 48,
 								pattern: KEY
 							},
-							count: int$4(1, 1e3),
+							count: int(1, 1e3),
 							time: num(0, 600),
 							ingredients: text(400)
 						}
@@ -15882,9 +16039,12 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 			kind: "settings",
 			sync: "all",
 			sections: {
-				columns: int$4(6, 14),
+				columns: int(6, 14),
 				player: gridSpec(),
-				drop: gridSpec({ despawnMinutes: int$4(1, 240) }),
+				drop: gridSpec({
+					despawnMinutes: int(1, 240),
+					maxPerPlayer: int(1, 100, !0)
+				}),
 				trunk: gridSpec(),
 				glovebox: gridSpec(),
 				noWeaponWheel: { type: "bool" }
@@ -16353,15 +16513,26 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 					icon: "box-open",
 					title: "ADMIN_C_DROP",
 					desc: "ADMIN_C_DROP_DESC",
-					fields: [...gridFields("drop."), {
-						widget: "number",
-						path: "drop.despawnMinutes",
-						label: "ADMIN_F_DESPAWN",
-						hint: "ADMIN_H_DESPAWN",
-						min: 1,
-						max: 240,
-						unit: "min"
-					}]
+					fields: [
+						...gridFields("drop."),
+						{
+							widget: "number",
+							path: "drop.despawnMinutes",
+							label: "ADMIN_F_DESPAWN",
+							hint: "ADMIN_H_DESPAWN",
+							min: 1,
+							max: 240,
+							unit: "min"
+						},
+						{
+							widget: "number",
+							path: "drop.maxPerPlayer",
+							label: "ADMIN_F_DROP_LIMIT",
+							hint: "ADMIN_H_DROP_LIMIT",
+							min: 1,
+							max: 100
+						}
+					]
 				},
 				{
 					icon: "car",
@@ -16378,7 +16549,31 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 			]
 		}
 	]
-})), isHotbarSlot = (slot) => slot >= 9001 && slot < 9006, footprint = (size, rotated) => rotated ? {
+})), EVENTS = {
+	player: "ai-inventory:client:player",
+	delta: "ai-inventory:client:delta",
+	layout: "ai-inventory:client:layout",
+	forceOpen: "ai-inventory:client:forceOpen",
+	ground: "ai-inventory:client:ground",
+	forceClose: "ai-inventory:client:forceClose",
+	drops: "ai-inventory:client:drops",
+	weapon: "ai-inventory:client:weapon",
+	startUse: "ai-inventory:client:startUse",
+	components: "ai-inventory:client:components",
+	close: "ai-inventory:close",
+	cancelUse: "ai-inventory:cancelUse",
+	ammo: "ai-inventory:ammo",
+	open: "ai-inventory:open",
+	move: "ai-inventory:move",
+	use: "ai-inventory:use",
+	finishUse: "ai-inventory:finishUse",
+	give: "ai-inventory:give",
+	drop: "ai-inventory:drop",
+	buy: "ai-inventory:buy",
+	craft: "ai-inventory:craft",
+	reload: "ai-inventory:reload",
+	detach: "ai-inventory:detach"
+}, isHotbarSlot = (slot) => slot >= 9001 && slot < 9006, footprint = (size, rotated) => rotated ? {
 	w: size.h,
 	h: size.w
 } : size;
@@ -16395,8 +16590,9 @@ var Occupancy = class Occupancy {
 		return grid;
 	}
 	mark(slot, w, h, value) {
-		let x0 = (slot - 1) % this.columns, y0 = Math.floor((slot - 1) / this.columns);
-		for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) this.cells[y * this.columns + x] = value;
+		if (slot < 1) return;
+		let x0 = (slot - 1) % this.columns, y0 = Math.floor((slot - 1) / this.columns), x1 = Math.min(x0 + w, this.columns), y1 = Math.min(y0 + h, this.rows);
+		for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) this.cells[y * this.columns + x] = value;
 	}
 	fits(slot, w, h, ignore = 0) {
 		if (slot < 1 || slot > this.cells.length) return !1;
@@ -16428,9 +16624,21 @@ var Occupancy = class Occupancy {
 	}
 };
 // resource/server/inventory.ts
+function canonical(value) {
+	if (Array.isArray(value)) return `[${value.map((v) => v === void 0 || typeof v == "function" ? "null" : canonical(v)).join(",")}]`;
+	if (typeof value == "object" && value) {
+		let parts = [];
+		for (let key of Object.keys(value).sort()) {
+			let v = value[key];
+			v !== void 0 && typeof v != "function" && parts.push(`${JSON.stringify(key)}:${canonical(v)}`);
+		}
+		return `{${parts.join(",")}}`;
+	}
+	return JSON.stringify(value) ?? "null";
+}
 function metaKey(metadata) {
-	let keys = Object.keys(metadata).sort();
-	return keys.length === 0 ? "" : JSON.stringify(metadata, keys);
+	let text = canonical(metadata);
+	return text === "{}" ? "" : text;
 }
 function ensureSerial(def, metadata) {
 	def.type === "weapon" && !def.weapon?.throwable && typeof metadata.serial != "string" && (metadata.serial = Math.random().toString(36).slice(2, 10).toUpperCase());
@@ -16475,14 +16683,37 @@ var Inventory = class {
 	}
 	rebuild() {
 		this.grid = new Occupancy(this.columns, this.rows), this.weight = 0;
+		let orphans = [];
 		for (let stack of this.stacks.values()) {
-			let def = content.items.get(stack.name), { w, h } = footprint(sizeOf(def), stack.rotated);
-			this.grid.fits(stack.slot, w, h) && this.grid.mark(stack.slot, w, h, stack.slot), this.weight += (def?.weight ?? 0) * stack.count;
+			let def = content.items.get(stack.name);
+			if (this.weight += (def?.weight ?? 0) * stack.count, this.hasHotbar && isHotbarSlot(stack.slot)) continue;
+			let { w, h } = footprint(sizeOf(def), stack.rotated);
+			this.grid.fits(stack.slot, w, h) ? this.grid.mark(stack.slot, w, h, stack.slot) : orphans.push(stack);
+		}
+		for (let stack of orphans) this.stacks.delete(stack.slot), this.touch(stack.slot);
+		for (let stack of orphans) {
+			let size = sizeOf(content.items.get(stack.name)), place;
+			if (Math.min(size.w, size.h) > this.columns) place = {
+				slot: this.rows * this.columns + 1,
+				rotated: !1
+			}, this.grow(size.h);
+			else for (place = this.grid.findPlace(size); !place;) this.grow(1), place = this.grid.findPlace(size);
+			let { w, h } = footprint(size, place.rotated);
+			this.grid.mark(place.slot, w, h, place.slot), this.stacks.set(place.slot, {
+				...stack,
+				slot: place.slot,
+				rotated: place.rotated
+			}), this.touch(place.slot);
 		}
 	}
+	grow(rows) {
+		this.rows += rows;
+		let grid = new Occupancy(this.columns, this.rows);
+		grid.cells.set(this.grid.cells), this.grid = grid;
+	}
 	relayout(columns, rows, maxWeight) {
-		let changed = columns !== this.columns || rows !== this.rows || maxWeight !== this.maxWeight;
-		if (this.columns = columns, this.rows = rows, this.maxWeight = maxWeight, this.rebuild(), changed) for (let viewer of this.viewers) emitNet(EVENTS.layout, viewer, this.id, columns, rows, maxWeight);
+		let before = `${this.columns}:${this.rows}:${this.maxWeight}`;
+		if (this.columns = columns, this.rows = rows, this.maxWeight = maxWeight, this.rebuild(), `${this.columns}:${this.rows}:${this.maxWeight}` !== before) for (let viewer of this.viewers) emitNet(EVENTS.layout, viewer, this.id, this.columns, this.rows, this.maxWeight);
 	}
 	shape(name, rotated) {
 		return footprint(sizeOf(content.items.get(name)), rotated);
@@ -16609,58 +16840,12 @@ var Inventory = class {
 		for (let viewer of this.viewers) emitNet(EVENTS.delta, viewer, this.id, put, remove, this.maxWeight);
 	}
 };
-// resource/server/repo.ts
-function decode(id, text) {
-	try {
-		let parsed = JSON.parse(text);
-		if (typeof parsed != "object" || !parsed || !("s" in parsed) || !Array.isArray(parsed.s)) return [];
-		let stacks = [];
-		for (let row of parsed.s) {
-			if (!Array.isArray(row)) continue;
-			let [slot, name, count, metadata, rotated] = row;
-			if (typeof slot != "number" || typeof name != "string" || typeof count != "number" || count <= 0) continue;
-			let meta = typeof metadata == "object" && metadata && !Array.isArray(metadata) ? metadata : {};
-			stacks.push({
-				slot,
-				name,
-				count,
-				metadata: meta,
-				rotated: rotated === !0
-			});
-		}
-		return stacks;
-	} catch (error) {
-		return log.error(`inventory ${id} has broken stored data`, error), [];
-	}
-}
-const encode = (stacks) => JSON.stringify({
-	v: 1,
-	s: [...stacks].map((s) => [
-		s.slot,
-		s.name,
-		s.count,
-		s.metadata,
-		s.rotated
-	])
-});
-async function loadInventories(ids) {
-	let found = new Map();
-	if (ids.length === 0) return found;
-	let rows = await mysql.query("SELECT id, items FROM ai_inventory_inventories WHERE id IN (?)", [ids]);
-	for (let row of rows) found.set(row.id, decode(row.id, row.items));
-	return found;
-}
-async function saveInventories(list) {
-	for (let i = 0; i < list.length; i += 200) {
-		let chunk = list.slice(i, i + 200), values = chunk.flatMap((inv) => [inv.id, encode(inv.stacks)]);
-		await mysql.query(`INSERT INTO ai_inventory_inventories (id, items) VALUES ${chunk.map(() => "(?, ?)").join(", ")} ON DUPLICATE KEY UPDATE items = VALUES(items)`, values);
-	}
-}
 // resource/server/registry.ts
 const inventories = new class {
 	byId = new Map();
 	loading = new Map();
 	players = new Map();
+	holders = new Map();
 	open = new Map();
 	get(id) {
 		return this.byId.get(id);
@@ -16698,12 +16883,15 @@ const inventories = new class {
 			maxWeight,
 			persistent: !0
 		});
-		stillCurrent() && !this.players.has(source) && (inventory.viewers.add(source), this.players.set(source, inventory), emitNet(EVENTS.player, source, inventory.view()));
+		stillCurrent() && !this.players.has(source) && (inventory.viewers.add(source), this.players.set(source, inventory), this.holders.set(inventory.id, (this.holders.get(inventory.id) ?? 0) + 1), emitNet(EVENTS.player, source, inventory.view()));
 	}
 	async unloadPlayer(source) {
 		this.close(source);
 		let inventory = this.players.get(source);
-		inventory && (this.players.delete(source), inventory.viewers.delete(source), inventory.dirty && await this.save([inventory]), [...this.players.values()].includes(inventory) || this.byId.delete(inventory.id));
+		if (!inventory) return;
+		this.players.delete(source), inventory.viewers.delete(source);
+		let held = (this.holders.get(inventory.id) ?? 1) - 1;
+		held > 0 ? this.holders.set(inventory.id, held) : this.holders.delete(inventory.id), inventory.dirty && await this.save([inventory]), this.holders.has(inventory.id) || this.remove(inventory.id);
 	}
 	watch(source, inventory) {
 		this.close(source), inventory.viewers.add(source), this.open.set(source, inventory.id);
@@ -16763,26 +16951,16 @@ setInterval(() => {
 	resource === GetCurrentResourceName() && saveNow("resource stop");
 });
 // resource/server/access.ts
-const core$2 = resourceExport("ai-core");
-function pedCoords(source) {
-	let [x = 0, y = 0, z = 0] = GetEntityCoords(GetPlayerPed(String(source)));
-	return {
-		x,
-		y,
-		z
-	};
-}
-function distanceTo(source, x, y, z) {
-	let p = pedCoords(source);
-	return Math.hypot(p.x - x, p.y - y, p.z - z);
-}
+const core$1 = resourceExport("ai-core");
 function allowed(source, place) {
 	let gangs = place.gangs ?? [];
-	if (place.jobs.length === 0 && gangs.length === 0) return !0;
+	if (place.jobs.length === 0 && gangs.length === 0 || gangs.length > 0 && online.gangs(source).some((g) => gangs.includes(g))) return !0;
+	let jobs = online.jobs(source).filter((job) => place.jobs.includes(job));
+	if (jobs.length === 0) return !1;
 	let grades = place.grades ?? {};
-	return place.jobs.length && (core$2.GetJobs(source) ?? []).some((m) => place.jobs.includes(m.job) && m.grade >= (grades[m.job] ?? 0)) ? !0 : gangs.length > 0 && (core$2.GetGangs(source) ?? []).some((m) => gangs.includes(m.gang));
+	return jobs.some((job) => (grades[job] ?? 0) <= 0) ? !0 : (core$1.GetJobs(source) ?? []).some((m) => jobs.includes(m.job) && m.grade >= (grades[m.job] ?? 0));
 }
-const charIdOf = (source) => core$2.GetCharacter(source)?.id ?? null, reach = new Map();
+const charIdOf = (source) => online.character(source)?.id ?? null, reach = new PlayerMap();
 function setReach(source, check) {
 	reach.set(source, check);
 }
@@ -16792,15 +16970,92 @@ function reachable(source, id) {
 	let open = inventories.openOf(source);
 	return !open || open.id !== id ? null : reach.get(source)?.() === !1 ? (inventories.close(source), null) : open;
 }
-on("playerDropped", () => reach.delete(Number(globalThis.source)));
-var Drop = class {
+// resource/server/dropAreas.ts
+const OFFSET = 16384, cellOf = (v) => Math.max(-16e3, Math.min(16e3, Math.floor(v / 64))), keyOf = (cx, cy) => (cx + OFFSET) * 32768 + (cy + OFFSET);
+var DropAreas = class {
+	cells = new Map();
+	followers = new PlayerMap({ onDrop: (source, follower) => this.forget(source, follower) });
+	inCell = new Map();
+	stale = !0;
+	count = 0;
+	get size() {
+		return this.count;
+	}
+	at(cell) {
+		return this.cells.get(cell);
+	}
+	*around(x, y) {
+		let cx = cellOf(x), cy = cellOf(y);
+		for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) yield* this.cells.get(keyOf(cx + dx, cy + dy)) ?? [];
+	}
+	add(drop) {
+		this.stale && this.followAll();
+		let cell = this.cells.get(drop.cell);
+		cell || this.cells.set(drop.cell, cell = new Set()), cell.add(drop), this.count++;
+		let cx = Math.floor(drop.cell / 32768) - OFFSET, cy = drop.cell % 32768 - OFFSET, put = [drop.point()];
+		for (let dx = -3; dx <= 3; dx++) for (let dy = -3; dy <= 3; dy++) for (let source of this.inCell.get(keyOf(cx + dx, cy + dy)) ?? []) this.followers.get(source)?.known.add(drop), drop.known.add(source), emitNet(EVENTS.drops, source, put, [], !1);
+	}
+	delete(drop) {
+		let cell = this.cells.get(drop.cell);
+		if (cell?.delete(drop)) {
+			cell.size === 0 && this.cells.delete(drop.cell), --this.count === 0 && (this.stale = !0);
+			for (let source of drop.known) this.followers.get(source)?.known.delete(drop), emitNet(EVENTS.drops, source, [], [drop.id], !1);
+			drop.known.clear();
+		}
+	}
+	start(source) {
+		this.stop(source);
+		let p = coordsOf(source), follower = {
+			cell: keyOf(cellOf(p.x), cellOf(p.y)),
+			known: new Set()
+		};
+		this.followers.set(source, follower), this.enter(source, follower.cell), this.diff(source, follower, cellOf(p.x), cellOf(p.y), !0);
+	}
+	stop(source) {
+		let follower = this.followers.get(source);
+		follower && (this.followers.delete(source), this.forget(source, follower));
+	}
+	followAll() {
+		this.stale = !1;
+		for (let [source, follower] of this.followers) {
+			let p = coordsOf(source), cx = cellOf(p.x), cy = cellOf(p.y), cell = keyOf(cx, cy);
+			cell !== follower.cell && (this.leave(source, follower.cell), follower.cell = cell, this.enter(source, cell), this.diff(source, follower, cx, cy, !1));
+		}
+	}
+	diff(source, follower, cx, cy, reset) {
+		let visible = new Set();
+		for (let dx = -3; dx <= 3; dx++) for (let dy = -3; dy <= 3; dy++) for (let drop of this.cells.get(keyOf(cx + dx, cy + dy)) ?? []) visible.add(drop);
+		let put = [], remove = [];
+		for (let drop of follower.known) visible.has(drop) || (follower.known.delete(drop), drop.known.delete(source), remove.push(drop.id));
+		for (let drop of visible) follower.known.has(drop) || (follower.known.add(drop), drop.known.add(source), put.push(drop.point()));
+		if (reset || put.length !== 0 || remove.length !== 0) {
+			emitNet(EVENTS.drops, source, put.slice(0, 100), remove, reset);
+			for (let i = 100; i < put.length; i += 100) emitNet(EVENTS.drops, source, put.slice(i, i + 100), [], !1);
+		}
+	}
+	enter(source, cell) {
+		let set = this.inCell.get(cell);
+		set || this.inCell.set(cell, set = new Set()), set.add(source);
+	}
+	leave(source, cell) {
+		let set = this.inCell.get(cell);
+		set?.delete(source), set?.size === 0 && this.inCell.delete(cell);
+	}
+	forget(source, follower) {
+		this.leave(source, follower.cell);
+		for (let drop of follower.known) drop.known.delete(source);
+	}
+}, Drop = class {
 	id;
 	x;
 	y;
 	z;
+	cell;
+	owner;
 	inventory;
-	constructor(id, x, y, z, inventory) {
-		this.id = id, this.x = x, this.y = y, this.z = z, this.inventory = inventory;
+	known = new Set();
+	constructor(id, x, y, z, cell, owner, inventory) {
+		this.id = id, this.x = x, this.y = y, this.z = z, this.cell = cell, this.owner = owner, this.inventory = inventory;
 	}
 	point() {
 		return {
@@ -16813,53 +17068,74 @@ var Drop = class {
 };
 const drops = new class {
 	byId = new Map();
+	areas = new DropAreas();
+	perOwner = new Map();
+	newDrop = new Cooldowns();
 	next = 0;
 	get(id) {
 		return this.byId.get(id);
 	}
-	at(x, y, z) {
-		for (let drop of this.byId.values()) if (Math.hypot(drop.x - x, drop.y - y, drop.z - z) <= 1.5) return drop;
+	get size() {
+		return this.byId.size;
+	}
+	near(x, y, z) {
+		for (let drop of this.areas.around(x, y)) if (Math.hypot(drop.x - x, drop.y - y, drop.z - z) <= 1.5) return drop;
+	}
+	refusal(source, x, y) {
+		let charId = charIdOf(source);
+		return charId !== null && (this.perOwner.get(charId) ?? 0) >= content.settings.drop.maxPerPlayer || (this.areas.at(keyOf(cellOf(x), cellOf(y)))?.size ?? 0) >= 50 ? "INV_ERR_DROP_LIMIT" : this.newDrop.take(source, 1e3) ? null : "INV_ERR_TOO_FAST";
+	}
+	create(x, y, z, owner) {
 		let id = `drop:${++this.next}`, { rows, maxWeight } = content.settings.drop, inventory = inventories.create(id, {
 			kind: "drop",
 			label: "",
 			rows,
 			maxWeight,
 			persistent: !1
-		}, []), drop = new Drop(id, x, y, z - .95, inventory);
-		return this.byId.set(id, drop), emitNet(EVENTS.dropPut, -1, drop.point()), drop;
+		}, []), cell = keyOf(cellOf(x), cellOf(y)), drop = new Drop(id, x, y, z - .95, cell, owner, inventory);
+		return this.byId.set(id, drop), owner !== null && this.perOwner.set(owner, (this.perOwner.get(owner) ?? 0) + 1), this.areas.add(drop), drop;
 	}
 	watch(source, drop) {
-		inventories.watch(source, drop.inventory), setReach(source, () => distanceTo(source, drop.x, drop.y, drop.z) <= 4);
+		inventories.watch(source, drop.inventory), setReach(source, () => isNear(source, drop, 4));
 	}
 	check(inventory) {
 		inventory?.kind === "drop" && inventory.stacks.size === 0 && this.remove(inventory.id);
 	}
 	remove(id) {
-		this.byId.delete(id) && (inventories.remove(id), emitNet(EVENTS.dropRemove, -1, id));
+		let drop = this.byId.get(id);
+		if (drop) {
+			if (this.byId.delete(id), drop.owner !== null) {
+				let left = (this.perOwner.get(drop.owner) ?? 1) - 1;
+				left > 0 ? this.perOwner.set(drop.owner, left) : this.perOwner.delete(drop.owner);
+			}
+			inventories.remove(id), this.areas.delete(drop);
+		}
 	}
-	points() {
-		return [...this.byId.values()].map((drop) => drop.point());
+	start(source) {
+		this.areas.start(source);
+	}
+	stop(source) {
+		this.areas.stop(source);
+	}
+	followAll() {
+		this.areas.followAll();
 	}
 	sweep() {
 		let limit = content.settings.drop.despawnMinutes * 6e4, now = Date.now();
 		for (let drop of this.byId.values()) drop.inventory.viewers.size === 0 && now - drop.inventory.lastUsed > limit && this.remove(drop.id);
 	}
-	get size() {
-		return this.byId.size;
-	}
 }();
-setInterval(() => drops.sweep(), 6e4);
+setInterval(() => drops.sweep(), 6e4), setInterval(() => {
+	drops.size > 0 && drops.followAll();
+}, 2e3);
 // resource/server/shop.ts
-const core$1 = resourceExport("ai-core"), fail$4 = (error) => ({
-	ok: !1,
-	error
-}), int$3 = (v, min, max) => typeof v == "number" && Number.isInteger(v) && v >= min && v <= max ? v : null;
+const core = resourceExport("ai-core");
 function pay(source, accounts, price, reason) {
-	return price <= 0 || accounts.some((account) => core$1.RemoveMoney(source, account, price, reason));
+	return price <= 0 || accounts.some((account) => core.RemoveMoney(source, account, price, reason));
 }
 onClientCallback(EVENTS.buy, {
 	args: ([shopId, name, count]) => {
-		let c = int$3(count, 1, 1e3);
+		let c = readInt(count, 1, 1e3);
 		return typeof shopId == "string" && typeof name == "string" && c !== null ? [
 			shopId,
 			name.toLowerCase(),
@@ -16868,12 +17144,12 @@ onClientCallback(EVENTS.buy, {
 	},
 	lock: !0
 }, (source, shopId, name, count) => {
-	let shop = content.shops.get(shopId), inventory = inventories.playerOf(source), p = pedCoords(source);
-	if (!shop || !inventory || !nearPlace(shop, p.x, p.y, p.z)) return fail$4("INV_ERR_FAR");
-	if (!allowed(source, shop)) return fail$4("INV_ERR_DENIED");
+	let shop = content.shops.get(shopId), inventory = inventories.playerOf(source), p = coordsOf(source);
+	if (!shop || !inventory || !nearPlace(shop, p.x, p.y, p.z)) return fail("INV_ERR_FAR");
+	if (!allowed(source, shop)) return fail("INV_ERR_DENIED");
 	let product = shop.items.find((row) => row.name === name), def = content.items.get(name);
-	if (!product || !def) return fail$4("INV_ERR_GONE");
-	if (!inventory.planAdd(def, count, {})) return fail$4("INV_ERR_NO_SPACE");
+	if (!product || !def) return fail("INV_ERR_GONE");
+	if (!inventory.planAdd(def, count, {})) return fail("INV_ERR_NO_SPACE");
 	let price = product.price * count;
 	return pay(source, shop.accounts, price, `shop:${shop.id}`) ? (inventory.add(def, count), aiLog("purchases", `bought ${count}x ${def.name} for $${price} at ${shop.id}`, {
 		source,
@@ -16883,28 +17159,31 @@ onClientCallback(EVENTS.buy, {
 			count,
 			price
 		}
-	}), { ok: !0 }) : fail$4("INV_ERR_MONEY");
+	}), { ok: !0 }) : fail("INV_ERR_MONEY");
 });
 const crafting = new Map();
 onClientCallback(EVENTS.craft, {
-	args: ([benchId, index]) => typeof benchId == "string" && int$3(index, 0, 100) !== null ? [benchId, index] : null,
+	args: ([benchId, index]) => {
+		let i = readInt(index, 0, 100);
+		return typeof benchId == "string" && i !== null ? [benchId, i] : null;
+	},
 	lock: !0
 }, (source, benchId, index) => {
-	let bench = content.benches.get(benchId), recipe = bench?.recipes[index], inventory = inventories.playerOf(source), p = pedCoords(source);
-	if (!bench || !recipe || !inventory || !nearPlace(bench, p.x, p.y, p.z)) return fail$4("INV_ERR_FAR");
-	if (!allowed(source, bench)) return fail$4("INV_ERR_DENIED");
-	if (crafting.has(source)) return fail$4("INV_ERR_BUSY");
+	let bench = content.benches.get(benchId), recipe = bench?.recipes[index], inventory = inventories.playerOf(source), p = coordsOf(source);
+	if (!bench || !recipe || !inventory || !nearPlace(bench, p.x, p.y, p.z)) return fail("INV_ERR_FAR");
+	if (!allowed(source, bench)) return fail("INV_ERR_DENIED");
+	if (crafting.has(source)) return fail("INV_ERR_BUSY");
 	let result = content.items.get(recipe.result);
-	if (!result) return fail$4("INV_ERR_GONE");
-	if (recipe.ingredients.some((part) => inventory.count(content.items.get(part.name)?.name ?? part.name) < part.count)) return fail$4("INV_ERR_MISSING");
+	if (!result) return fail("INV_ERR_GONE");
+	if (recipe.ingredients.some((part) => inventory.count(content.items.get(part.name)?.name ?? part.name) < part.count)) return fail("INV_ERR_MISSING");
 	for (let part of recipe.ingredients) inventory.remove(content.items.get(part.name)?.name ?? part.name, part.count);
 	return crafting.set(source, setTimeout(() => {
 		crafting.delete(source);
 		let own = inventories.playerOf(source);
 		if (own) {
 			if (!own.add(result, recipe.count)) {
-				let q = pedCoords(source);
-				drops.at(q.x, q.y, q.z).inventory.add(result, recipe.count);
+				let q = coordsOf(source);
+				drops.near(q.x, q.y, q.z)?.inventory.add(result, recipe.count) || drops.create(q.x, q.y, q.z, null).inventory.add(result, recipe.count);
 			}
 			aiLog("crafting", `crafted ${recipe.count}x ${result.name} at ${bench.id}`, {
 				source,
@@ -16922,10 +17201,7 @@ function cancelCraft(source) {
 	timer && clearTimeout(timer), crafting.delete(source);
 }
 // resource/server/weapons.ts
-const fail$3 = (error) => ({
-	ok: !1,
-	error
-}), ammoOf = (stack) => typeof stack.metadata.ammo == "number" ? stack.metadata.ammo : 0, componentsOf = (stack) => Array.isArray(stack.metadata.components) ? stack.metadata.components.filter((c) => typeof c == "string") : [], weapons = new class {
+const ammoOf = (stack) => typeof stack.metadata.ammo == "number" ? stack.metadata.ammo : 0, componentsOf = (stack) => Array.isArray(stack.metadata.components) ? stack.metadata.components.filter((c) => typeof c == "string") : [], weapons = new class {
 	held = new Map();
 	stackOf(source) {
 		let held = this.held.get(source), inventory = inventories.playerOf(source);
@@ -16964,29 +17240,29 @@ const fail$3 = (error) => ({
 	}
 	reload(source, want) {
 		let stack = this.stackOf(source), inventory = inventories.playerOf(source), ammoItem = stack ? content.items.get(stack.name)?.weapon?.ammo : void 0;
-		if (!stack || !inventory || !ammoItem) return fail$3("INV_ERR_NO_WEAPON");
+		if (!stack || !inventory || !ammoItem) return fail("INV_ERR_NO_WEAPON");
 		let need = Math.max(0, want - ammoOf(stack)), take = Math.min(need, inventory.count(ammoItem));
-		return take <= 0 ? fail$3("INV_ERR_NO_AMMO") : (inventory.remove(ammoItem, take), inventory.setMetadata(stack.slot, {
+		return take <= 0 ? fail("INV_ERR_NO_AMMO") : (inventory.remove(ammoItem, take), inventory.setMetadata(stack.slot, {
 			...stack.metadata,
 			ammo: ammoOf(stack) + take
 		}), this.send(source, stack), { ok: !0 });
 	}
 	attach(source, item, hash) {
 		let weapon = this.stackOf(source), inventory = inventories.playerOf(source), def = content.items.get(item.name);
-		if (!weapon || !inventory) return fail$3("INV_ERR_NO_WEAPON");
-		if (!def?.component?.hashes.includes(hash)) return fail$3("INV_ERR_NOT_FIT");
+		if (!weapon || !inventory) return fail("INV_ERR_NO_WEAPON");
+		if (!def?.component?.hashes.includes(hash)) return fail("INV_ERR_NOT_FIT");
 		let components = componentsOf(weapon);
-		return components.includes(hash) ? fail$3("INV_ERR_HAS_COMPONENT") : (inventory.setCount(item.slot, item.count - 1), inventory.setMetadata(weapon.slot, {
+		return components.includes(hash) ? fail("INV_ERR_HAS_COMPONENT") : (inventory.setCount(item.slot, item.count - 1), inventory.setMetadata(weapon.slot, {
 			...weapon.metadata,
 			components: [...components, hash]
 		}), emitNet(EVENTS.components, source, [...components, hash]), { ok: !0 });
 	}
 	detach(source, slot, hash) {
 		let inventory = inventories.playerOf(source), weapon = inventory?.stacks.get(slot);
-		if (!inventory || !weapon) return fail$3("INV_ERR_GONE");
+		if (!inventory || !weapon) return fail("INV_ERR_GONE");
 		let components = componentsOf(weapon), def = [...content.items.byName.values()].find((item) => item.component?.hashes.includes(hash));
-		if (!components.includes(hash) || !def) return fail$3("INV_ERR_GONE");
-		if (!inventory.add(def, 1)) return fail$3("INV_ERR_NO_SPACE");
+		if (!components.includes(hash) || !def) return fail("INV_ERR_GONE");
+		if (!inventory.add(def, 1)) return fail("INV_ERR_NO_SPACE");
 		let left = components.filter((c) => c !== hash);
 		return inventory.setMetadata(slot, {
 			...weapon.metadata,
@@ -16996,15 +17272,11 @@ const fail$3 = (error) => ({
 	drop(source) {
 		this.held.delete(source);
 	}
-}(), fail$2 = (error) => ({
-	ok: !1,
-	error
-}), int$2 = (v, min, max) => typeof v == "number" && Number.isInteger(v) && v >= min && v <= max ? v : null, handlers = new Map();
+}(), handlers = new Map();
 function registerUsable(name, handler) {
 	handlers.set(name.toLowerCase(), handler);
 }
-const pending = new Map();
-let nextToken = 0;
+const pending = new PendingActions();
 function finish(source, stack, def) {
 	let inventory = inventories.playerOf(source);
 	if (!inventory) return;
@@ -17018,24 +17290,19 @@ function finish(source, stack, def) {
 }
 function useSlot(source, slot, hash) {
 	let inventory = inventories.playerOf(source), stack = inventory?.stacks.get(slot), def = stack ? content.items.get(stack.name) : void 0;
-	if (!inventory || !stack || !def) return fail$2("INV_ERR_GONE");
+	if (!inventory || !stack || !def) return fail("INV_ERR_GONE");
 	if (def.type === "weapon") return weapons.toggle(source, stack), { ok: !0 };
-	if (def.type === "component") return hash ? weapons.attach(source, stack, hash) : fail$2("INV_ERR_NOT_FIT");
+	if (def.type === "component") return hash ? weapons.attach(source, stack, hash) : fail("INV_ERR_NOT_FIT");
 	if (def.type === "ammo") return weapons.reload(source, 250);
-	if (!def.usable && !handlers.has(def.name)) return fail$2("INV_ERR_NOT_USABLE");
-	if (pending.has(source)) return fail$2("INV_ERR_BUSY");
+	if (!def.usable && !handlers.has(def.name)) return fail("INV_ERR_NOT_USABLE");
+	if (pending.peek(source)) return fail("INV_ERR_BUSY");
 	if (def.use.time <= 0) return finish(source, stack, def), { ok: !0 };
-	let token = ++nextToken;
-	pending.set(source, {
-		token,
-		slot,
-		name: def.name,
-		serial: stack.metadata.serial,
-		startedAt: Date.now(),
-		time: def.use.time
-	});
 	let use = {
-		token,
+		token: pending.start(source, {
+			slot,
+			name: def.name,
+			serial: stack.metadata.serial
+		}, def.use.time),
 		name: def.name,
 		anim: def.use.anim,
 		time: def.use.time
@@ -17044,51 +17311,51 @@ function useSlot(source, slot, hash) {
 }
 onClientCallback(EVENTS.use, {
 	args: ([slot, hash]) => {
-		let s = int$2(slot, 1, 1e4);
+		let s = readInt(slot, 1, 1e4);
 		return s === null ? null : [s, typeof hash == "string" && /^[A-Z0-9_]{2,64}$/.test(hash) ? hash : void 0];
 	},
 	lock: !0
 }, (source, slot, hash) => useSlot(source, slot, hash)), onClientCallback(EVENTS.finishUse, {
-	args: ([token]) => int$2(token, 1, 2 ** 31) === null ? null : [token],
+	args: oneArg(readId),
 	lock: !0
 }, (source, token) => {
-	let use = pending.get(source);
-	if (!use || use.token !== token) return fail$2("INV_ERR_GONE");
-	if (pending.delete(source), Date.now() - use.startedAt < use.time * .8) return fail$2("INV_ERR_TOO_FAST");
+	let running = pending.peek(source) !== null, use = pending.take(source, token);
+	if (!use) return fail(running && pending.peek(source) === null ? "INV_ERR_TOO_FAST" : "INV_ERR_GONE");
 	let stack = inventories.playerOf(source)?.stacks.get(use.slot), def = content.items.get(use.name);
-	return !stack || !def || stack.name !== use.name || stack.metadata.serial !== use.serial ? fail$2("INV_ERR_GONE") : (finish(source, stack, def), { ok: !0 });
-}), onClientEvent(EVENTS.cancelUse, (source) => pending.delete(source)), onClientCallback(EVENTS.reload, {
-	args: ([want]) => int$2(want, 1, 1e3) === null ? null : [want],
+	return !stack || !def || stack.name !== use.name || stack.metadata.serial !== use.serial ? fail("INV_ERR_GONE") : (finish(source, stack, def), { ok: !0 });
+}), onClientEvent(EVENTS.cancelUse, (source) => pending.cancel(source)), onClientCallback(EVENTS.reload, {
+	args: oneArg((v) => readInt(v, 1, 1e3)),
 	lock: !0
 }, (source, want) => weapons.reload(source, want)), onClientCallback(EVENTS.detach, {
-	args: ([slot, hash]) => int$2(slot, 1, 1e4) !== null && typeof hash == "string" ? [slot, hash] : null,
+	args: ([slot, hash]) => {
+		let s = readInt(slot, 1, 1e4);
+		return s !== null && typeof hash == "string" ? [s, hash] : null;
+	},
 	lock: !0
-}, (source, slot, hash) => weapons.detach(source, slot, hash)), onClientEvent(EVENTS.ammo, { args: ([slot, ammo]) => int$2(slot, 1, 1e4) !== null && int$2(ammo, 0, 1e5) !== null ? [slot, ammo] : null }, (source, slot, ammo) => weapons.reportAmmo(source, slot, ammo));
+}, (source, slot, hash) => weapons.detach(source, slot, hash)), onClientEvent(EVENTS.ammo, { args: ([slot, ammo]) => {
+	let s = readInt(slot, 1, 1e4), a = readInt(ammo, 0, 1e5);
+	return s !== null && a !== null ? [s, a] : null;
+} }, (source, slot, ammo) => weapons.reportAmmo(source, slot, ammo));
 function dropPlayer(source) {
-	pending.delete(source), weapons.drop(source);
+	pending.cancel(source), weapons.drop(source);
 }
 // resource/server/session.ts
-const core = resourceExport("ai-core");
-function load(source, character) {
-	emitNet(EVENTS.drops, source, drops.points()), inventories.loadPlayer(source, character.id, () => core.GetCharacter(source)?.id === character.id).catch((error) => log.error(`loading the inventory of character ${character.id} failed`, error));
-}
-function unload(source) {
-	dropPlayer(source), cancelCraft(source), inventories.unloadPlayer(source).catch((error) => log.error(`saving the inventory of ${source} failed`, error));
-}
-on(CORE.playerLoadedEvent, (source, character) => load(source, character)), on(CORE.playerUnloadedEvent, (source) => unload(source)), on("playerDropped", () => unload(Number(globalThis.source))), content.subscribe((file) => {
+const current = new PlayerMap();
+onCharacter({
+	loaded: (source, character) => {
+		current.set(source, character.id), drops.start(source), inventories.loadPlayer(source, character.id, () => current.get(source) === character.id).catch((error) => log.error(`loading the inventory of character ${character.id} failed`, error));
+	},
+	unloaded: (source) => {
+		current.delete(source), drops.stop(source), dropPlayer(source), cancelCraft(source), inventories.unloadPlayer(source).catch((error) => log.error(`saving the inventory of ${source} failed`, error));
+	}
+}), content.subscribe((file) => {
 	(file === "items" || file === "settings") && inventories.rebuildAll();
 });
-function restoreOnline() {
-	for (let source of core.GetLoadedSources()) {
-		let character = core.GetCharacter(source);
-		character && load(source, character);
-	}
-}
 // resource/common/nui.ts
-const isObj = (v) => typeof v == "object" && !!v && !Array.isArray(v), int$1 = (v, min, max) => typeof v == "number" && Number.isInteger(v) && v >= min && v <= max ? v : null, id = (v) => typeof v == "string" && v.length > 0 && v.length <= 96 ? v : null;
+const id = (v) => typeof v == "string" && v.length > 0 && v.length <= 96 ? v : null;
 function toMoveInput(v) {
-	if (!isObj(v)) return null;
-	let from = id(v.from), to = id(v.to), fromSlot = int$1(v.fromSlot, 1, 1e4), toSlot = int$1(v.toSlot, 1, 1e4), count = int$1(v.count, 1, 1e6);
+	if (!isRecord(v)) return null;
+	let from = id(v.from), to = id(v.to), fromSlot = readInt(v.fromSlot, 1, 1e4), toSlot = readInt(v.toSlot, 1, 1e4), count = readInt(v.count, 1, 1e6);
 	return !from || !to || fromSlot === null || toSlot === null || count === null || typeof v.rotated != "boolean" ? null : {
 		from,
 		to,
@@ -17099,7 +17366,7 @@ function toMoveInput(v) {
 	};
 }
 function toOpenTarget(v) {
-	if (!isObj(v)) return null;
+	if (!isRecord(v)) return null;
 	switch (v.kind) {
 		case "self":
 		case "glovebox": return { kind: v.kind };
@@ -17114,7 +17381,7 @@ function toOpenTarget(v) {
 			} : null;
 		}
 		case "trunk": {
-			let netId = int$1(v.netId, 1, 4294967295);
+			let netId = readId(v.netId);
 			return netId === null ? null : {
 				kind: "trunk",
 				netId
@@ -17126,7 +17393,7 @@ function toOpenTarget(v) {
 // resource/server/api.ts
 const scriptStashes = new Map();
 let temp = 0;
-const rowsFor = (slots) => Math.max(1, Math.ceil(slots / content.settings.columns));
+const rowsFor = (slots) => Number.isFinite(slots) ? Math.min(200, Math.max(1, Math.ceil(slots / content.settings.columns))) : 1, countOf = (v) => typeof v == "number" ? Number.isFinite(v) ? Math.max(1, Math.floor(v)) : null : 1;
 function resolve(inv) {
 	if (typeof inv == "number") return inventories.playerOf(inv);
 	if (isRecord(inv) && typeof inv.id == "string") {
@@ -17139,12 +17406,12 @@ function resolve(inv) {
 }
 const metaOf = (v) => isRecord(v) ? { ...v } : {};
 function addItem(inv, name, count, metadata, slot) {
-	let inventory = resolve(inv), def = content.items.get(name), n = typeof count == "number" && count > 0 ? Math.floor(count) : 1;
-	return !inventory || !def ? !1 : inventory.add(def, n, metaOf(metadata), typeof slot == "number" ? slot : void 0);
+	let inventory = resolve(inv), def = content.items.get(name), n = countOf(count);
+	return !inventory || !def || n === null ? !1 : inventory.add(def, n, metaOf(metadata), typeof slot == "number" ? slot : void 0);
 }
 function removeItem(inv, name, count, metadata, slot) {
-	let inventory = resolve(inv), def = content.items.get(name), n = typeof count == "number" && count > 0 ? Math.floor(count) : 1;
-	if (!inventory || !def) return !1;
+	let inventory = resolve(inv), def = content.items.get(name), n = countOf(count);
+	if (!inventory || !def || n === null) return !1;
 	let ok = inventory.remove(def.name, n, isRecord(metadata) ? metadata : void 0, typeof slot == "number" ? slot : void 0);
 	if (ok && inventory.kind === "player") for (let viewer of inventory.viewers) weapons.check(viewer);
 	return drops.check(inventory), ok;
@@ -17154,8 +17421,8 @@ function countItem(inv, name, metadata) {
 	return inventory && def ? inventory.count(def.name, isRecord(metadata) ? metadata : void 0) : 0;
 }
 function canCarry(inv, name, count, metadata) {
-	let inventory = resolve(inv), def = content.items.get(name), n = typeof count == "number" && count > 0 ? Math.floor(count) : 1;
-	return !!(inventory && def && inventory.planAdd(def, n, metaOf(metadata)));
+	let inventory = resolve(inv), def = content.items.get(name), n = countOf(count);
+	return !!(inventory && def && n !== null && inventory.planAdd(def, n, metaOf(metadata)));
 }
 function stacksOf(inventory, name, metadata) {
 	let def = content.items.get(name);
@@ -17248,13 +17515,30 @@ function definitionView(name) {
 	} : null;
 }
 // resource/server/open.ts
-const FAR = {
-	ok: !1,
-	error: "INV_ERR_FAR"
-}, DENIED = {
-	ok: !1,
-	error: "INV_ERR_DENIED"
-}, plateOf = (vehicle) => GetVehicleNumberPlateText(vehicle).trim().toUpperCase(), owned = new EntityState(VEHICLE_BAGS.owned, stateBoolean), isOwned = (vehicle) => owned.get(vehicle) === !0;
+const FAR = fail("INV_ERR_FAR"), DENIED = fail("INV_ERR_DENIED"), GONE = fail("INV_ERR_GONE"), plateOf = (vehicle) => GetVehicleNumberPlateText(vehicle).trim().toUpperCase(), owned = new EntityState(VEHICLE_BAGS.owned, stateBoolean), isOwned = (vehicle) => owned.get(vehicle) === !0, temporary = new Map();
+function vehicleInventory(vehicle, kind) {
+	let plate = plateOf(vehicle), shape = {
+		kind,
+		label: plate,
+		...content.settings[kind]
+	};
+	if (isOwned(vehicle)) return inventories.load(`${kind}:${plate}`, {
+		...shape,
+		persistent: !0
+	});
+	let id = `${kind}:tmp:${vehicle}`, ids = temporary.get(vehicle) ?? [];
+	return ids.includes(id) || temporary.set(vehicle, [...ids, id]), inventories.load(id, {
+		...shape,
+		persistent: !1
+	});
+}
+on("entityRemoved", (entity) => {
+	let ids = temporary.get(entity);
+	if (ids) {
+		temporary.delete(entity);
+		for (let id of ids) inventories.remove(id);
+	}
+});
 async function open(source, target) {
 	switch (target.kind) {
 		case "self": return inventories.close(source), {
@@ -17264,17 +17548,14 @@ async function open(source, target) {
 		};
 		case "drop": {
 			let drop = drops.get(target.id);
-			return drop ? distanceTo(source, drop.x, drop.y, drop.z) > 3 ? FAR : (drops.watch(source, drop), {
+			return drop ? isNear(source, drop, 3) ? (drops.watch(source, drop), {
 				ok: !0,
 				other: drop.inventory.view(),
 				panel: null
-			}) : {
-				ok: !1,
-				error: "INV_ERR_GONE"
-			};
+			}) : FAR : GONE;
 		}
 		case "stash": {
-			let stash = content.stashes.get(target.id) ?? scriptStashes.get(target.id), p = pedCoords(source);
+			let stash = content.stashes.get(target.id) ?? scriptStashes.get(target.id), p = coordsOf(source);
 			if (!stash || stash.scriptOnly || !nearPlace(stash, p.x, p.y, p.z)) return FAR;
 			if (!allowed(source, stash)) return DENIED;
 			let charId = charIdOf(source);
@@ -17286,7 +17567,7 @@ async function open(source, target) {
 				persistent: !0
 			});
 			return inventory.label = stash.label, inventories.watch(source, inventory), setReach(source, () => {
-				let q = pedCoords(source);
+				let q = coordsOf(source);
 				return nearPlace(stash, q.x, q.y, q.z, 2);
 			}), {
 				ok: !0,
@@ -17295,28 +17576,12 @@ async function open(source, target) {
 			};
 		}
 		case "trunk": {
-			let vehicle = NetworkGetEntityFromNetworkId(target.netId);
-			if (!vehicle || !DoesEntityExist(vehicle) || GetEntityType(vehicle) !== 2) return {
-				ok: !1,
-				error: "INV_ERR_GONE"
-			};
-			let [vx = 0, vy = 0, vz = 0] = GetEntityCoords(vehicle);
-			if (distanceTo(source, vx, vy, vz) > 6) return FAR;
-			if (GetVehicleDoorLockStatus(vehicle) >= 2) return {
-				ok: !1,
-				error: "INV_ERR_LOCKED"
-			};
-			let plate = plateOf(vehicle), inventory = await inventories.load(`trunk:${plate}`, {
-				kind: "trunk",
-				label: plate,
-				...content.settings.trunk,
-				persistent: isOwned(vehicle)
-			});
-			return inventories.watch(source, inventory), setReach(source, () => {
-				if (!DoesEntityExist(vehicle)) return !1;
-				let [x = 0, y = 0, z = 0] = GetEntityCoords(vehicle);
-				return distanceTo(source, x, y, z) <= 7;
-			}), {
+			let vehicle = vehicleFromNet(target.netId);
+			if (!vehicle) return GONE;
+			if (!isNear(source, entityCoords(vehicle), 6)) return FAR;
+			if (GetVehicleDoorLockStatus(vehicle) >= 2) return fail("INV_ERR_LOCKED");
+			let inventory = await vehicleInventory(vehicle, "trunk");
+			return inventories.watch(source, inventory), setReach(source, () => DoesEntityExist(vehicle) && isNear(source, entityCoords(vehicle), 7)), {
 				ok: !0,
 				other: inventory.view(),
 				panel: null
@@ -17325,12 +17590,7 @@ async function open(source, target) {
 		case "glovebox": {
 			let vehicle = GetVehiclePedIsIn(GetPlayerPed(String(source)), !1);
 			if (!vehicle) return FAR;
-			let plate = plateOf(vehicle), inventory = await inventories.load(`glovebox:${plate}`, {
-				kind: "glovebox",
-				label: plate,
-				...content.settings.glovebox,
-				persistent: isOwned(vehicle)
-			});
+			let inventory = await vehicleInventory(vehicle, "glovebox");
 			return inventories.watch(source, inventory), setReach(source, () => GetVehiclePedIsIn(GetPlayerPed(String(source)), !1) === vehicle), {
 				ok: !0,
 				other: inventory.view(),
@@ -17339,7 +17599,7 @@ async function open(source, target) {
 		}
 		case "shop":
 		case "bench": {
-			let place = target.kind === "shop" ? content.shops.get(target.id) : content.benches.get(target.id), p = pedCoords(source);
+			let place = target.kind === "shop" ? content.shops.get(target.id) : content.benches.get(target.id), p = coordsOf(source);
 			return !place || !nearPlace(place, p.x, p.y, p.z) ? FAR : allowed(source, place) ? (inventories.close(source), {
 				ok: !0,
 				other: null,
@@ -17355,20 +17615,14 @@ async function open(source, target) {
 onClientCallback(EVENTS.open, {
 	args: ([raw]) => asArgs(toOpenTarget(raw)),
 	lock: !0
-}, (source, target) => inventories.playerOf(source) ? open(source, target) : {
-	ok: !1,
-	error: "INV_ERR_BUSY"
-}), onClientEvent(EVENTS.close, (source) => inventories.close(source));
+}, (source, target) => inventories.playerOf(source) ? open(source, target) : fail("INV_ERR_BUSY")), onClientEvent(EVENTS.close, (source) => inventories.close(source));
 // resource/server/move.ts
-const OK = { ok: !0 }, fail$1 = (error) => ({
-	ok: !1,
-	error
-}), weightFits = (inv, extra) => inv.maxWeight <= 0 || inv.weight + extra <= inv.maxWeight;
+const OK = { ok: !0 }, weightFits = (inv, extra) => inv.maxWeight <= 0 || inv.weight + extra <= inv.maxWeight;
 function moveStack(a, b, m) {
 	let stack = a.stacks.get(m.fromSlot);
-	if (!stack || m.count > stack.count) return fail$1("INV_ERR_GONE");
+	if (!stack || m.count > stack.count) return fail("INV_ERR_GONE");
 	let def = content.items.get(stack.name);
-	if (!def) return fail$1("INV_ERR_GONE");
+	if (!def) return fail("INV_ERR_GONE");
 	let same = a === b, whole = m.count === stack.count;
 	if (same && whole && m.toSlot === m.fromSlot && m.rotated === stack.rotated) return OK;
 	let { w, h } = b.shape(stack.name, m.rotated), movedWeight = def.weight * m.count, covered = b.coveredAt(m.toSlot, w, h);
@@ -17376,10 +17630,10 @@ function moveStack(a, b, m) {
 		let target = b.stacks.get([...covered][0] ?? 0);
 		if (target && target.slot !== m.fromSlot && target.name === stack.name && def.stack > 1 && metaKey(target.metadata) === metaKey(stack.metadata)) {
 			let add = Math.min(m.count, def.stack - target.count);
-			return add <= 0 ? fail$1("INV_ERR_FULL_STACK") : !same && !weightFits(b, def.weight * add) ? fail$1("INV_ERR_HEAVY") : (a.setCount(stack.slot, stack.count - add), b.setCount(target.slot, target.count + add), OK);
+			return add <= 0 ? fail("INV_ERR_FULL_STACK") : !same && !weightFits(b, def.weight * add) ? fail("INV_ERR_HEAVY") : (a.setCount(stack.slot, stack.count - add), b.setCount(target.slot, target.count + add), OK);
 		}
 	}
-	if (b.fitsAt(m.toSlot, w, h, same && whole ? m.fromSlot : 0)) return !same && !weightFits(b, movedWeight) ? fail$1("INV_ERR_HEAVY") : (whole ? (a.take(stack.slot), b.put({
+	if (b.fitsAt(m.toSlot, w, h, same && whole ? m.fromSlot : 0)) return !same && !weightFits(b, movedWeight) ? fail("INV_ERR_HEAVY") : (whole ? (a.take(stack.slot), b.put({
 		...stack,
 		slot: m.toSlot,
 		rotated: m.rotated
@@ -17390,16 +17644,16 @@ function moveStack(a, b, m) {
 		metadata: structuredClone(stack.metadata),
 		rotated: m.rotated
 	})), OK);
-	if (!whole || covered.size !== 1) return fail$1("INV_ERR_NO_SPACE");
+	if (!whole || covered.size !== 1) return fail("INV_ERR_NO_SPACE");
 	let other = b.stacks.get([...covered][0] ?? 0);
-	return other ? swap(a, b, stack, other, m) : fail$1("INV_ERR_NO_SPACE");
+	return other ? swap(a, b, stack, other, m) : fail("INV_ERR_NO_SPACE");
 }
 function swap(a, b, stack, other, m) {
 	let defA = content.items.get(stack.name), defB = content.items.get(other.name);
-	if (!defA || !defB) return fail$1("INV_ERR_GONE");
+	if (!defA || !defB) return fail("INV_ERR_GONE");
 	if (a !== b) {
 		let delta = defB.weight * other.count - defA.weight * stack.count;
-		if (!weightFits(a, delta) || !weightFits(b, -delta)) return fail$1("INV_ERR_HEAVY");
+		if (!weightFits(a, delta) || !weightFits(b, -delta)) return fail("INV_ERR_HEAVY");
 	}
 	a.take(stack.slot), b.take(other.slot);
 	let mine = b.shape(stack.name, m.rotated), placeMine = b.fitsAt(m.toSlot, mine.w, mine.h), reserve = placeMine && !isHotbarSlot(m.toSlot);
@@ -17408,7 +17662,7 @@ function swap(a, b, stack, other, m) {
 		let s = a.shape(other.name, rot);
 		return a.fitsAt(stack.slot, s.w, s.h);
 	});
-	return reserve && b.grid.mark(m.toSlot, mine.w, mine.h, 0), !placeMine || theirs === void 0 ? (a.put(stack), b.put(other), fail$1("INV_ERR_NO_SPACE")) : (b.put({
+	return reserve && b.grid.mark(m.toSlot, mine.w, mine.h, 0), !placeMine || theirs === void 0 ? (a.put(stack), b.put(other), fail("INV_ERR_NO_SPACE")) : (b.put({
 		...stack,
 		slot: m.toSlot,
 		rotated: m.rotated
@@ -17418,11 +17672,6 @@ function swap(a, b, stack, other, m) {
 		rotated: theirs
 	}), OK);
 }
-// resource/server/actions.ts
-const fail = (error) => ({
-	ok: !1,
-	error
-}), int = (v, min, max) => typeof v == "number" && Number.isInteger(v) && v >= min && v <= max ? v : null;
 onClientCallback(EVENTS.move, {
 	args: ([raw]) => asArgs(toMoveInput(raw)),
 	lock: !0
@@ -17441,7 +17690,7 @@ onClientCallback(EVENTS.move, {
 	})), result;
 }), onClientCallback(EVENTS.drop, {
 	args: ([from, slot, count]) => {
-		let s = int(slot, 1, 1e4), c = int(count, 1, 1e6);
+		let s = readInt(slot, 1, 1e4), c = readInt(count, 1, 1e6);
 		return typeof from == "string" && s !== null && c !== null ? [
 			from,
 			s,
@@ -17455,7 +17704,12 @@ onClientCallback(EVENTS.move, {
 	let def = content.items.get(stack.name);
 	if (!def) return fail("INV_ERR_GONE");
 	if (GetVehiclePedIsIn(GetPlayerPed(String(source)), !1)) return fail("INV_ERR_IN_VEHICLE");
-	let p = pedCoords(source), drop = drops.at(p.x, p.y, p.z);
+	let p = coordsOf(source), drop = drops.near(p.x, p.y, p.z);
+	if (!drop) {
+		let refused = drops.refusal(source, p.x, p.y);
+		if (refused) return fail(refused);
+		drop = drops.create(p.x, p.y, p.z, charIdOf(source));
+	}
 	return drop.inventory.add(def, count, stack.metadata) ? (inventory.setCount(slot, stack.count - count), weapons.check(source), inventories.openOf(source) || (drops.watch(source, drop), emitNet(EVENTS.ground, source, drop.inventory.view())), aiLog("drops", `dropped ${count}x ${def.name}`, {
 		source,
 		metadata: {
@@ -17466,7 +17720,7 @@ onClientCallback(EVENTS.move, {
 	}), { ok: !0 }) : (drops.check(drop.inventory), fail("INV_ERR_NO_SPACE"));
 }), onClientCallback(EVENTS.give, {
 	args: ([slot, count, target]) => {
-		let s = int(slot, 1, 1e4), c = int(count, 1, 1e6), t = int(target, 1, 65535);
+		let s = readInt(slot, 1, 1e4), c = readInt(count, 1, 1e6), t = readInt(target, 1, 65535);
 		return s !== null && c !== null && t !== null ? [
 			s,
 			c,
@@ -17478,8 +17732,7 @@ onClientCallback(EVENTS.move, {
 	let mine = inventories.playerOf(source), theirs = inventories.playerOf(target), stack = mine?.stacks.get(slot);
 	if (!mine || !stack || count > stack.count) return fail("INV_ERR_GONE");
 	if (!theirs || target === source) return fail("INV_ERR_NO_TARGET");
-	let p = pedCoords(source), q = pedCoords(target);
-	if (Math.hypot(p.x - q.x, p.y - q.y, p.z - q.z) > 3) return fail("INV_ERR_FAR");
+	if (!isNear(target, coordsOf(source), 3)) return fail("INV_ERR_FAR");
 	let def = content.items.get(stack.name);
 	return !def || !theirs.add(def, count, stack.metadata) ? fail("INV_ERR_TARGET_FULL") : (mine.setCount(slot, stack.count - count), weapons.check(source), aiLog("gives", `gave ${count}x ${def.name}`, {
 		source,
@@ -17646,9 +17899,13 @@ const exportsMap$1 = {
 			x: coords[0],
 			y: coords[1],
 			z: coords[2]
-		} : null;
-		if (!c) return null;
-		let drop = drops.at(Number(c.x), Number(c.y), Number(c.z) + .95);
+		} : null, x = Number(c?.x), y = Number(c?.y), z = Number(c?.z) + .95;
+		if (![
+			x,
+			y,
+			z
+		].every(Number.isFinite)) return null;
+		let drop = drops.near(x, y, z) ?? drops.create(x, y, z, null);
 		for (let item of toList(items)) addItem(drop.id, item.name, item.count, item.metadata);
 		return drop.id;
 	},
@@ -17747,4 +18004,4 @@ aiLogChannels({
 	gives: {},
 	purchases: {},
 	crafting: {}
-}), createDatabaseTables(ResourceName, "sql/main.sql").then(restoreOnline).catch((error) => log.error("database setup failed", error));
+}), prepareDatabase().catch((error) => log.error("database setup failed", error));

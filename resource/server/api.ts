@@ -15,7 +15,17 @@ export const scriptStashes = new Map<string, Stash>();
 let temp = 0;
 
 const rowsFor = (slots: number): number =>
-  Math.max(1, Math.ceil(slots / content.settings.columns));
+  Number.isFinite(slots)
+    ? Math.min(200, Math.max(1, Math.ceil(slots / content.settings.columns)))
+    : 1;
+
+/** A count from a script: whole (1 when missing or below 1); NaN and Infinity are refused (null). */
+const countOf = (v: unknown): number | null =>
+  typeof v !== "number"
+    ? 1
+    : Number.isFinite(v)
+      ? Math.max(1, Math.floor(v))
+      : null;
 
 /**
  * Finds an inventory the way scripts name one: a player source (number or numeric text), an id (`stash:x`,
@@ -52,8 +62,8 @@ export function addItem(
 ): boolean {
   const inventory = resolve(inv);
   const def = content.items.get(name);
-  const n = typeof count === "number" && count > 0 ? Math.floor(count) : 1;
-  if (!inventory || !def) return false;
+  const n = countOf(count);
+  if (!inventory || !def || n === null) return false;
   return inventory.add(
     def,
     n,
@@ -71,8 +81,8 @@ export function removeItem(
 ): boolean {
   const inventory = resolve(inv);
   const def = content.items.get(name);
-  const n = typeof count === "number" && count > 0 ? Math.floor(count) : 1;
-  if (!inventory || !def) return false;
+  const n = countOf(count);
+  if (!inventory || !def || n === null) return false;
   const ok = inventory.remove(
     def.name,
     n,
@@ -105,9 +115,12 @@ export function canCarry(
 ): boolean {
   const inventory = resolve(inv);
   const def = content.items.get(name);
-  const n = typeof count === "number" && count > 0 ? Math.floor(count) : 1;
+  const n = countOf(count);
   return Boolean(
-    inventory && def && inventory.planAdd(def, n, metaOf(metadata)),
+    inventory &&
+    def &&
+    n !== null &&
+    inventory.planAdd(def, n, metaOf(metadata)),
   );
 }
 

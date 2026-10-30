@@ -229,8 +229,11 @@ const exportsMap: Record<string, (...args: unknown[]) => unknown> = {
       : Array.isArray(coords)
         ? { x: coords[0], y: coords[1], z: coords[2] }
         : null;
-    if (!c) return null;
-    const drop = drops.at(Number(c.x), Number(c.y), Number(c.z) + 0.95);
+    const x = Number(c?.x);
+    const y = Number(c?.y);
+    const z = Number(c?.z) + 0.95;
+    if (![x, y, z].every(Number.isFinite)) return null;
+    const drop = drops.near(x, y, z) ?? drops.create(x, y, z, null);
     for (const item of toList(items))
       addItem(drop.id, item.name, item.count, item.metadata);
     return drop.id;

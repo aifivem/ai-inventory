@@ -1,22 +1,20 @@
 import {
   cache,
+  callAction,
   Keybind,
   onCache,
   onServerEvent,
-  triggerServerCallback,
 } from "@aicore-fivem/lib/client";
+import { isRecord } from "@aicore-fivem/lib/shared";
 import { Locale } from "common";
 import { EVENTS } from "common/events";
 import type { EquippedWeapon } from "common/nui";
-import { toast, toResult } from "./screen";
 
 const UNARMED = GetHashKey("WEAPON_UNARMED");
-const isObj = (v: unknown): v is Record<string, unknown> =>
-  typeof v === "object" && v !== null && !Array.isArray(v);
 
 function toWeapon(v: unknown): EquippedWeapon | null {
   if (
-    !isObj(v) ||
+    !isRecord(v) ||
     typeof v.slot !== "number" ||
     typeof v.name !== "string" ||
     typeof v.ammo !== "number"
@@ -94,12 +92,9 @@ class ClientWeapons {
     if (!this.current || IsPedReloading(cache.ped)) return;
     const clip = GetMaxAmmoInClip(cache.ped, this.hash, true);
     const want = GetAmmoInPedWeapon(cache.ped, this.hash) + clip;
-    const result = toResult(
-      await triggerServerCallback(EVENTS.reload, [Math.min(1000, want)]).catch(
-        () => null,
-      ),
-    );
-    if (!result.ok) toast(result.error);
+    await callAction(EVENTS.reload, [Math.min(1000, want)], {
+      fallback: "INV_ERR_NO_WEAPON",
+    });
   }
 
   /** A weapon in hand the server did not give (pickups, other scripts) is taken away. */

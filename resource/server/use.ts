@@ -1,4 +1,9 @@
-import { onClientCallback, onClientEvent } from "@aicore-fivem/lib/server";
+import { fail, oneArg, readId, readInt } from "@aicore-fivem/lib/shared";
+import {
+  onClientCallback,
+  onClientEvent,
+  PendingActions,
+} from "@aicore-fivem/lib/server";
 import { EVENTS, type ActionResult } from "common/events";
 import type { ItemDef } from "common/items";
 import type { PendingUse, Stack } from "common/nui";
@@ -8,12 +13,6 @@ import { weapons } from "./weapons";
 
 /** Server local event every use fires: (source, name, slot, metadata, status) (ai-hud applies `status`). */
 export const USED_EVENT = "ai-inventory:usedItem";
-
-const fail = (error: string): ActionResult => ({ ok: false, error });
-const int = (v: unknown, min: number, max: number): number | null =>
-  typeof v === "number" && Number.isInteger(v) && v >= min && v <= max
-    ? v
-    : null;
 
 /** A script's handler for an item (`RegisterUsableItem`, QB `CreateUseableItem`); returning false keeps the item. */
 export type UseHandler = (
@@ -31,19 +30,12 @@ export function registerUsable(name: string, handler: UseHandler): void {
   handlers.set(name.toLowerCase(), handler);
 }
 
-/** The use the player's animation is running for: checked when it reports done (too early = refused). */
-const pending = new Map<
-  number,
-  {
-    token: number;
-    slot: number;
-    name: string;
-    serial: unknown;
-    startedAt: number;
-    time: number;
-  }
->();
-let nextToken = 0;
+/** The use the player's animation is running for: checked when it reports done (before 80 % of its time = refused). */
+const pending = new PendingActions<{
+  slot: number;
+  name: string;
+  serial: unknown;
+}>();
 
 /** Consumes the item and tells scripts (after the animation, or at once when the item has none). */
 function finish(source: number, stack: Stack, def: ItemDef): void {
@@ -90,20 +82,16 @@ export function useSlot(
     return hash ? weapons.attach(source, stack, hash) : fail("INV_ERR_NOT_FIT");
   if (def.type === "ammo") return weapons.reload(source, 250);
   if (!def.usable && !handlers.has(def.name)) return fail("INV_ERR_NOT_USABLE");
-  if (pending.has(source)) return fail("INV_ERR_BUSY");
+  if (pending.peek(source)) return fail("INV_ERR_BUSY");
   if (def.use.time <= 0) {
     finish(source, stack, def);
     return { ok: true };
   }
-  const token = ++nextToken;
-  pending.set(source, {
-    token,
-    slot,
-    name: def.name,
-    serial: stack.metadata.serial,
-    startedAt: Date.now(),
-    time: def.use.time,
-  });
+  const token = pending.start(
+    source,
+    { slot, name: def.name, serial: stack.metadata.serial },
+    def.use.time,
+  );
   const use: PendingUse = {
     token,
     name: def.name,
@@ -118,7 +106,7 @@ onClientCallback(
   EVENTS.use,
   {
     args: ([slot, hash]) => {
-      const s = int(slot, 1, 10_000);
+      const s = readInt(slot, 1, 10_000);
       if (s === null) return null;
       return [
         s,
@@ -134,18 +122,17 @@ onClientCallback(
 
 onClientCallback(
   EVENTS.finishUse,
-  {
-    args: ([token]) =>
-      int(token, 1, 2 ** 31) === null ? null : [token as number],
-    lock: true,
-  },
+  { args: oneArg(readId), lock: true },
   (source, token): ActionResult => {
-    const use = pending.get(source);
-    if (!use || use.token !== token) return fail("INV_ERR_GONE");
-    pending.delete(source);
-    // The animation runs on the client clock; allow a little drift.
-    if (Date.now() - use.startedAt < use.time * 0.8)
-      return fail("INV_ERR_TOO_FAST");
+    const running = pending.peek(source) !== null;
+    const use = pending.take(source, token);
+    // A matching token ends the use even when too early; a wrong one leaves it running.
+    if (!use)
+      return fail(
+        running && pending.peek(source) === null
+          ? "INV_ERR_TOO_FAST"
+          : "INV_ERR_GONE",
+      );
     const stack = inventories.playerOf(source)?.stacks.get(use.slot);
     const def = content.items.get(use.name);
     if (
@@ -161,24 +148,21 @@ onClientCallback(
 );
 
 /** The client cancelled the use animation (moved, got in a car). */
-onClientEvent(EVENTS.cancelUse, (source) => pending.delete(source));
+onClientEvent(EVENTS.cancelUse, (source) => pending.cancel(source));
 
 onClientCallback(
   EVENTS.reload,
-  {
-    args: ([want]) => (int(want, 1, 1000) === null ? null : [want as number]),
-    lock: true,
-  },
+  { args: oneArg((v) => readInt(v, 1, 1000)), lock: true },
   (source, want) => weapons.reload(source, want),
 );
 
 onClientCallback(
   EVENTS.detach,
   {
-    args: ([slot, hash]) =>
-      int(slot, 1, 10_000) !== null && typeof hash === "string"
-        ? [slot as number, hash]
-        : null,
+    args: ([slot, hash]) => {
+      const s = readInt(slot, 1, 10_000);
+      return s !== null && typeof hash === "string" ? [s, hash] : null;
+    },
     lock: true,
   },
   (source, slot, hash) => weapons.detach(source, slot, hash),
@@ -187,15 +171,16 @@ onClientCallback(
 onClientEvent(
   EVENTS.ammo,
   {
-    args: ([slot, ammo]) =>
-      int(slot, 1, 10_000) !== null && int(ammo, 0, 100_000) !== null
-        ? [slot as number, ammo as number]
-        : null,
+    args: ([slot, ammo]) => {
+      const s = readInt(slot, 1, 10_000);
+      const a = readInt(ammo, 0, 100_000);
+      return s !== null && a !== null ? [s, a] : null;
+    },
   },
   (source, slot, ammo) => weapons.reportAmmo(source, slot, ammo),
 );
 
 export function dropPlayer(source: number): void {
-  pending.delete(source);
+  pending.cancel(source);
   weapons.drop(source);
 }

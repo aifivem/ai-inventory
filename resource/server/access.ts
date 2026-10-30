@@ -1,24 +1,9 @@
-import { resourceExport } from "@aicore-fivem/lib/server";
+import { online, PlayerMap, resourceExport } from "@aicore-fivem/lib/server";
 import type { Place } from "common/content";
 import { inventories } from "./registry";
 import type { Inventory } from "./inventory";
 
 const core = resourceExport("ai-core");
-
-export function pedCoords(source: number): { x: number; y: number; z: number } {
-  const [x = 0, y = 0, z = 0] = GetEntityCoords(GetPlayerPed(String(source)));
-  return { x, y, z };
-}
-
-export function distanceTo(
-  source: number,
-  x: number,
-  y: number,
-  z: number,
-): number {
-  const p = pedCoords(source);
-  return Math.hypot(p.x - x, p.y - y, p.z - z);
-}
 
 /** Whether the player's character has one of the jobs (or gangs); an empty list lets everyone in. */
 export function allowed(
@@ -27,25 +12,23 @@ export function allowed(
 ): boolean {
   const gangs = place.gangs ?? [];
   if (place.jobs.length === 0 && gangs.length === 0) return true;
-  const grades = place.grades ?? {};
-  if (
-    place.jobs.length &&
-    (core.GetJobs(source) ?? []).some(
-      (m) => place.jobs.includes(m.job) && m.grade >= (grades[m.job] ?? 0),
-    )
-  )
+  if (gangs.length > 0 && online.gangs(source).some((g) => gangs.includes(g)))
     return true;
-  return (
-    gangs.length > 0 &&
-    (core.GetGangs(source) ?? []).some((m) => gangs.includes(m.gang))
+  const jobs = online.jobs(source).filter((job) => place.jobs.includes(job));
+  if (jobs.length === 0) return false;
+  const grades = place.grades ?? {};
+  if (jobs.some((job) => (grades[job] ?? 0) <= 0)) return true;
+  // Grades are not in lib `online`: ai-core is asked only when a matching job needs one (script stashes).
+  return (core.GetJobs(source) ?? []).some(
+    (m) => jobs.includes(m.job) && m.grade >= (grades[m.job] ?? 0),
   );
 }
 
 export const charIdOf = (source: number): number | null =>
-  core.GetCharacter(source)?.id ?? null;
+  online.character(source)?.id ?? null;
 
 /** Per player: how to re-check that the open second inventory is still in reach (distance to its point or vehicle). */
-const reach = new Map<number, () => boolean>();
+const reach = new PlayerMap<() => boolean>();
 
 export function setReach(source: number, check: () => boolean): void {
   reach.set(source, check);
@@ -66,5 +49,3 @@ export function reachable(source: number, id: string): Inventory | null {
   }
   return open;
 }
-
-on("playerDropped", () => reach.delete(Number(globalThis.source)));

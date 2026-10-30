@@ -1,3 +1,4 @@
+import { isRecord } from "@aicore-fivem/lib/shared";
 import { provideExport, registerExport } from "@aicore-fivem/lib/client";
 import { content } from "./content";
 import { screen } from "./screen";
@@ -20,9 +21,6 @@ function currentWeapon() {
 }
 
 /** Client exports: own names, ox_inventory's and qb-inventory's (the common read-only ones and open / close). */
-
-const isObj = (v: unknown): v is Record<string, unknown> =>
-  typeof v === "object" && v !== null && !Array.isArray(v);
 
 function itemView(name: string) {
   const def = content.items.get(name);
@@ -68,7 +66,7 @@ function hasItem(items: unknown, amount: unknown): boolean {
   if (typeof items === "string") return state.count(items) >= need;
   if (Array.isArray(items))
     return items.every((n) => typeof n === "string" && state.count(n) >= need);
-  if (isObj(items))
+  if (isRecord(items))
     return Object.entries(items).every(
       ([n, c]) => state.count(n) >= (typeof c === "number" ? c : 1),
     );
@@ -76,7 +74,7 @@ function hasItem(items: unknown, amount: unknown): boolean {
 }
 
 function openInventory(type: unknown, data: unknown): void {
-  const id = isObj(data)
+  const id = isRecord(data)
     ? String(data.id ?? data.type ?? "")
     : String(data ?? "");
   if (type === "stash" || type === "shop") void screen.open({ kind: type, id });

@@ -1,6 +1,14 @@
+import { createDatabaseTables } from "@aicore-fivem/lib/server";
 import { mysql } from "@aicore-fivem/mysql";
+import { ResourceName } from "common";
 import type { Metadata, Stack } from "common/nui";
 import { log } from "./log";
+
+let setup: Promise<void> | null = null;
+
+/** Creates the table once; every query waits for it (players already in the game load right after a restart). */
+export const prepareDatabase = (): Promise<void> =>
+  (setup ??= createDatabaseTables(ResourceName, "sql/main.sql"));
 
 /** Stored form of an inventory: `{ v: 1, s: [[slot, name, count, metadata, rotated], ...] }`. */
 type Row = [number, string, number, Metadata, boolean];
@@ -65,6 +73,7 @@ export async function loadInventories(
 ): Promise<Map<string, Stack[]>> {
   const found = new Map<string, Stack[]>();
   if (ids.length === 0) return found;
+  await prepareDatabase();
   const rows = await mysql.query<Array<{ id: string; items: string }>>(
     "SELECT id, items FROM ai_inventory_inventories WHERE id IN (?)",
     [ids],
@@ -77,6 +86,8 @@ export async function loadInventories(
 export async function saveInventories(
   list: Array<{ id: string; stacks: Iterable<Stack> }>,
 ): Promise<void> {
+  if (list.length === 0) return;
+  await prepareDatabase();
   for (let i = 0; i < list.length; i += 200) {
     const chunk = list.slice(i, i + 200);
     const values = chunk.flatMap((inv) => [inv.id, encode(inv.stacks)]);

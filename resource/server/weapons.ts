@@ -1,9 +1,9 @@
+import { fail } from "@aicore-fivem/lib/shared";
 import { EVENTS, type ActionResult } from "common/events";
 import type { EquippedWeapon, Stack } from "common/nui";
 import { content } from "./content";
 import { inventories } from "./registry";
 
-const fail = (error: string): ActionResult => ({ ok: false, error });
 const ammoOf = (stack: Stack): number =>
   typeof stack.metadata.ammo === "number" ? stack.metadata.ammo : 0;
 const componentsOf = (stack: Stack): string[] =>

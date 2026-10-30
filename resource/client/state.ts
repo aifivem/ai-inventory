@@ -1,15 +1,13 @@
+import { isRecord } from "@aicore-fivem/lib/shared";
 import { onServerEvent } from "@aicore-fivem/lib/client";
 import { EVENTS } from "common/events";
 import type { InventoryView, Stack } from "common/nui";
 import { content } from "./content";
 
-const isObj = (v: unknown): v is Record<string, unknown> =>
-  typeof v === "object" && v !== null && !Array.isArray(v);
-
 /** Server data shapes are checked once here; the server is trusted, but msgpack can turn values into null. */
 export function toStack(v: unknown): Stack | null {
   if (
-    !isObj(v) ||
+    !isRecord(v) ||
     typeof v.slot !== "number" ||
     typeof v.name !== "string" ||
     typeof v.count !== "number"
@@ -19,14 +17,14 @@ export function toStack(v: unknown): Stack | null {
     slot: v.slot,
     name: v.name,
     count: v.count,
-    metadata: isObj(v.metadata) ? v.metadata : {},
+    metadata: isRecord(v.metadata) ? v.metadata : {},
     rotated: v.rotated === true,
   };
 }
 
 export function toView(v: unknown): InventoryView | null {
   if (
-    !isObj(v) ||
+    !isRecord(v) ||
     typeof v.id !== "string" ||
     typeof v.columns !== "number" ||
     typeof v.rows !== "number" ||

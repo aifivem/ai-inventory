@@ -296,7 +296,10 @@ export const inventorySchema: PanelSchema = {
       sections: {
         columns: int(6, 14),
         player: gridSpec(),
-        drop: gridSpec({ despawnMinutes: int(1, 240) }),
+        drop: gridSpec({
+          despawnMinutes: int(1, 240),
+          maxPerPlayer: int(1, 100, true),
+        }),
         trunk: gridSpec(),
         glovebox: gridSpec(),
         noWeaponWheel: { type: "bool" },
@@ -762,6 +765,14 @@ export const inventorySchema: PanelSchema = {
               min: 1,
               max: 240,
               unit: "min",
+            },
+            {
+              widget: "number",
+              path: "drop.maxPerPlayer",
+              label: "ADMIN_F_DROP_LIMIT",
+              hint: "ADMIN_H_DROP_LIMIT",
+              min: 1,
+              max: 100,
             },
           ],
         },

@@ -8,7 +8,8 @@
   "drop": {
     "rows": 6,
     "maxWeight": 1000000,
-    "despawnMinutes": 15
+    "despawnMinutes": 15,
+    "maxPerPlayer": 10
   },
   "trunk": {
     "maxWeight": 80000,

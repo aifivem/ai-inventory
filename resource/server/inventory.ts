@@ -4,10 +4,26 @@ import type { InventoryKind, InventoryView, Metadata, Stack } from "common/nui";
 import { EVENTS } from "common/events";
 import { content } from "./content";
 
-/** Stable text of metadata for "same stack" checks (key order does not matter). */
+/** JSON text with the keys of every object sorted, at every depth (equal data gives equal text whatever the key order). */
+function canonical(value: unknown): string {
+  if (Array.isArray(value))
+    return `[${value.map((v) => (v === undefined || typeof v === "function" ? "null" : canonical(v))).join(",")}]`;
+  if (value !== null && typeof value === "object") {
+    const parts: string[] = [];
+    for (const key of Object.keys(value).sort()) {
+      const v = (value as Record<string, unknown>)[key];
+      if (v !== undefined && typeof v !== "function")
+        parts.push(`${JSON.stringify(key)}:${canonical(v)}`);
+    }
+    return `{${parts.join(",")}}`;
+  }
+  return JSON.stringify(value) ?? "null";
+}
+
+/** Stable text of metadata for "same stack" checks: nested objects count, key order does not ("" = none). */
 export function metaKey(metadata: Metadata): string {
-  const keys = Object.keys(metadata).sort();
-  return keys.length === 0 ? "" : JSON.stringify(metadata, keys);
+  const text = canonical(metadata);
+  return text === "{}" ? "" : text;
 }
 
 /** A serial ties the held weapon to its stack while it moves around the grid. */
@@ -80,32 +96,79 @@ export class Inventory {
     return this.hasHotbar && (!this.stacks.has(slot) || slot === ignore);
   }
 
-  /** Recomputes occupancy and weight (after load, a resize or an item definition change). */
+  /**
+   * Recomputes occupancy and weight (after load, a resize or an item definition change). A stack that no longer fits
+   * at its slot (smaller grid, overlap after a column change) moves to the first free place; while there is none the
+   * grid grows by a row, so no item is lost, hidden or drawn outside.
+   */
   rebuild(): void {
     this.grid = new Occupancy(this.columns, this.rows);
     this.weight = 0;
+    const orphans: Stack[] = [];
     for (const stack of this.stacks.values()) {
       const def = content.items.get(stack.name);
+      this.weight += (def?.weight ?? 0) * stack.count;
+      if (this.hasHotbar && isHotbarSlot(stack.slot)) continue;
       const { w, h } = footprint(sizeOf(def), stack.rotated);
       if (this.grid.fits(stack.slot, w, h))
         this.grid.mark(stack.slot, w, h, stack.slot);
-      this.weight += (def?.weight ?? 0) * stack.count;
+      else orphans.push(stack);
     }
+    // Out of the map first: a new place may be another orphan's old anchor slot.
+    for (const stack of orphans) {
+      this.stacks.delete(stack.slot);
+      this.touch(stack.slot);
+    }
+    for (const stack of orphans) {
+      const size = sizeOf(content.items.get(stack.name));
+      let place: { slot: number; rotated: boolean } | null;
+      if (Math.min(size.w, size.h) > this.columns) {
+        // Wider than a row both ways (item larger than the column count): own new rows, marked clipped.
+        place = { slot: this.rows * this.columns + 1, rotated: false };
+        this.grow(size.h);
+      } else {
+        place = this.grid.findPlace(size);
+        while (!place) {
+          this.grow(1);
+          place = this.grid.findPlace(size);
+        }
+      }
+      const { w, h } = footprint(size, place.rotated);
+      this.grid.mark(place.slot, w, h, place.slot);
+      this.stacks.set(place.slot, {
+        ...stack,
+        slot: place.slot,
+        rotated: place.rotated,
+      });
+      this.touch(place.slot);
+    }
+  }
+
+  /** Adds empty rows at the bottom (cells keep their place: rows are row-major). */
+  private grow(rows: number): void {
+    this.rows += rows;
+    const grid = new Occupancy(this.columns, this.rows);
+    grid.cells.set(this.grid.cells);
+    this.grid = grid;
   }
 
   /** Takes a new column count, rows and weight limit from the panel; viewers get the new layout (only when it changed). */
   relayout(columns: number, rows: number, maxWeight: number): void {
-    const changed =
-      columns !== this.columns ||
-      rows !== this.rows ||
-      maxWeight !== this.maxWeight;
+    const before = `${this.columns}:${this.rows}:${this.maxWeight}`;
     this.columns = columns;
     this.rows = rows;
     this.maxWeight = maxWeight;
     this.rebuild();
-    if (!changed) return;
+    if (`${this.columns}:${this.rows}:${this.maxWeight}` === before) return;
     for (const viewer of this.viewers)
-      emitNet(EVENTS.layout, viewer, this.id, columns, rows, maxWeight);
+      emitNet(
+        EVENTS.layout,
+        viewer,
+        this.id,
+        this.columns,
+        this.rows,
+        this.maxWeight,
+      );
   }
 
   /** Cells a stack of `name` covers at `rotated`. */

@@ -1,3 +1,4 @@
+import { fail } from "@aicore-fivem/lib/shared";
 import type { ActionResult } from "common/events";
 import type { MoveInput, Stack } from "common/nui";
 import { isHotbarSlot } from "common/grid";
@@ -5,7 +6,6 @@ import { content } from "./content";
 import { metaKey, type Inventory } from "./inventory";
 
 const OK: ActionResult = { ok: true };
-const fail = (error: string): ActionResult => ({ ok: false, error });
 
 const weightFits = (inv: Inventory, extra: number): boolean =>
   inv.maxWeight <= 0 || inv.weight + extra <= inv.maxWeight;

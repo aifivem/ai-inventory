@@ -5,6 +5,7 @@ import {
   requestModel,
   Zones,
 } from "@aicore-fivem/lib/client";
+import { isRecord, readFinite } from "@aicore-fivem/lib/shared";
 import { Locale } from "common";
 import { EVENTS } from "common/events";
 import type { DropPoint } from "common/nui";
@@ -13,20 +14,17 @@ import { screen } from "./screen";
 const MODEL = "prop_paper_bag_small";
 /** The bag prop exists only while the player is this close (local entity, not networked). */
 const SHOW_RANGE = 40;
-const isObj = (v: unknown): v is Record<string, unknown> =>
-  typeof v === "object" && v !== null && !Array.isArray(v);
-const toPoint = (v: unknown): DropPoint | null =>
-  isObj(v) &&
-  typeof v.id === "string" &&
-  typeof v.x === "number" &&
-  typeof v.y === "number" &&
-  typeof v.z === "number"
-    ? { id: v.id, x: v.x, y: v.y, z: v.z }
-    : null;
+function toPoint(v: unknown): DropPoint | null {
+  if (!isRecord(v) || typeof v.id !== "string") return null;
+  const x = readFinite(v.x);
+  const y = readFinite(v.y);
+  const z = readFinite(v.z);
+  return x === null || y === null || z === null ? null : { id: v.id, x, y, z };
+}
 
 /**
- * Drops on this client: a wide zone each that spawns a local bag prop, and an interaction point at the bag, from the
- * server's snapshot and put / remove events. Nothing runs per frame.
+ * Drops around this client (the server sends the ones in the 64 m cells around the player): a wide zone each that
+ * spawns a local bag prop, and an interaction point at the bag. Nothing runs per frame.
  */
 class Drops {
   private readonly points = new Map<string, DropPoint>();
@@ -34,12 +32,14 @@ class Drops {
   private readonly zones = new Zones();
   private readonly use = new Points();
 
-  set(list: DropPoint[]): void {
-    for (const id of this.points.keys()) this.remove(id);
-    for (const point of list) this.put(point);
+  /** One server message: `reset` replaces every known drop (the first list after a character load). */
+  apply(put: DropPoint[], remove: string[], reset: boolean): void {
+    if (reset) for (const id of this.points.keys()) this.remove(id);
+    for (const id of remove) this.remove(id);
+    for (const point of put) if (!this.points.has(point.id)) this.put(point);
   }
 
-  put(point: DropPoint): void {
+  private put(point: DropPoint): void {
     this.points.set(point.id, point);
     const center = { x: point.x, y: point.y, z: point.z };
     this.zones.add(`${point.id}:show`, {
@@ -58,7 +58,7 @@ class Drops {
     });
   }
 
-  remove(id: string): void {
+  private remove(id: string): void {
     this.points.delete(id);
     this.zones.remove(`${id}:show`);
     this.use.remove(id);
@@ -113,27 +113,16 @@ export const drops = new Drops();
 onServerEvent(
   EVENTS.drops,
   {
-    args: ([raw]) =>
-      Array.isArray(raw)
-        ? [raw.map(toPoint).filter((p): p is DropPoint => p !== null)]
+    args: ([put, remove, reset]) =>
+      Array.isArray(put) && Array.isArray(remove)
+        ? [
+            put.map(toPoint).filter((p): p is DropPoint => p !== null),
+            remove.filter((id): id is string => typeof id === "string"),
+            reset === true,
+          ]
         : null,
   },
-  (list) => drops.set(list),
-);
-onServerEvent(
-  EVENTS.dropPut,
-  {
-    args: ([raw]) => {
-      const p = toPoint(raw);
-      return p ? [p] : null;
-    },
-  },
-  (point) => drops.put(point),
-);
-onServerEvent(
-  EVENTS.dropRemove,
-  { args: ([id]) => (typeof id === "string" ? [id] : null) },
-  (id) => drops.remove(id),
+  (put, remove, reset) => drops.apply(put, remove, reset),
 );
 on("onResourceStop", (resource: string) => {
   if (resource === GetCurrentResourceName()) drops.cleanup();

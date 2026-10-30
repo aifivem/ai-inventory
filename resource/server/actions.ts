@@ -1,8 +1,13 @@
-import { asArgs } from "@aicore-fivem/lib/shared";
-import { aiLog, onClientCallback } from "@aicore-fivem/lib/server";
+import { asArgs, fail, readInt } from "@aicore-fivem/lib/shared";
+import {
+  aiLog,
+  coordsOf,
+  isNear,
+  onClientCallback,
+} from "@aicore-fivem/lib/server";
 import { EVENTS, type ActionResult } from "common/events";
 import { toMoveInput } from "common/nui";
-import { pedCoords, reachable } from "./access";
+import { charIdOf, reachable } from "./access";
 import { content } from "./content";
 import { drops } from "./drops";
 import { moveStack } from "./move";
@@ -10,11 +15,6 @@ import { inventories } from "./registry";
 import { weapons } from "./weapons";
 
 const GIVE_DISTANCE = 3;
-const fail = (error: string): ActionResult => ({ ok: false, error });
-const int = (v: unknown, min: number, max: number): number | null =>
-  typeof v === "number" && Number.isInteger(v) && v >= min && v <= max
-    ? v
-    : null;
 
 onClientCallback(
   EVENTS.move,
@@ -42,8 +42,8 @@ onClientCallback(
   EVENTS.drop,
   {
     args: ([from, slot, count]) => {
-      const s = int(slot, 1, 10_000);
-      const c = int(count, 1, 1_000_000);
+      const s = readInt(slot, 1, 10_000);
+      const c = readInt(count, 1, 1_000_000);
       return typeof from === "string" && s !== null && c !== null
         ? [from, s, c]
         : null;
@@ -64,8 +64,13 @@ onClientCallback(
     if (!def) return fail("INV_ERR_GONE");
     if (GetVehiclePedIsIn(GetPlayerPed(String(source)), false))
       return fail("INV_ERR_IN_VEHICLE");
-    const p = pedCoords(source);
-    const drop = drops.at(p.x, p.y, p.z);
+    const p = coordsOf(source);
+    let drop = drops.near(p.x, p.y, p.z);
+    if (!drop) {
+      const refused = drops.refusal(source, p.x, p.y);
+      if (refused) return fail(refused);
+      drop = drops.create(p.x, p.y, p.z, charIdOf(source));
+    }
     if (!drop.inventory.add(def, count, stack.metadata)) {
       drops.check(drop.inventory);
       return fail("INV_ERR_NO_SPACE");
@@ -89,9 +94,9 @@ onClientCallback(
   EVENTS.give,
   {
     args: ([slot, count, target]) => {
-      const s = int(slot, 1, 10_000);
-      const c = int(count, 1, 1_000_000);
-      const t = int(target, 1, 65_535);
+      const s = readInt(slot, 1, 10_000);
+      const c = readInt(count, 1, 1_000_000);
+      const t = readInt(target, 1, 65_535);
       return s !== null && c !== null && t !== null ? [s, c, t] : null;
     },
     lock: true,
@@ -102,9 +107,7 @@ onClientCallback(
     const stack = mine?.stacks.get(slot);
     if (!mine || !stack || count > stack.count) return fail("INV_ERR_GONE");
     if (!theirs || target === source) return fail("INV_ERR_NO_TARGET");
-    const p = pedCoords(source);
-    const q = pedCoords(target);
-    if (Math.hypot(p.x - q.x, p.y - q.y, p.z - q.z) > GIVE_DISTANCE)
+    if (!isNear(target, coordsOf(source), GIVE_DISTANCE))
       return fail("INV_ERR_FAR");
     const def = content.items.get(stack.name);
     if (!def || !theirs.add(def, count, stack.metadata))

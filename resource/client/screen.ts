@@ -1,13 +1,12 @@
 import { wardrobe } from "./clothes";
 import {
   cache,
+  callAction,
   getPlayerData,
   hud,
   loadLocaleTexts,
-  notify,
-  triggerServerCallback,
 } from "@aicore-fivem/lib/client";
-import { EVENTS, type ActionResult } from "common/events";
+import { EVENTS } from "common/events";
 import {
   toPanel,
   type InventoryView,
@@ -33,22 +32,6 @@ export function sendProfile(): void {
   });
 }
 
-export function toResult(v: unknown): ActionResult {
-  if (typeof v === "object" && v !== null && "ok" in v) {
-    if (v.ok === true) return { ok: true };
-    if ("error" in v && typeof v.error === "string")
-      return { ok: false, error: v.error };
-  }
-  return { ok: false, error: "INV_ERR_GONE" };
-}
-
-const texts = loadLocaleTexts();
-
-/** An action failed: ai-core's notification with the server's reason (a lang key of this resource). */
-export function toast(error: string): void {
-  notify(texts[error] ?? error, "error");
-}
-
 /** The inventory screen: opening (asks the server), the NUI focus, and forwarding deltas while it is open. */
 class Screen {
   /** The open key's current binding (set by `open.ts`, which owns the keybind). */
@@ -71,16 +54,10 @@ class Screen {
   /** Asks the server for the second inventory (or a shop / bench) and opens the screen with it. */
   async open(target: OpenTarget): Promise<void> {
     if (!state.player || IsPauseMenuActive() || IsEntityDead(cache.ped)) return;
-    const raw: unknown = await triggerServerCallback(EVENTS.open, [
-      target,
-    ]).catch(() => null);
-    const result = toResult(raw);
-    if (!result.ok) return toast(result.error);
-    if (typeof raw !== "object" || raw === null) return;
-    this.show(
-      "other" in raw ? toView(raw.other) : null,
-      "panel" in raw ? toPanel(raw.panel) : null,
-    );
+    const reply = await callAction(EVENTS.open, [target], {
+      fallback: "INV_ERR_GONE",
+    });
+    if (reply) this.show(toView(reply.other), toPanel(reply.panel));
   }
 
   /** Shows the screen with what the server already granted (an `open` answer or a script's force open). */

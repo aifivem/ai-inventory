@@ -12,10 +12,11 @@ export const EVENTS = {
   ground: "ai-inventory:client:ground",
   /** Server -> client: () the second inventory went away (drop emptied, too far). */
   forceClose: "ai-inventory:client:forceClose",
-  /** Server -> everyone: (drops: DropPoint[]) snapshot at join; then put / remove. */
+  /**
+   * Server -> players near drops: (put: DropPoint[], remove: string[], reset) the ground bags around the player (cells
+   * of 64 m); `reset` = the first list after a character load (replaces what the client had).
+   */
   drops: "ai-inventory:client:drops",
-  dropPut: "ai-inventory:client:dropPut",
-  dropRemove: "ai-inventory:client:dropRemove",
   /** Server -> owner: (weapon: EquippedWeapon | null) equip or holster. */
   weapon: "ai-inventory:client:weapon",
   /** Server -> owner: (use: PendingUse) play the use animation, then call `finishUse`. */
@@ -52,4 +53,4 @@ export const EVENTS = {
   detach: "ai-inventory:detach",
 } as const;
 
-export type ActionResult = { ok: true } | { ok: false; error: string };
+export type { ActionResult } from "@aicore-fivem/shared";
