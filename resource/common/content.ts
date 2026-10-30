@@ -90,7 +90,7 @@ export function readSettings(raw: unknown): Settings {
   const s = record(raw);
   const drop = record(s.drop);
   return {
-    columns: int(s.columns, 10, 6, 14),
+    columns: int(s.columns, 8, 6, 14),
     player: grid(s.player, 6, 40_000),
     drop: {
       ...grid(s.drop, 6, 1_000_000),

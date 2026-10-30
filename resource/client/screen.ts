@@ -100,8 +100,6 @@ class Screen {
     if (!this.isOpen) {
       SetNuiFocus(true, true);
       hud.hide("inventory");
-      // The NUI floats over the game (TGIANN full-screen look): the game behind it is blurred.
-      TriggerScreenblurFadeIn(250);
     }
     this.isOpen = true;
   }
@@ -113,7 +111,6 @@ class Screen {
     SetNuiFocus(false, false);
     hud.show("inventory");
     worldPed.hide();
-    TriggerScreenblurFadeOut(250);
     send({ action: "close", data: null });
     emitNet(EVENTS.close);
   }
@@ -144,11 +141,6 @@ class Hotbar {
 }
 
 export const hotbar = new Hotbar();
-
-on("onResourceStop", (resource: string) => {
-  if (resource === GetCurrentResourceName() && screen.isOpen)
-    TriggerScreenblurFadeOut(0);
-});
 
 state.onDelta((id, put, remove, maxWeight) => {
   const shown =

@@ -48,6 +48,7 @@ const openBind = new Keybind({
   description: Locale("KEYBIND_OPEN"),
   defaultKey: "F1",
   hint: "always",
+  icon: "box-open",
   onPressed: () => {
     if (screen.isOpen) return screen.close();
     void screen.open(contextTarget());
@@ -61,6 +62,7 @@ new Keybind({
   description: Locale("KEYBIND_HOTBAR_BAR"),
   defaultKey: "TAB",
   hint: "always",
+  icon: "table-cells",
   onPressed: () => hotbar.toggle(),
 });
 

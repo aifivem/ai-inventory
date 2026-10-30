@@ -72,13 +72,8 @@ RegisterNuiCallback(NUI.worldPed, (data: unknown, cb: NuiReply) => {
   cb({ ok: true });
   if (!screen.isOpen) return;
   const area = toPedArea(data);
-  if (!area) {
-    if (worldPed.active) TriggerScreenblurFadeIn(0);
-    return worldPed.hide();
-  }
-  // The blur would cover the character too.
-  if (!worldPed.active) TriggerScreenblurFadeOut(0);
-  worldPed.show(area);
+  if (area) worldPed.show(area);
+  else worldPed.hide();
 });
 
 RegisterNuiCallback(NUI.move, (data: unknown, cb: NuiReply) => {

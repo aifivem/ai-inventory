@@ -19,7 +19,8 @@ import {
 import { closeScreen } from "./features/actions";
 import { Ghost } from "./features/grid/Ghost";
 import { AmountDialog, ItemMenu } from "./features/menu/ItemMenu";
-import { Equipment, QuickSlots } from "./features/panels/Equipment";
+import { Equipment } from "./features/panels/Equipment";
+import { Hotbar } from "./features/panels/Hotbar";
 import { Hints, TopBar } from "./features/panels/Header";
 import { InventoryPanel } from "./features/panels/InventoryPanel";
 import {
@@ -74,35 +75,40 @@ export function App() {
   useNuiEvent("profile", onProfile, PROFILE_MOCK);
   useNuiEvent("hotbar", onHotbar);
 
-  // Escape or Tab closes the screen (the game's Tab bind does not fire while the NUI has focus); dialogs close first.
+  // Escape or the open key closes the screen (game keybinds do not fire while the NUI has focus); dialogs close first.
+  // It closes when the key comes up: closing on the press hands the release to the game (Escape opens the pause menu).
   useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      const { open, openKey } = store.getState().inventory;
-      const isOpenKey =
-        openKey !== "" &&
-        (event.key.toUpperCase() === openKey ||
-          event.code.toUpperCase() === openKey);
-      if (
-        (event.code !== "Escape" && !isOpenKey) ||
-        !open ||
-        ui.menu ||
-        ui.amount
-      )
-        return;
-      event.preventDefault();
+    let armed = false;
+    const isCloseKey = (event: KeyboardEvent) => {
+      const { openKey } = store.getState().inventory;
+      return (
+        event.code === "Escape" ||
+        (openKey !== "" &&
+          (event.key.toUpperCase() === openKey ||
+            event.code.toUpperCase() === openKey))
+      );
+    };
+    const onDown = (event: KeyboardEvent) => {
+      if (event.repeat || !isCloseKey(event)) return;
+      armed = store.getState().inventory.open && !ui.menu && !ui.amount;
+      if (armed) event.preventDefault();
+    };
+    const onUp = (event: KeyboardEvent) => {
+      if (!armed || !isCloseKey(event)) return;
+      armed = false;
       closeScreen();
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("keydown", onDown);
+    window.addEventListener("keyup", onUp);
+    return () => {
+      window.removeEventListener("keydown", onDown);
+      window.removeEventListener("keyup", onUp);
+    };
   }, []);
 
   return (
     <TooltipProvider>
-      {!state.open && state.hotbar && state.player && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-[3vh] flex animate-fade justify-center">
-          <QuickSlots />
-        </div>
-      )}
+      {!state.open && state.hotbar && state.player && <Hotbar />}
       {state.open && state.player && (
         <div
           className="fixed inset-0 animate-fade bg-[linear-gradient(90deg,rgba(8,8,8,0.35)_0%,rgba(8,8,8,0.45)_30%,rgba(8,8,8,0.82)_42%,rgba(8,8,8,0.82)_100%)]"

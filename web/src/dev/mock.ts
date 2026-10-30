@@ -60,7 +60,7 @@ export const MOCK_PLAYER: InventoryView = {
   id: "player:1",
   kind: "player",
   label: "",
-  columns: 10,
+  columns: 8,
   rows: 6,
   maxWeight: 40_000,
   stacks: [
@@ -86,7 +86,7 @@ const OTHER: Record<string, InventoryView | null> = {
     id: "stash:mrpd_lockers:1",
     kind: "stash",
     label: "Police Locker",
-    columns: 10,
+    columns: 8,
     rows: 6,
     maxWeight: 100_000,
     stacks: [

@@ -110,7 +110,6 @@
     }
   },
   "required": [
-    "columns",
     "player",
     "drop",
     "trunk",

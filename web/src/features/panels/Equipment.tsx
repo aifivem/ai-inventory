@@ -152,10 +152,10 @@ function ClothesSlot({ id }: { id: ClothesId }) {
 }
 
 /** The stacks keys 1-5 use: whatever covers each of the first five cells of the top row. */
-export function QuickSlots() {
+export function useQuickStacks() {
   const view = useAppSelector((s) => s.inventory.player);
   const items = useAppSelector((s) => s.inventory.items);
-  const slots = useMemo(() => {
+  return useMemo(() => {
     if (!view) return [];
     const sized = view.stacks.map((s) => {
       const def = items[s.name];
@@ -169,6 +169,12 @@ export function QuickSlots() {
       return anchor ? view.stacks.find((s) => s.slot === anchor) : undefined;
     });
   }, [view, items]);
+}
+
+/** The quick slots under the equipment column. */
+export function QuickSlots() {
+  const items = useAppSelector((s) => s.inventory.items);
+  const slots = useQuickStacks();
   return (
     <div className="flex gap-[0.6vh]">
       {slots.map((stack, i) => {

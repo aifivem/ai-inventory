@@ -1,6 +1,6 @@
 {
   "$schema": "./schemas/settings.schema.json",
-  "columns": 10,
+  "columns": 8,
   "player": {
     "rows": 6,
     "maxWeight": 40000

@@ -301,7 +301,7 @@ export const inventorySchema: PanelSchema = {
         glovebox: gridSpec(),
         noWeaponWheel: { type: "bool" },
       },
-      defaults: { noWeaponWheel: true },
+      defaults: { noWeaponWheel: true, columns: 8 },
     },
   },
   tabs: [

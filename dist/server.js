@@ -15296,7 +15296,7 @@ const names$1 = (v) => Array.isArray(v) ? v.filter((x) => typeof x == "string" &
 function readSettings(raw) {
 	let s = record(raw), drop = record(s.drop);
 	return {
-		columns: int$5(s.columns, 10, 6, 14),
+		columns: int$5(s.columns, 8, 6, 14),
 		player: grid(s.player, 6, 4e4),
 		drop: {
 			...grid(s.drop, 6, 1e6),
@@ -15742,7 +15742,10 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 				glovebox: gridSpec(),
 				noWeaponWheel: { type: "bool" }
 			},
-			defaults: { noWeaponWheel: !0 }
+			defaults: {
+				noWeaponWheel: !0,
+				columns: 8
+			}
 		}
 	},
 	tabs: [
