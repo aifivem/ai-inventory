@@ -4791,5 +4791,53 @@
     "aliases": [
       "thermite"
     ]
+  },
+  "newscam": {
+    "label": "News Camera",
+    "description": "Hold it on your shoulder; H opens the camera view.",
+    "weight": 1500,
+    "size": {
+      "w": 2,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "item",
+    "usable": true,
+    "consume": 0,
+    "close": true,
+    "image": "",
+    "aliases": []
+  },
+  "newsmic": {
+    "label": "News Microphone",
+    "description": "Hold it for interviews.",
+    "weight": 1500,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "item",
+    "usable": true,
+    "consume": 0,
+    "close": true,
+    "image": "",
+    "aliases": []
+  },
+  "newsboom": {
+    "label": "Boom Microphone",
+    "description": "Hold it over the scene.",
+    "weight": 1500,
+    "size": {
+      "w": 1,
+      "h": 3
+    },
+    "stack": 1,
+    "type": "item",
+    "usable": true,
+    "consume": 0,
+    "close": true,
+    "image": "",
+    "aliases": []
   }
 }
