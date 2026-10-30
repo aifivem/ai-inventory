@@ -1,5 +1,6 @@
+import { VEHICLE_BAGS } from "@aicore-fivem/shared";
 import { asArgs } from "@aicore-fivem/lib/shared";
-import { onClientCallback, onClientEvent } from "@aicore-fivem/lib/server";
+import { EntityState, onClientCallback, onClientEvent, stateBoolean } from "@aicore-fivem/lib/server";
 import { nearPlace } from "common/content";
 import { EVENTS } from "common/events";
 import { toOpenTarget, type OpenResult, type OpenTarget } from "common/nui";
@@ -16,8 +17,8 @@ const TRUNK_REACH = 4;
 const plateOf = (vehicle: number): string =>
   GetVehicleNumberPlateText(vehicle).trim().toUpperCase();
 /** Trunks of vehicles a vehicles resource marks as owned (`ai:owned` state bag) are stored; others are temporary. */
-const isOwned = (vehicle: number): boolean =>
-  Entity(vehicle).state["ai:owned"] === true;
+const owned = new EntityState(VEHICLE_BAGS.owned, stateBoolean);
+const isOwned = (vehicle: number): boolean => owned.get(vehicle) === true;
 
 async function open(source: number, target: OpenTarget): Promise<OpenResult> {
   switch (target.kind) {
