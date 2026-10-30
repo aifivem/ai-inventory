@@ -18,6 +18,7 @@ export function itemViews(): ItemView[] {
     usable: d.usable,
     image: d.image,
     hashes: d.component?.hashes ?? [],
+    rarity: content.rarities.get(d.rarity) ?? "",
   }));
 }
 

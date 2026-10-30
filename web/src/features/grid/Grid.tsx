@@ -68,14 +68,8 @@ const matches = (
   );
 };
 
-/** The free cells as rounded boxes (covered cells are left out so a big stack's box shows no cell lines); quick slot numbers 1-5 on the player grid. */
-const EmptyCells = memo(function EmptyCells({
-  grid,
-  own,
-}: {
-  grid: Occupancy;
-  own: boolean;
-}) {
+/** The free cells as hairline boxes (covered cells are left out so a big stack's box shows no cell lines). */
+const EmptyCells = memo(function EmptyCells({ grid }: { grid: Occupancy }) {
   const half = CELL_GAP_VH / 2;
   const cells: ReactNode[] = [];
   grid.cells.forEach((anchor, i) => {
@@ -85,16 +79,14 @@ const EmptyCells = memo(function EmptyCells({
     cells.push(
       <div
         key={i}
-        className="absolute flex items-center justify-center rounded-[0.9vh] border border-white/8 bg-black/20 text-[4.8vh] leading-none font-medium text-white/10 [box-shadow:inset_0_0_2.4vh_rgba(0,0,0,0.2)]"
+        className="absolute rounded-[0.2vh] border-[0.1vh] border-white/10 bg-[rgba(16,16,16,0.86)]"
         style={{
           left: `${x * CELL_VH + half}vh`,
           top: `${y * CELL_VH + half}vh`,
           width: `${CELL_VH - CELL_GAP_VH}vh`,
           height: `${CELL_VH - CELL_GAP_VH}vh`,
         }}
-      >
-        {own && i < 5 ? i + 1 : null}
-      </div>,
+      />,
     );
   });
   return <>{cells}</>;
@@ -138,11 +130,11 @@ export function Grid({
         height: `${view.rows * CELL_VH}vh`,
       }}
     >
-      <EmptyCells grid={grid} own={own} />
+      <EmptyCells grid={grid} />
       {fit && (
         <div
           className={cn(
-            "pointer-events-none absolute z-10 rounded-[0.9vh] border transition-[left,top] duration-75",
+            "pointer-events-none absolute z-10 rounded-[0.2vh] border transition-[left,top] duration-75",
             FIT_STYLE[fit.fit],
           )}
           style={{

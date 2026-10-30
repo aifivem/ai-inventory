@@ -648,6 +648,9 @@ var AdminPanel = class {
 		let data = this.data.get(file);
 		data && (key === void 0 ? isRecord(value) && this.data.set(file, clone(value)) : value === null ? delete data[key] : data[key] = clone(value), this.changed(file, key));
 	}
+	linked(spec, value) {
+		return spec.type === "text" && spec.records && typeof value == "string" && value !== "" && !(value in this.get(spec.records)) ? "ADMIN_ERR_LOOKUP" : null;
+	}
 	check(patch, spec) {
 		let data = this.get(patch.file);
 		if (patch.action === "create") return spec.kind !== "records" || !new RegExp(spec.keyPattern ?? DEFAULT_KEY).test(patch.key) ? ERR.pattern : patch.key in data ? "ADMIN_ERR_EXISTS" : null;
@@ -661,6 +664,8 @@ var AdminPanel = class {
 				for (let [name, section] of Object.entries(spec.sections)) {
 					let refusal = validate(section, record[name], name);
 					if (refusal) return refusal.error;
+					let link = this.linked(section, record[name]);
+					if (link) return link;
 				}
 				let ruled = this.rules.get(patch.file)?.(key, record);
 				if (ruled) return ruled;
@@ -671,6 +676,8 @@ var AdminPanel = class {
 		if (!section || spec.kind === "records" && (!patch.key || !(patch.key in data))) return ERR.type;
 		let refusal = validate(section, patch.value, patch.section);
 		if (refusal) return refusal.error;
+		let link = this.linked(section, patch.value);
+		if (link) return link;
 		let current = spec.kind === "records" ? data[patch.key ?? ""] : data, next = {
 			...isRecord(current) ? current : {},
 			[patch.section]: patch.value
@@ -15247,6 +15254,7 @@ function readItem(name, raw) {
 		close: raw.close === !0,
 		image: s(raw.image),
 		aliases: names$2(raw.aliases),
+		rarity: s(raw.rarity),
 		use: {
 			anim: ANIMS.includes(use.anim) ? use.anim : "none",
 			time: n(use.time, 0, 0, 6e4),
@@ -15355,8 +15363,19 @@ const readShops = (raw) => readRecords(raw, (id, v) => ({
 			ingredients: parseIngredients(str(r.ingredients, "", 400))
 		}] : [];
 	})
-})), FILES = [
+}));
+function readRarities(raw) {
+	let out = new Map();
+	if (typeof raw != "object" || !raw) return out;
+	for (let [key, value] of Object.entries(raw)) {
+		let color = typeof value == "object" && value ? Reflect.get(value, "color") : null;
+		typeof color == "string" && /^#[0-9a-fA-F]{6}$/.test(color) && out.set(key, color);
+	}
+	return out;
+}
+const FILES = [
 	"items",
+	"rarities",
 	"settings",
 	"shops",
 	"stashes",
@@ -15369,9 +15388,10 @@ var InventoryContent = class {
 	shops;
 	stashes;
 	benches;
+	rarities;
 	listeners = [];
 	constructor(source) {
-		this.source = source, this.items = new ItemList(source.get("items")), this.settings = readSettings(source.get("settings")), this.shops = readShops(source.get("shops")), this.stashes = readStashes(source.get("stashes")), this.benches = readBenches(source.get("benches"));
+		this.source = source, this.items = new ItemList(source.get("items")), this.settings = readSettings(source.get("settings")), this.shops = readShops(source.get("shops")), this.stashes = readStashes(source.get("stashes")), this.benches = readBenches(source.get("benches")), this.rarities = readRarities(source.get("rarities"));
 		for (let file of FILES) source.onChange(file, () => this.reload(file));
 	}
 	subscribe(listener) {
@@ -15379,7 +15399,7 @@ var InventoryContent = class {
 	}
 	reload(file) {
 		let raw = this.source.get(file);
-		file === "items" ? this.items = new ItemList(raw) : file === "settings" ? this.settings = readSettings(raw) : file === "shops" ? this.shops = readShops(raw) : file === "stashes" ? this.stashes = readStashes(raw) : this.benches = readBenches(raw);
+		file === "items" ? this.items = new ItemList(raw) : file === "settings" ? this.settings = readSettings(raw) : file === "shops" ? this.shops = readShops(raw) : file === "stashes" ? this.stashes = readStashes(raw) : file === "rarities" ? this.rarities = readRarities(raw) : this.benches = readBenches(raw);
 		for (let listener of this.listeners) listener(file);
 	}
 };
@@ -15468,6 +15488,25 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 	title: "ADMIN_TITLE",
 	icon: "box-open",
 	files: {
+		rarities: {
+			kind: "records",
+			sync: "all",
+			keyPattern: KEY,
+			labelPath: "label",
+			newRecord: {
+				label: "",
+				color: "#9e9e9e"
+			},
+			sections: {
+				label: text(32),
+				color: {
+					type: "text",
+					min: 7,
+					max: 7,
+					pattern: "^#[0-9a-fA-F]{6}$"
+				}
+			}
+		},
 		items: {
 			kind: "records",
 			sync: "all",
@@ -15515,6 +15554,13 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 				close: { type: "bool" },
 				image: text(200),
 				aliases: names,
+				rarity: {
+					type: "text",
+					min: 0,
+					max: 48,
+					records: "rarities",
+					optional: !0
+				},
 				use: {
 					type: "object",
 					optional: !0,
@@ -15751,6 +15797,14 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 						},
 						{
 							widget: "text",
+							path: "rarity",
+							records: "rarities",
+							label: "ADMIN_F_RARITY",
+							hint: "ADMIN_H_RARITY",
+							placeholder: "ADMIN_P_RARITY"
+						},
+						{
+							widget: "text",
 							path: "image",
 							label: "ADMIN_F_IMAGE",
 							hint: "ADMIN_H_IMAGE",
@@ -15921,6 +15975,32 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 					]
 				}
 			]
+		},
+		{
+			id: "rarities",
+			file: "rarities",
+			icon: "gem",
+			label: "ADMIN_TAB_RARITIES",
+			desc: "ADMIN_TAB_RARITIES_DESC",
+			createLabel: "ADMIN_NEW_RARITY",
+			deleteLabel: "ADMIN_DELETE_RARITY",
+			deleteDesc: "ADMIN_DELETE_RARITY_DESC",
+			cards: [{
+				icon: "gem",
+				title: "ADMIN_C_RARITY",
+				desc: "ADMIN_C_RARITY_DESC",
+				fields: [{
+					widget: "text",
+					path: "label",
+					label: "ADMIN_F_LABEL",
+					placeholder: "ADMIN_P_RARITY_LABEL"
+				}, {
+					widget: "color",
+					path: "color",
+					label: "ADMIN_F_RARITY_COLOR",
+					hint: "ADMIN_H_RARITY_COLOR"
+				}]
+			}]
 		},
 		{
 			id: "shops",

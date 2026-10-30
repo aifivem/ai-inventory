@@ -46,6 +46,7 @@
   ],
   "fxFiles": [
     "data/items.json",
+    "data/rarities.json",
     "data/settings.json",
     "data/shops.json",
     "data/stashes.json",

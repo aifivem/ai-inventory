@@ -186,8 +186,24 @@ interface ContentSource {
   onChange(file: string, handler: () => void): void;
 }
 
+/** Rarities from the panel: key -> colour. */
+function readRarities(raw: unknown): Map<string, string> {
+  const out = new Map<string, string>();
+  if (typeof raw !== "object" || raw === null) return out;
+  for (const [key, value] of Object.entries(raw)) {
+    const color =
+      typeof value === "object" && value !== null
+        ? Reflect.get(value, "color")
+        : null;
+    if (typeof color === "string" && /^#[0-9a-fA-F]{6}$/.test(color))
+      out.set(key, color);
+  }
+  return out;
+}
+
 export const FILES = [
   "items",
+  "rarities",
   "settings",
   "shops",
   "stashes",
@@ -202,6 +218,8 @@ export class InventoryContent {
   shops: Map<string, Shop>;
   stashes: Map<string, Stash>;
   benches: Map<string, Bench>;
+  /** Rarity key -> colour (`#rrggbb`). */
+  rarities: Map<string, string>;
   private readonly listeners: Array<(file: ContentFile) => void> = [];
 
   constructor(private readonly source: ContentSource) {
@@ -210,6 +228,7 @@ export class InventoryContent {
     this.shops = readShops(source.get("shops"));
     this.stashes = readStashes(source.get("stashes"));
     this.benches = readBenches(source.get("benches"));
+    this.rarities = readRarities(source.get("rarities"));
     for (const file of FILES) source.onChange(file, () => this.reload(file));
   }
 
@@ -223,6 +242,7 @@ export class InventoryContent {
     else if (file === "settings") this.settings = readSettings(raw);
     else if (file === "shops") this.shops = readShops(raw);
     else if (file === "stashes") this.stashes = readStashes(raw);
+    else if (file === "rarities") this.rarities = readRarities(raw);
     else this.benches = readBenches(raw);
     for (const listener of this.listeners) listener(file);
   }

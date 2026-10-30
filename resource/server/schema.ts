@@ -98,6 +98,17 @@ export const inventorySchema: PanelSchema = {
   title: "ADMIN_TITLE",
   icon: "box-open",
   files: {
+    rarities: {
+      kind: "records",
+      sync: "all",
+      keyPattern: KEY,
+      labelPath: "label",
+      newRecord: { label: "", color: "#9e9e9e" },
+      sections: {
+        label: text(32),
+        color: { type: "text", min: 7, max: 7, pattern: "^#[0-9a-fA-F]{6}$" },
+      },
+    },
     items: {
       kind: "records",
       sync: "all",
@@ -128,6 +139,13 @@ export const inventorySchema: PanelSchema = {
         close: { type: "bool" },
         image: text(200),
         aliases: names,
+        rarity: {
+          type: "text",
+          min: 0,
+          max: 48,
+          records: "rarities",
+          optional: true,
+        },
         use: {
           type: "object",
           optional: true,
@@ -327,6 +345,14 @@ export const inventorySchema: PanelSchema = {
             },
             {
               widget: "text",
+              path: "rarity",
+              records: "rarities",
+              label: "ADMIN_F_RARITY",
+              hint: "ADMIN_H_RARITY",
+              placeholder: "ADMIN_P_RARITY",
+            },
+            {
+              widget: "text",
               path: "image",
               label: "ADMIN_F_IMAGE",
               hint: "ADMIN_H_IMAGE",
@@ -478,6 +504,37 @@ export const inventorySchema: PanelSchema = {
               label: "ADMIN_F_COMPONENTS",
               hint: "ADMIN_H_COMPONENTS",
               placeholder: "ADMIN_P_COMPONENTS",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "rarities",
+      file: "rarities",
+      icon: "gem",
+      label: "ADMIN_TAB_RARITIES",
+      desc: "ADMIN_TAB_RARITIES_DESC",
+      createLabel: "ADMIN_NEW_RARITY",
+      deleteLabel: "ADMIN_DELETE_RARITY",
+      deleteDesc: "ADMIN_DELETE_RARITY_DESC",
+      cards: [
+        {
+          icon: "gem",
+          title: "ADMIN_C_RARITY",
+          desc: "ADMIN_C_RARITY_DESC",
+          fields: [
+            {
+              widget: "text",
+              path: "label",
+              label: "ADMIN_F_LABEL",
+              placeholder: "ADMIN_P_RARITY_LABEL",
+            },
+            {
+              widget: "color",
+              path: "color",
+              label: "ADMIN_F_RARITY_COLOR",
+              hint: "ADMIN_H_RARITY_COLOR",
             },
           ],
         },

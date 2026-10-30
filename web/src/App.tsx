@@ -3,6 +3,7 @@ import { useNuiEvent } from "fivem-nui-react";
 import type { NuiMessage } from "../../resource/common/nui";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { MOCK_OPEN, MOCK_PLAYER, MOCK_PROFILE, MOCK_SETUP } from "./dev/mock";
+import { setCellFor } from "./lib/cell";
 import { setTexts } from "./lib/lang";
 import { store, useAppSelector } from "./store";
 import {
@@ -17,8 +18,8 @@ import {
 import { closeScreen } from "./features/actions";
 import { Ghost } from "./features/grid/Ghost";
 import { AmountDialog, ItemMenu } from "./features/menu/ItemMenu";
-import { ClothesColumn } from "./features/panels/ClothesColumn";
-import { Header } from "./features/panels/Header";
+import { Equipment } from "./features/panels/Equipment";
+import { Hints, TopBar } from "./features/panels/Header";
 import { InventoryPanel } from "./features/panels/InventoryPanel";
 import {
   BenchPanel,
@@ -38,7 +39,10 @@ const onSetup = (data: Data<"setup">) => {
   store.dispatch(itemsSet(data.items));
 };
 const onItems = (data: Data<"items">) => store.dispatch(itemsSet(data));
-const onPlayer = (data: Data<"player">) => store.dispatch(playerSet(data));
+const onPlayer = (data: Data<"player">) => {
+  setCellFor(data.columns);
+  store.dispatch(playerSet(data));
+};
 const onOpen = (data: Data<"open">) => store.dispatch(opened(data));
 const onDelta = (data: Data<"delta">) => store.dispatch(deltaApplied(data));
 const onClose = () => {
@@ -88,13 +92,14 @@ export function App() {
     <TooltipProvider>
       {state.open && state.player && (
         <div
-          className="fixed inset-0 flex animate-fade flex-col gap-[3.2vh] bg-[radial-gradient(circle,rgba(0,0,0,0.3)_0%,rgba(0,0,0,0.4)_8%,rgba(0,0,0,0.55)_19%,rgba(0,0,0,0.7)_29%,rgba(0,0,0,0.75)_40%,rgba(0,0,0,0.8)_60%)] px-[3.2vh] pt-[3vh] pb-[3vh]"
+          className="fixed inset-0 animate-fade bg-[linear-gradient(90deg,rgba(8,8,8,0.35)_0%,rgba(8,8,8,0.45)_30%,rgba(8,8,8,0.82)_42%,rgba(8,8,8,0.82)_100%)]"
           onContextMenu={(e) => e.preventDefault()}
         >
-          <Header />
-          <div className="flex min-h-0 flex-1 items-start justify-between gap-[3.2vh]">
-            <InventoryPanel view={state.player} own />
-            <ClothesColumn />
+          <TopBar />
+          <div className="absolute inset-0 flex gap-[2vh] px-[3vh] pt-[8vh] pb-[3vh]">
+            <Equipment />
+            <InventoryPanel view={state.player} own footer={<Hints />} />
+            <div className="flex-1" />
             {state.other ? (
               <InventoryPanel view={state.other} own={false} />
             ) : state.shop ? (

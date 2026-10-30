@@ -9,6 +9,7 @@ import items from "../../../data/items.json";
 import shops from "../../../data/shops.json";
 import benches from "../../../data/benches.json";
 import en from "../../../locales/en.json";
+import rarities from "../../../data/rarities.json";
 
 /**
  * Browser preview only (`bun run webdev`): `?view=ground|stash|shop|bench`. fivem-nui-react hands these out only
@@ -39,6 +40,10 @@ export const MOCK_ITEMS: ItemView[] = Object.entries(items).map(
       hashes: Array.isArray(component.hashes)
         ? component.hashes.filter((h): h is string => typeof h === "string")
         : [],
+      rarity:
+        typeof d.rarity === "string" && isObj(Reflect.get(rarities, d.rarity))
+          ? String(Reflect.get(Reflect.get(rarities, d.rarity), "color"))
+          : "",
     };
   },
 );

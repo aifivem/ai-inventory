@@ -6,7 +6,6 @@ import {
   faGun,
   faMagnifyingGlass,
   faPuzzlePiece,
-  faWeightHanging,
   type IconDefinition,
 } from "@fortawesome/free-solid-svg-icons";
 import type { InventoryView } from "../../../../resource/common/nui";
@@ -22,16 +21,17 @@ import { cn } from "../../lib/utils";
 import { useAppSelector } from "../../store";
 import { Grid, type StackFilter } from "../grid/Grid";
 
-/** Width of a side of the screen: one grid of `columns` cells. */
+/** Width of a grid of `columns` cells (the card adds its padding around it). */
 export const sideWidth = (columns: number): string => `${columns * CELL_VH}vh`;
 
-/** One side of the screen: green dot + name (+ kind), optional weight, the bar line under it, then the body. No outer box. */
+/** One inventory card (tgiann grid layout): name in caps and the weight, the weight bar, then the body. */
 export function PanelFrame({
   title,
   kind,
   weight,
   bar,
   width,
+  footer,
   children,
 }: {
   title: string;
@@ -39,29 +39,32 @@ export function PanelFrame({
   weight?: ReactNode;
   bar?: ReactNode;
   width: string;
+  footer?: ReactNode;
   children: ReactNode;
 }) {
   return (
     <section
-      className="flex min-h-0 shrink-0 flex-col gap-[1.2vh]"
-      style={{ width }}
+      className="flex max-h-full min-h-0 shrink-0 flex-col gap-[0.8vh] self-start rounded-[1vh] border-[0.1vh] border-white/6 bg-[rgba(14,14,14,0.88)] p-[1.2vh]"
+      style={{ width: `calc(${width} + 2.6vh)` }}
     >
       <header className="flex flex-col gap-[0.8vh]">
-        <div className="flex items-center justify-between gap-[2vh]">
-          <div className="flex min-w-0 items-center gap-[0.8vh]">
-            <span className="size-[1.1vh] shrink-0 rounded-full bg-tgi-green" />
-            <h2 className="truncate text-[1.6vh] leading-[1.3] font-semibold">
+        <div className="flex items-baseline justify-between gap-[1vh]">
+          <div className="flex min-w-0 items-baseline gap-[0.8vh]">
+            <h2 className="truncate text-[1.4vh] font-bold tracking-[0.08em] uppercase">
               {title}
             </h2>
             {kind && (
-              <span className="shrink-0 text-[1.3vh] text-text-3">{kind}</span>
+              <span className="shrink-0 text-[1.15vh] text-text-3 uppercase">
+                {kind}
+              </span>
             )}
           </div>
           {weight}
         </div>
-        {bar ?? <div className="h-[0.3vh] rounded-full bg-white/4" />}
+        {bar ?? <div className="h-[0.4vh] bg-white/8" />}
       </header>
       {children}
+      {footer}
     </section>
   );
 }
@@ -74,11 +77,11 @@ function Weight({ view }: { view: InventoryView }) {
     0,
   );
   return (
-    <span className="flex shrink-0 items-center gap-[0.8vh] text-[1.6vh] tabular-nums">
-      {view.maxWeight > 0
-        ? t("UI_WEIGHT", kg(weight), kg(view.maxWeight))
-        : t("UI_KG", kg(weight))}
-      <FontAwesomeIcon icon={faWeightHanging} className="text-[1.8vh]" />
+    <span className="shrink-0 text-[1.2vh] whitespace-nowrap uppercase tabular-nums">
+      <span className="font-semibold text-white">{kg(weight)}</span>
+      <span className="text-white/50">
+        {view.maxWeight > 0 ? ` / ${t("UI_KG", kg(view.maxWeight))}` : ""}
+      </span>
     </span>
   );
 }
@@ -93,13 +96,13 @@ function WeightBar({ view }: { view: InventoryView }) {
   );
   const ratio = Math.min(1, weight / view.maxWeight);
   return (
-    <div className="h-[0.3vh] overflow-hidden rounded-full bg-white/4">
+    <div className="h-[0.4vh] overflow-hidden bg-white/8">
       <div
         className={cn(
-          "h-full rounded-full transition-[width] duration-300 ease-out",
-          ratio > 0.9 ? "bg-danger" : "bg-tgi-green",
+          "h-full w-full origin-left transition-transform duration-300 ease-out",
+          ratio >= 0.9 ? "bg-warn" : "bg-tgi-green",
         )}
-        style={{ width: `${ratio * 100}%` }}
+        style={{ transform: `scaleX(${ratio})` }}
       />
     </div>
   );
@@ -113,14 +116,14 @@ const FILTERS: Array<{ type: string; icon: IconDefinition; label: string }> = [
 ];
 
 /** Narrower grids than this show the kind filters as icons with a tooltip; wider ones show icon and label. */
-const LABELLED_COLUMNS = 9;
+const LABELLED_COLUMNS = 99;
 
 const filterButton = (active: boolean) =>
   cn(
-    "flex h-[3.6vh] min-w-[3.6vh] shrink-0 items-center justify-center gap-[0.7vh] rounded-full border bg-white/2 text-[1.5vh] transition-[background-color,border-color,color] duration-150 active:[transform:scale(0.94)]",
+    "flex h-[3.2vh] min-w-[3.2vh] shrink-0 items-center justify-center gap-[0.7vh] rounded-[0.4vh] border-[0.1vh] text-[1.3vh] transition-[background-color,border-color,color] duration-150 active:[transform:scale(0.94)]",
     active
-      ? "border-dashed border-tgi-green text-tgi-green"
-      : "border-white/10 text-text-3 hover:border-tgi-green hover:text-white",
+      ? "border-tgi-green-40 bg-tgi-green-10 text-tgi-green"
+      : "border-white/10 bg-white/4 text-text-3 hover:border-white/30 hover:text-white",
   );
 
 /** Search pill and item kind filters: stacks that do not match are dimmed in place (the grid keeps its layout). */
@@ -138,8 +141,8 @@ function Toolbar({
     <div className="flex items-center gap-[0.6vh]">
       <label
         className={cn(
-          "flex h-[3.6vh] min-w-[12vh] flex-1 items-center gap-[0.6vh] rounded-full border bg-[#2222224D] px-[1.4vh] transition-colors duration-150 focus-within:border-tgi-green-40",
-          filter.search ? "border-dashed border-tgi-green" : "border-white/8",
+          "flex h-[3.2vh] min-w-[10vh] flex-1 items-center gap-[0.6vh] rounded-[0.4vh] border-[0.1vh] bg-white/4 px-[1vh] transition-colors duration-150 focus-within:border-tgi-green-40",
+          filter.search ? "border-tgi-green-40" : "border-white/10",
         )}
       >
         <input
@@ -160,7 +163,7 @@ function Toolbar({
           aria-pressed={filter.type === null}
           className={cn(
             filterButton(filter.type === null),
-            "px-[1.3vh] text-[1.3vh] font-medium",
+            "px-[1vh] text-[1.2vh] font-medium",
           )}
           onClick={() => onChange({ ...filter, type: null })}
         >
@@ -224,9 +227,11 @@ const KIND_KEY = {
 export function InventoryPanel({
   view,
   own,
+  footer,
 }: {
   view: InventoryView;
   own: boolean;
+  footer?: ReactNode;
 }) {
   const t = useLang();
   const [filter, setFilter] = useState<StackFilter>({ search: "", type: null });
@@ -239,13 +244,14 @@ export function InventoryPanel({
       weight={<Weight view={view} />}
       bar={<WeightBar view={view} />}
       width={sideWidth(view.columns)}
+      footer={footer}
     >
       <Toolbar
         filter={filter}
         labelled={view.columns >= LABELLED_COLUMNS}
         onChange={setFilter}
       />
-      <ScrollArea className="max-h-[60vh]">
+      <ScrollArea className="min-h-0">
         <Grid view={view} own={own} filter={filter} />
       </ScrollArea>
     </PanelFrame>

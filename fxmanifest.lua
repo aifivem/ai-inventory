@@ -19,6 +19,7 @@ dependencies {
 
 files {
 	'locales/*.json',
+	'dist/web/assets/*.svg',
 	'dist/web/assets/*.js',
 	'dist/web/assets/*.css',
 	'dist/web/assets/*.woff',
@@ -26,6 +27,7 @@ files {
 	'dist/web/images/*.png',
 	'dist/web/*.html',
 	'data/items.json',
+	'data/rarities.json',
 	'data/settings.json',
 	'data/shops.json',
 	'data/stashes.json',

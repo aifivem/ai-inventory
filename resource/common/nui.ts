@@ -85,6 +85,8 @@ export interface ItemView {
   image: string;
   /** Attachment items: the GTA component names they can be. */
   hashes: string[];
+  /** The rarity's colour (`#rrggbb`), "" = none: the tile takes it. */
+  rarity: string;
 }
 
 export interface ShopView {

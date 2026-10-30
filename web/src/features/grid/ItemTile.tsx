@@ -7,7 +7,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "../../components/ui/tooltip";
-import { CELL_GAP_VH, CELL_VH, imageUrl, kg } from "../../lib/cell";
+import { CELL_GAP_VH, CELL_VH, imageUrl, kg, tint } from "../../lib/cell";
 import { useLang } from "../../lib/lang";
 import { cn } from "../../lib/utils";
 import { itemUse } from "../actions";
@@ -26,7 +26,7 @@ interface Props {
 
 /** The look of a stack box, shared with the drag ghost: white-alpha rounded cell, hairline, soft inner shade. */
 export const TILE_CLASS =
-  "flex items-center justify-center overflow-hidden rounded-[0.9vh] border px-[0.6vh] pt-[1.8vh] pb-[0.6vh] [box-shadow:inset_0_0_2.4vh_rgba(0,0,0,0.25)]";
+  "flex items-center justify-center overflow-hidden rounded-[0.2vh] border-[0.1vh] px-[0.5vh] pt-[1.6vh] pb-[0.6vh]";
 
 /** What the tooltip lists from metadata (ammo, serial, condition, a stack's own description); script data stays hidden. */
 function MetaLines({ stack }: { stack: Stack }) {
@@ -100,8 +100,9 @@ export const ItemTile = memo(function ItemTile({
           aria-label={def?.label ?? stack.name}
           className={cn(
             TILE_CLASS,
-            "absolute border-white/10 bg-white/4 transition-[border-color,background-color,opacity] duration-150 hover:border-tgi-green hover:bg-white/8",
-            h > 1 && "pb-[2.4vh]",
+            "absolute transition-[border-color,background-color,opacity] duration-150 hover:border-white/45",
+            !def?.rarity &&
+              "border-white/16 bg-[rgba(34,34,34,0.92)] hover:bg-[rgba(44,44,44,0.94)]",
             (lifted || dimmed) && "opacity-35",
           )}
           style={{
@@ -109,6 +110,12 @@ export const ItemTile = memo(function ItemTile({
             top: `${y * CELL_VH + half}vh`,
             width: `${w * CELL_VH - CELL_GAP_VH}vh`,
             height: `${h * CELL_VH - CELL_GAP_VH}vh`,
+            ...(def?.rarity
+              ? {
+                  backgroundColor: tint(def.rarity, 0.22),
+                  borderColor: tint(def.rarity, 0.55),
+                }
+              : null),
           }}
           onPointerDown={(event) => {
             if (event.button !== 0) return;
@@ -163,13 +170,12 @@ export const ItemTile = memo(function ItemTile({
               className="text-[2.2vh] text-text-3"
             />
           )}
-          <CornerLabels
-            count={stack.count}
-            grams={(def?.weight ?? 0) * stack.count}
-          />
-          {h > 1 && (
-            <span className="absolute inset-x-0 bottom-[0.6vh] truncate px-[1vh] text-center text-[1.1vh] text-white/60">
-              {def?.label ?? stack.name}
+          <span className="pointer-events-none absolute inset-x-[0.5vh] top-[0.4vh] truncate text-right text-[1.15vh] leading-none font-semibold text-white/80 [text-shadow:0_0.1vh_0.3vh_rgba(0,0,0,0.9)]">
+            {def?.label ?? stack.name}
+          </span>
+          {stack.count > 1 && (
+            <span className="pointer-events-none absolute right-[0.5vh] bottom-[0.4vh] text-[1.2vh] leading-none font-bold text-white tabular-nums [text-shadow:0_0.1vh_0.3vh_rgba(0,0,0,0.9)]">
+              {stack.count}
             </span>
           )}
         </button>

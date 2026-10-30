@@ -2034,7 +2034,8 @@
       "anim": "bandage",
       "time": 2500,
       "status": {}
-    }
+    },
+    "rarity": "medical"
   },
   "burger": {
     "label": "Burger",
@@ -2128,7 +2129,8 @@
     "consume": 0,
     "close": false,
     "image": "lockpick.png",
-    "aliases": []
+    "aliases": [],
+    "rarity": "special"
   },
   "medikit": {
     "label": "Medikit",
@@ -2146,7 +2148,8 @@
     "image": "",
     "aliases": [
       "firstaid"
-    ]
+    ],
+    "rarity": "medical"
   },
   "paperbag": {
     "label": "Paper Bag",
@@ -2194,7 +2197,8 @@
     "consume": 0,
     "close": false,
     "image": "phone.png",
-    "aliases": []
+    "aliases": [],
+    "rarity": "rare"
   },
   "radio": {
     "label": "Radio",
@@ -2210,7 +2214,8 @@
     "consume": 0,
     "close": false,
     "image": "radio.png",
-    "aliases": []
+    "aliases": [],
+    "rarity": "rare"
   },
   "scrapmetal": {
     "label": "Scrap Metal",
@@ -2292,7 +2297,8 @@
     "weapon": {
       "ammo": "ammo-rifle",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_appistol": {
     "label": "AP Pistol",
@@ -2312,7 +2318,8 @@
     "weapon": {
       "ammo": "ammo-9",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_assaultrifle": {
     "label": "Assault Rifle",
@@ -2332,7 +2339,8 @@
     "weapon": {
       "ammo": "ammo-rifle2",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_assaultrifle_mk2": {
     "label": "Assault Rifle MK2",
@@ -2352,7 +2360,8 @@
     "weapon": {
       "ammo": "ammo-rifle2",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_assaultshotgun": {
     "label": "Assault Shotgun",
@@ -2372,7 +2381,8 @@
     "weapon": {
       "ammo": "ammo-shotgun",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_assaultsmg": {
     "label": "Assault SMG",
@@ -2392,7 +2402,8 @@
     "weapon": {
       "ammo": "ammo-rifle",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_autoshotgun": {
     "label": "Sweeper Shotgun",
@@ -2412,7 +2423,8 @@
     "weapon": {
       "ammo": "ammo-shotgun",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_ball": {
     "label": "Ball",
@@ -2432,7 +2444,8 @@
     "weapon": {
       "ammo": "",
       "throwable": true
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_bat": {
     "label": "Bat",
@@ -2452,7 +2465,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_battleaxe": {
     "label": "Battle Axe",
@@ -2472,7 +2486,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_battlerifle": {
     "label": "Battle Rifle",
@@ -2492,7 +2507,8 @@
     "weapon": {
       "ammo": "ammo-rifle2",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_bottle": {
     "label": "Bottle",
@@ -2512,7 +2528,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_bullpuprifle": {
     "label": "Bullpup Rifle",
@@ -2532,7 +2549,8 @@
     "weapon": {
       "ammo": "ammo-rifle",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_bullpuprifle_mk2": {
     "label": "Bullpup Rifle MK2",
@@ -2552,7 +2570,8 @@
     "weapon": {
       "ammo": "ammo-rifle",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_bullpupshotgun": {
     "label": "Bullpup Shotgun",
@@ -2572,7 +2591,8 @@
     "weapon": {
       "ammo": "ammo-shotgun",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_bzgas": {
     "label": "BZ Gas",
@@ -2592,7 +2612,8 @@
     "weapon": {
       "ammo": "",
       "throwable": true
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_candycane": {
     "label": "Candy Cane",
@@ -2612,7 +2633,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_carbinerifle": {
     "label": "Carbine Rifle",
@@ -2632,7 +2654,8 @@
     "weapon": {
       "ammo": "ammo-rifle",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_carbinerifle_mk2": {
     "label": "Carbine Rifle MK2",
@@ -2652,7 +2675,8 @@
     "weapon": {
       "ammo": "ammo-rifle",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_ceramicpistol": {
     "label": "Ceramic Pistol",
@@ -2672,7 +2696,8 @@
     "weapon": {
       "ammo": "ammo-9",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_combatmg": {
     "label": "Combat MG",
@@ -2692,7 +2717,8 @@
     "weapon": {
       "ammo": "ammo-rifle",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_combatmg_mk2": {
     "label": "Combat MG MK2",
@@ -2712,7 +2738,8 @@
     "weapon": {
       "ammo": "ammo-rifle2",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_combatpdw": {
     "label": "Combat PDW",
@@ -2732,7 +2759,8 @@
     "weapon": {
       "ammo": "ammo-9",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_combatpistol": {
     "label": "Combat Pistol",
@@ -2752,7 +2780,8 @@
     "weapon": {
       "ammo": "ammo-9",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_combatshotgun": {
     "label": "Combat Shotgun",
@@ -2772,7 +2801,8 @@
     "weapon": {
       "ammo": "ammo-shotgun",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_compactlauncher": {
     "label": "Compact Grenade Launcher",
@@ -2792,7 +2822,8 @@
     "weapon": {
       "ammo": "ammo-grenade",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_compactrifle": {
     "label": "Compact Rifle",
@@ -2812,7 +2843,8 @@
     "weapon": {
       "ammo": "ammo-rifle2",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_crowbar": {
     "label": "Crowbar",
@@ -2832,7 +2864,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_dagger": {
     "label": "Dagger",
@@ -2852,7 +2885,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_dbshotgun": {
     "label": "Double Barrel Shotgun",
@@ -2872,7 +2906,8 @@
     "weapon": {
       "ammo": "ammo-shotgun",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_doubleaction": {
     "label": "Double Action Revolver",
@@ -2892,7 +2927,8 @@
     "weapon": {
       "ammo": "ammo-38",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_emplauncher": {
     "label": "Compact EMP Launcher",
@@ -2912,7 +2948,8 @@
     "weapon": {
       "ammo": "ammo-emp",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_fertilizercan": {
     "label": "Fertilizer Can",
@@ -2932,7 +2969,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_fireextinguisher": {
     "label": "Fire Extinguisher",
@@ -2952,7 +2990,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_firework": {
     "label": "Firework Launcher",
@@ -2972,7 +3011,8 @@
     "weapon": {
       "ammo": "ammo-firework",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_flare": {
     "label": "Flare",
@@ -2992,7 +3032,8 @@
     "weapon": {
       "ammo": "",
       "throwable": true
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_flaregun": {
     "label": "Flare Gun",
@@ -3012,7 +3053,8 @@
     "weapon": {
       "ammo": "ammo-flare",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_flashlight": {
     "label": "Flashlight",
@@ -3032,7 +3074,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_gadgetpistol": {
     "label": "Perico Pistol",
@@ -3052,7 +3095,8 @@
     "weapon": {
       "ammo": "ammo-9",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_golfclub": {
     "label": "Golf Club",
@@ -3072,7 +3116,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_grenade": {
     "label": "Grenade",
@@ -3092,7 +3137,8 @@
     "weapon": {
       "ammo": "",
       "throwable": true
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_grenadelauncher": {
     "label": "Grenade Launcher",
@@ -3112,7 +3158,8 @@
     "weapon": {
       "ammo": "ammo-grenade",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_gusenberg": {
     "label": "Gusenberg",
@@ -3132,7 +3179,8 @@
     "weapon": {
       "ammo": "ammo-45",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_hammer": {
     "label": "Hammer",
@@ -3152,7 +3200,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_hatchet": {
     "label": "Hatchet",
@@ -3172,7 +3221,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_hazardcan": {
     "label": "Hazard Can",
@@ -3192,7 +3242,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_heavypistol": {
     "label": "Heavy Pistol",
@@ -3212,7 +3263,8 @@
     "weapon": {
       "ammo": "ammo-45",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_heavyrifle": {
     "label": "Heavy Rifle",
@@ -3232,7 +3284,8 @@
     "weapon": {
       "ammo": "ammo-rifle",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_heavyshotgun": {
     "label": "Heavy Shotgun",
@@ -3252,7 +3305,8 @@
     "weapon": {
       "ammo": "ammo-shotgun",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_heavysniper": {
     "label": "Heavy Sniper",
@@ -3272,7 +3326,8 @@
     "weapon": {
       "ammo": "ammo-heavysniper",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_heavysniper_mk2": {
     "label": "Heavy Sniper MK2",
@@ -3292,7 +3347,8 @@
     "weapon": {
       "ammo": "ammo-heavysniper",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_hominglauncher": {
     "label": "Homing Launcher",
@@ -3312,7 +3368,8 @@
     "weapon": {
       "ammo": "ammo-rocket",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_knife": {
     "label": "Knife",
@@ -3332,7 +3389,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_knuckle": {
     "label": "Knuckle Dusters",
@@ -3352,7 +3410,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_machete": {
     "label": "Machete",
@@ -3372,7 +3431,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_machinepistol": {
     "label": "Machine Pistol",
@@ -3392,7 +3452,8 @@
     "weapon": {
       "ammo": "ammo-9",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_marksmanpistol": {
     "label": "Marksman Pistol",
@@ -3412,7 +3473,8 @@
     "weapon": {
       "ammo": "ammo-22",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_marksmanrifle": {
     "label": "Marksman Rifle",
@@ -3432,7 +3494,8 @@
     "weapon": {
       "ammo": "ammo-sniper",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_marksmanrifle_mk2": {
     "label": "Marksman Rifle MK2",
@@ -3452,7 +3515,8 @@
     "weapon": {
       "ammo": "ammo-sniper",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_metaldetector": {
     "label": "Metal Detector",
@@ -3472,7 +3536,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_mg": {
     "label": "Machine Gun",
@@ -3492,7 +3557,8 @@
     "weapon": {
       "ammo": "ammo-rifle2",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_microsmg": {
     "label": "Micro SMG",
@@ -3512,7 +3578,8 @@
     "weapon": {
       "ammo": "ammo-45",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_militaryrifle": {
     "label": "Military Rifle",
@@ -3532,7 +3599,8 @@
     "weapon": {
       "ammo": "ammo-rifle",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_minigun": {
     "label": "Minigun",
@@ -3552,7 +3620,8 @@
     "weapon": {
       "ammo": "ammo-rifle2",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_minismg": {
     "label": "Mini SMG",
@@ -3572,7 +3641,8 @@
     "weapon": {
       "ammo": "ammo-9",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_molotov": {
     "label": "Molotov",
@@ -3592,7 +3662,8 @@
     "weapon": {
       "ammo": "",
       "throwable": true
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_musket": {
     "label": "Musket",
@@ -3612,7 +3683,8 @@
     "weapon": {
       "ammo": "ammo-musket",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_navyrevolver": {
     "label": "Navy Revolver",
@@ -3632,7 +3704,8 @@
     "weapon": {
       "ammo": "ammo-44",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_nightstick": {
     "label": "Nightstick",
@@ -3652,7 +3725,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_petrolcan": {
     "label": "Jerry Can",
@@ -3672,7 +3746,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_pipebomb": {
     "label": "Pipe Bomb",
@@ -3692,7 +3767,8 @@
     "weapon": {
       "ammo": "",
       "throwable": true
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_pistol": {
     "label": "Pistol",
@@ -3712,7 +3788,8 @@
     "weapon": {
       "ammo": "ammo-9",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_pistol50": {
     "label": "Pistol .50",
@@ -3732,7 +3809,8 @@
     "weapon": {
       "ammo": "ammo-50",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_pistol_mk2": {
     "label": "Pistol MK2",
@@ -3752,7 +3830,8 @@
     "weapon": {
       "ammo": "ammo-9",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_pistolxm3": {
     "label": "WM 29 Pistol",
@@ -3772,7 +3851,8 @@
     "weapon": {
       "ammo": "ammo-9",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_poolcue": {
     "label": "Pool Cue",
@@ -3792,7 +3872,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_precisionrifle": {
     "label": "Precision Rifle",
@@ -3812,7 +3893,8 @@
     "weapon": {
       "ammo": "ammo-sniper",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_proxmine": {
     "label": "Proximity Mine",
@@ -3832,7 +3914,8 @@
     "weapon": {
       "ammo": "",
       "throwable": true
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_pumpshotgun": {
     "label": "Pump Shotgun",
@@ -3852,7 +3935,8 @@
     "weapon": {
       "ammo": "ammo-shotgun",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_pumpshotgun_mk2": {
     "label": "Pump Shotgun MK2",
@@ -3872,7 +3956,8 @@
     "weapon": {
       "ammo": "ammo-shotgun",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_railgun": {
     "label": "Railgun",
@@ -3892,7 +3977,8 @@
     "weapon": {
       "ammo": "ammo-railgun",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_railgunxm3": {
     "label": "Railgun XM3",
@@ -3912,7 +3998,8 @@
     "weapon": {
       "ammo": "ammo-railgun",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_raycarbine": {
     "label": "Unholy Hellbringer",
@@ -3932,7 +4019,8 @@
     "weapon": {
       "ammo": "ammo-laser",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_rayminigun": {
     "label": "Widowmaker",
@@ -3952,7 +4040,8 @@
     "weapon": {
       "ammo": "ammo-laser",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_raypistol": {
     "label": "Up-n-Atomizer",
@@ -3972,7 +4061,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_revolver": {
     "label": "Revolver",
@@ -3992,7 +4082,8 @@
     "weapon": {
       "ammo": "ammo-44",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_revolver_mk2": {
     "label": "Revolver MK2",
@@ -4012,7 +4103,8 @@
     "weapon": {
       "ammo": "ammo-44",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_rpg": {
     "label": "RPG",
@@ -4032,7 +4124,8 @@
     "weapon": {
       "ammo": "ammo-rocket",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_sawnoffshotgun": {
     "label": "Sawn Off Shotgun",
@@ -4052,7 +4145,8 @@
     "weapon": {
       "ammo": "ammo-shotgun",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_smg": {
     "label": "SMG",
@@ -4072,7 +4166,8 @@
     "weapon": {
       "ammo": "ammo-9",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_smg_mk2": {
     "label": "SMG Mk2",
@@ -4092,7 +4187,8 @@
     "weapon": {
       "ammo": "ammo-9",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_smokegrenade": {
     "label": "Smoke Grenade",
@@ -4112,7 +4208,8 @@
     "weapon": {
       "ammo": "",
       "throwable": true
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_sniperrifle": {
     "label": "Sniper Rifle",
@@ -4132,7 +4229,8 @@
     "weapon": {
       "ammo": "ammo-sniper",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_snowball": {
     "label": "Snow Ball",
@@ -4152,7 +4250,8 @@
     "weapon": {
       "ammo": "",
       "throwable": true
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_snowlauncher": {
     "label": "Snowball Launcher",
@@ -4172,7 +4271,8 @@
     "weapon": {
       "ammo": "weapon_snowball",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_snspistol": {
     "label": "SNS Pistol",
@@ -4192,7 +4292,8 @@
     "weapon": {
       "ammo": "ammo-45",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_snspistol_mk2": {
     "label": "SNS Pistol MK2",
@@ -4212,7 +4313,8 @@
     "weapon": {
       "ammo": "ammo-45",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_specialcarbine": {
     "label": "Special Carbine",
@@ -4232,7 +4334,8 @@
     "weapon": {
       "ammo": "ammo-rifle",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_specialcarbine_mk2": {
     "label": "Special Carbine MK2",
@@ -4252,7 +4355,8 @@
     "weapon": {
       "ammo": "ammo-rifle",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_stickybomb": {
     "label": "Sticky Bomb",
@@ -4272,7 +4376,8 @@
     "weapon": {
       "ammo": "",
       "throwable": true
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_stone_hatchet": {
     "label": "Stone Hatchet",
@@ -4292,7 +4397,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_stungun": {
     "label": "Tazer",
@@ -4312,7 +4418,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_switchblade": {
     "label": "Switchblade",
@@ -4332,7 +4439,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_tacticalrifle": {
     "label": "Tactical Rifle",
@@ -4352,7 +4460,8 @@
     "weapon": {
       "ammo": "ammo-rifle",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_teargas": {
     "label": "Tear Gas",
@@ -4372,7 +4481,8 @@
     "weapon": {
       "ammo": "",
       "throwable": true
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_tecpistol": {
     "label": "Tactical SMG",
@@ -4392,7 +4502,8 @@
     "weapon": {
       "ammo": "ammo-9",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_vintagepistol": {
     "label": "Vintage Pistol",
@@ -4412,7 +4523,8 @@
     "weapon": {
       "ammo": "ammo-9",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "weapon_wrench": {
     "label": "Wrench",
@@ -4432,7 +4544,8 @@
     "weapon": {
       "ammo": "",
       "throwable": false
-    }
+    },
+    "rarity": "epic"
   },
   "repairkit": {
     "label": "Repair Kit",
@@ -4498,7 +4611,8 @@
     "consume": 0,
     "close": false,
     "image": "",
-    "aliases": []
+    "aliases": [],
+    "rarity": "legendary"
   },
   "goldchain": {
     "label": "Golden Chain",
@@ -4514,7 +4628,8 @@
     "consume": 0,
     "close": false,
     "image": "",
-    "aliases": []
+    "aliases": [],
+    "rarity": "legendary"
   },
   "diamond_ring": {
     "label": "Diamond Ring",
@@ -4546,7 +4661,8 @@
     "consume": 0,
     "close": false,
     "image": "",
-    "aliases": []
+    "aliases": [],
+    "rarity": "legendary"
   },
   "plastic": {
     "label": "Plastic",
@@ -4855,7 +4971,8 @@
     "close": true,
     "image": "",
     "aliases": [],
-    "stack": 5
+    "stack": 5,
+    "rarity": "special"
   },
   "notepad": {
     "label": "Notepad",
@@ -4871,7 +4988,8 @@
     "close": true,
     "image": "",
     "aliases": [],
-    "stack": 1
+    "stack": 1,
+    "rarity": "special"
   },
   "note": {
     "label": "Note",

@@ -8,7 +8,7 @@ import { closeScreen } from "../actions";
 /** A key cap as on the TGIANN screens: small white box, dark bold label. */
 function Key({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex h-[2.2vh] min-w-[2.2vh] items-center justify-center rounded-[0.4vh] bg-white/90 px-[0.5vh] text-[1.05vh] leading-none font-bold text-black">
+    <span className="inline-flex h-[1.9vh] min-w-[1.9vh] items-center justify-center rounded-[0.3vh] bg-white/85 px-[0.4vh] text-[0.95vh] leading-none font-bold text-black">
       {children}
     </span>
   );
@@ -16,7 +16,7 @@ function Key({ children }: { children: ReactNode }) {
 
 function Hint({ keys, text }: { keys: ReactNode; text: string }) {
   return (
-    <span className="flex items-center gap-[0.8vh] text-[1.4vh] text-text-2">
+    <span className="flex items-center gap-[0.7vh] text-[1.15vh] text-text-3">
       {keys}
       {text}
     </span>
@@ -51,41 +51,45 @@ function NameChip() {
   const name = useAppSelector((s) => s.inventory.profile?.name);
   if (!name) return null;
   return (
-    <span className="flex h-[4.4vh] items-center gap-[0.9vh] rounded-full border border-white/8 bg-black/50 px-[1.8vh] text-[1.5vh] font-semibold">
-      <span className="size-[0.9vh] rounded-full bg-tgi-green" />
+    <span className="flex h-[4vh] items-center gap-[0.9vh] rounded-full border-[0.1vh] border-white/8 bg-black/60 px-[1.6vh] text-[1.4vh] font-semibold">
+      <span className="size-[0.8vh] rounded-full bg-tgi-green" />
       {name}
     </span>
   );
 }
 
-/** Top of the screen: the big title with the controls under it on the left, the name in the middle, close on the right. */
-export function Header() {
+/** Over the screen: the name in the middle, "ESC to close" on the right. */
+export function TopBar() {
+  return (
+    <div className="pointer-events-none absolute inset-x-[3vh] top-[2vh] grid grid-cols-[1fr_auto_1fr] items-center">
+      <span />
+      <span className="pointer-events-auto">
+        <NameChip />
+      </span>
+      <span className="pointer-events-auto flex justify-end">
+        <EscClose />
+      </span>
+    </div>
+  );
+}
+
+/** The controls, under the player's grid (two columns of key caps and what they do). */
+export function Hints() {
   const t = useLang();
   return (
-    <header className="grid shrink-0 grid-cols-[1fr_auto_1fr] items-start gap-[4vh]">
-      <div className="flex flex-col gap-[2vh]">
-        <h1 className="font-display text-[4.4vh] leading-none font-extrabold tracking-[-0.01em] uppercase">
-          {t("UI_INVENTORY")}
-        </h1>
-        <div className="grid grid-cols-[auto_auto_auto] gap-x-[2.4vh] gap-y-[1vh]">
-          <Hint
-            keys={
-              <Key>
-                <FontAwesomeIcon icon={faComputerMouse} />
-              </Key>
-            }
-            text={t("UI_HINT_USE")}
-          />
-          <Hint keys={<Key>SHIFT</Key>} text={t("UI_HINT_HALF")} />
-          <Hint keys={<Key>CTRL</Key>} text={t("UI_HINT_ONE")} />
-          <Hint keys={<Key>1-5</Key>} text={t("UI_QUICK_SLOTS")} />
-          <Hint keys={<Key>R</Key>} text={t("UI_ROTATE_HINT")} />
-        </div>
-      </div>
-      <NameChip />
-      <div className="flex justify-end">
-        <EscClose />
-      </div>
-    </header>
+    <div className="grid grid-cols-2 gap-x-[1.6vh] gap-y-[0.7vh] border-t-[0.1vh] border-white/8 pt-[1vh]">
+      <Hint
+        keys={
+          <Key>
+            <FontAwesomeIcon icon={faComputerMouse} />
+          </Key>
+        }
+        text={t("UI_HINT_USE")}
+      />
+      <Hint keys={<Key>SHIFT</Key>} text={t("UI_HINT_HALF")} />
+      <Hint keys={<Key>CTRL</Key>} text={t("UI_HINT_ONE")} />
+      <Hint keys={<Key>R</Key>} text={t("UI_ROTATE_HINT")} />
+      <Hint keys={<Key>1-5</Key>} text={t("UI_QUICK_SLOTS")} />
+    </div>
   );
 }

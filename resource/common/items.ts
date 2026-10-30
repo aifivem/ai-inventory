@@ -24,6 +24,8 @@ export interface ItemDef {
   image: string;
   /** Other names scripts call this item by (QB `pistol_ammo` for ox `ammo-9`). */
   aliases: string[];
+  /** Key of a rarity (panel Rarities tab), "" = none. */
+  rarity: string;
   use: { anim: UseAnim; time: number; status: Record<string, number> };
   weapon: { ammo: string; throwable: boolean } | null;
   component: { hashes: string[] } | null;
@@ -77,6 +79,7 @@ export function readItem(name: string, raw: unknown): ItemDef | null {
     close: raw.close === true,
     image: s(raw.image),
     aliases: names(raw.aliases),
+    rarity: s(raw.rarity),
     use: {
       anim: ANIMS.includes(use.anim as UseAnim)
         ? (use.anim as UseAnim)

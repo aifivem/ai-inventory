@@ -132,5 +132,6 @@ state.onDelta((id, put, remove, maxWeight) => {
 });
 
 content.subscribe((file) => {
-  if (file === "items") send({ action: "items", data: itemViews() });
+  if (file === "items" || file === "rarities")
+    send({ action: "items", data: itemViews() });
 });
