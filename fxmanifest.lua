@@ -19,6 +19,11 @@ dependencies {
 
 files {
 	'locales/*.json',
+	'dist/web/*.html',
+	'dist/web/assets/*.css',
+	'dist/web/assets/*.js',
+	'dist/web/assets/*.woff',
+	'dist/web/assets/*.woff2',
 	'dist/web/images/*.png',
 	'data/items.json',
 	'data/settings.json',

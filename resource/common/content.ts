@@ -1,4 +1,4 @@
-import { bool, int, num, record, str } from "@aicore-fivem/lib/shared";
+import { bool, int, num, record, str, readPlacePed, type PlacePed } from "@aicore-fivem/lib/shared";
 import { ItemList } from "./items";
 
 /** Panel content (`data/*.json`): the server reads it from its AdminPanel, clients from the AdminWorld mirror. No natives. */
@@ -34,6 +34,8 @@ export interface Place extends Point {
 }
 
 export interface Shop extends Place {
+  /** NPC standing at the place (panel), null for none. */
+  ped: PlacePed | null;
   blip: boolean;
   accounts: string[];
   items: Array<{ name: string; price: number }>;
@@ -134,6 +136,7 @@ function readRecords<T>(
 export const readShops = (raw: unknown): Map<string, Shop> =>
   readRecords(raw, (id, v) => ({
     ...readPlace(id, v),
+    ped: readPlacePed(v.ped),
     blip: bool(v.blip, true),
     accounts: names(v.accounts).length ? names(v.accounts) : ["cash", "bank"],
     items: (Array.isArray(v.items) ? v.items : []).flatMap((row) => {

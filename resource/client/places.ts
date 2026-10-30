@@ -1,3 +1,4 @@
+import { type PlacePed } from "@aicore-fivem/lib/shared";
 import { Points } from "@aicore-fivem/lib/client";
 import { Locale } from "common";
 import type { Place } from "common/content";
@@ -20,12 +21,13 @@ const SHOP_BLIP = { sprite: 52, color: 2, scale: 0.7 };
 /** Shops, stashes and crafting benches from the panel, a map blip for shops that want one. Rebuilt when the panel changes them. */
 const points = new Points();
 
-function add(kind: Kind, place: Place, blip = false): void {
+function add(kind: Kind, place: Place, blip = false, ped?: PlacePed | null): void {
   points.add(`${kind}:${place.id}`, {
     coords: { x: place.x, y: place.y, z: place.z },
     label: Locale(PROMPT[kind], place.label),
     icon: ICON[kind],
     radius: place.radius,
+    ped: ped ?? undefined,
     blip: blip ? { ...SHOP_BLIP, label: place.label } : undefined,
     onPressed: () => screen.open({ kind, id: place.id }),
   });
@@ -33,7 +35,7 @@ function add(kind: Kind, place: Place, blip = false): void {
 
 function rebuild(): void {
   points.clear();
-  for (const shop of content.shops.values()) add("shop", shop, shop.blip);
+  for (const shop of content.shops.values()) add("shop", shop, shop.blip, shop.ped);
   for (const stash of content.stashes.values()) add("stash", stash);
   for (const bench of content.benches.values()) add("bench", bench);
 }

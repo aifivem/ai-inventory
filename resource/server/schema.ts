@@ -1,3 +1,4 @@
+import { PLACE_PED_SPEC, placePedFields } from "@aicore-fivem/lib/shared";
 import type { DataSpec, PanelSchema, WidgetSpec } from "@aicore-fivem/shared";
 
 /** ai-inventory's panel: item definitions, shops, stashes, crafting benches and grid sizes. */
@@ -185,6 +186,7 @@ export const inventorySchema: PanelSchema = {
         items: [{ name: "water", price: 5 }],
       },
       sections: {
+        ped: PLACE_PED_SPEC,
         ...placeSections,
         blip: { type: "bool" },
         accounts: {
@@ -543,6 +545,12 @@ export const inventorySchema: PanelSchema = {
               ],
             },
           ],
+        },
+        {
+          icon: "user",
+          title: "ADMIN_C_PED",
+          desc: "ADMIN_C_PED_DESC",
+          fields: placePedFields(),
         },
       ],
     },
