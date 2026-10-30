@@ -17,5 +17,6 @@
   "glovebox": {
     "rows": 2,
     "maxWeight": 10000
-  }
+  },
+  "noWeaponWheel": true
 }

@@ -237,5 +237,10 @@
   "ADMIN_H_RARITY": "Tints the item's box (Rarities tab). None: a plain box.",
   "ADMIN_P_RARITY": "epic",
   "UI_EQUIPMENT": "Equipment",
-  "UI_QUICK_SLOTS_TITLE": "Quick slots"
+  "UI_QUICK_SLOTS_TITLE": "Quick slots",
+  "UI_PED_SHOW": "Show character",
+  "UI_PED_HIDE": "Hide character",
+  "KEYBIND_HOTBAR_BAR": "Show / hide the quick slots bar",
+  "ADMIN_F_NO_WHEEL": "No GTA weapon wheel",
+  "ADMIN_H_NO_WHEEL": "GTA's weapon wheel and switching weapons with the mouse wheel stay off: weapons are taken from the quick slots (1-5)."
 }

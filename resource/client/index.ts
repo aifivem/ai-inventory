@@ -18,3 +18,4 @@ on(CORE.clientPlayerUnloadedEvent, () => {
   weapons.holster();
 });
 onServerEvent("ai-core:client:openCharacters", () => screen.close());
+import "./wheel";

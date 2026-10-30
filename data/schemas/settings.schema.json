@@ -103,6 +103,10 @@
         "rows",
         "maxWeight"
       ]
+    },
+    "noWeaponWheel": {
+      "description": "No GTA weapon wheel: GTA's weapon wheel and switching weapons with the mouse wheel stay off: weapons are taken from the quick slots (1-5).",
+      "type": "boolean"
     }
   },
   "required": [

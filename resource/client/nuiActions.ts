@@ -1,12 +1,13 @@
 import { cache, triggerServerCallback } from "@aicore-fivem/lib/client";
 import { EVENTS, type ActionResult } from "common/events";
-import { NUI, toMoveInput } from "common/nui";
+import { NUI, toMoveInput, toPedArea } from "common/nui";
 import { content } from "./content";
 import { isClothesId } from "common/clothes";
 import { wardrobe } from "./clothes";
 import { screen, sendProfile, toResult, toast } from "./screen";
 import { state } from "./state";
 import { useItem } from "./use";
+import { worldPed } from "./worldPed";
 
 type NuiReply = (result: ActionResult) => void;
 const isObj = (v: unknown): v is Record<string, unknown> =>
@@ -59,7 +60,25 @@ RegisterNuiCallback(NUI.clothes, (data: unknown, cb: NuiReply) => {
   cb({ ok: true });
   const done = wardrobe.toggle(id);
   sendProfile();
-  void done.then(sendProfile);
+  worldPed.refresh();
+  void done.then(() => {
+    sendProfile();
+    worldPed.refresh();
+  });
+});
+
+// The equipment column's character: its area on screen, or hidden (the show / hide switch under it).
+RegisterNuiCallback(NUI.worldPed, (data: unknown, cb: NuiReply) => {
+  cb({ ok: true });
+  if (!screen.isOpen) return;
+  const area = toPedArea(data);
+  if (!area) {
+    if (worldPed.active) TriggerScreenblurFadeIn(0);
+    return worldPed.hide();
+  }
+  // The blur would cover the character too.
+  if (!worldPed.active) TriggerScreenblurFadeOut(0);
+  worldPed.show(area);
 });
 
 RegisterNuiCallback(NUI.move, (data: unknown, cb: NuiReply) => {

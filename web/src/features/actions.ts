@@ -15,6 +15,16 @@ export function toggleClothes(id: string): void {
   void fetchNui(NUI.clothes, { id }, OK);
 }
 
+/** Where the game draws the character (screen shares), or `show: false` to hide it. */
+export function setWorldPed(area: {
+  x: number;
+  top: number;
+  bottom: number;
+  show: boolean;
+}): void {
+  void fetchNui(NUI.worldPed, area, OK);
+}
+
 export function closeScreen(): void {
   void fetchNui(NUI.close, undefined, OK);
 }

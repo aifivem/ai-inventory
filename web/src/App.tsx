@@ -14,11 +14,12 @@ import {
   otherClosed,
   playerSet,
   profileSet,
+  hotbarSet,
 } from "./store/inventory";
 import { closeScreen } from "./features/actions";
 import { Ghost } from "./features/grid/Ghost";
 import { AmountDialog, ItemMenu } from "./features/menu/ItemMenu";
-import { Equipment } from "./features/panels/Equipment";
+import { Equipment, QuickSlots } from "./features/panels/Equipment";
 import { Hints, TopBar } from "./features/panels/Header";
 import { InventoryPanel } from "./features/panels/InventoryPanel";
 import {
@@ -52,6 +53,7 @@ const onClose = () => {
 };
 const onOtherClosed = () => store.dispatch(otherClosed());
 const onProfile = (data: Data<"profile">) => store.dispatch(profileSet(data));
+const onHotbar = (data: Data<"hotbar">) => store.dispatch(hotbarSet(data));
 
 const SETUP_MOCK = { mockData: MOCK_SETUP };
 const PLAYER_MOCK = { mockData: MOCK_PLAYER, mockDelay: 50 };
@@ -70,13 +72,19 @@ export function App() {
   useNuiEvent("close", onClose);
   useNuiEvent("otherClosed", onOtherClosed);
   useNuiEvent("profile", onProfile, PROFILE_MOCK);
+  useNuiEvent("hotbar", onHotbar);
 
   // Escape or Tab closes the screen (the game's Tab bind does not fire while the NUI has focus); dialogs close first.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      const { open, openKey } = store.getState().inventory;
+      const isOpenKey =
+        openKey !== "" &&
+        (event.key.toUpperCase() === openKey ||
+          event.code.toUpperCase() === openKey);
       if (
-        (event.code !== "Escape" && event.code !== "Tab") ||
-        !store.getState().inventory.open ||
+        (event.code !== "Escape" && !isOpenKey) ||
+        !open ||
         ui.menu ||
         ui.amount
       )
@@ -90,6 +98,11 @@ export function App() {
 
   return (
     <TooltipProvider>
+      {!state.open && state.hotbar && state.player && (
+        <div className="pointer-events-none fixed inset-x-0 bottom-[3vh] flex animate-fade justify-center">
+          <QuickSlots />
+        </div>
+      )}
       {state.open && state.player && (
         <div
           className="fixed inset-0 animate-fade bg-[linear-gradient(90deg,rgba(8,8,8,0.35)_0%,rgba(8,8,8,0.45)_30%,rgba(8,8,8,0.82)_42%,rgba(8,8,8,0.82)_100%)]"

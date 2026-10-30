@@ -17,6 +17,7 @@ import {
 } from "common/nui";
 import { benchView, content, itemViews, shopView } from "./content";
 import { state, toView } from "./state";
+import { worldPed } from "./worldPed";
 
 export const send = (message: NuiMessage): void => SendNUIMessage(message);
 
@@ -50,6 +51,9 @@ export function toast(error: string): void {
 
 /** The inventory screen: opening (asks the server), the NUI focus, and forwarding deltas while it is open. */
 class Screen {
+  /** The open key's current binding (set by `open.ts`, which owns the keybind). */
+  openKey: () => string = () => "";
+
   isOpen = false;
   private setupSent = false;
 
@@ -89,6 +93,7 @@ class Screen {
         other,
         shop: panel?.kind === "shop" ? shopView(panel.id) : null,
         bench: panel?.kind === "bench" ? benchView(panel.id) : null,
+        key: this.openKey(),
       },
     });
     sendProfile();
@@ -107,6 +112,7 @@ class Screen {
     state.otherId = null;
     SetNuiFocus(false, false);
     hud.show("inventory");
+    worldPed.hide();
     TriggerScreenblurFadeOut(250);
     send({ action: "close", data: null });
     emitNet(EVENTS.close);
@@ -121,14 +127,34 @@ class Screen {
 
 export const screen = new Screen();
 
+/** The quick slots bar (Tab): the player's grid stays current on the screen while it shows. */
+class Hotbar {
+  visible = false;
+
+  toggle(): void {
+    this.set(!this.visible);
+  }
+
+  set(visible: boolean): void {
+    if (visible === this.visible) return;
+    this.visible = visible;
+    if (visible && state.player) send({ action: "player", data: state.player });
+    send({ action: "hotbar", data: visible });
+  }
+}
+
+export const hotbar = new Hotbar();
+
 on("onResourceStop", (resource: string) => {
   if (resource === GetCurrentResourceName() && screen.isOpen)
     TriggerScreenblurFadeOut(0);
 });
 
 state.onDelta((id, put, remove, maxWeight) => {
-  if (screen.isOpen && (id === state.player?.id || id === state.otherId))
-    send({ action: "delta", data: { id, put, remove, maxWeight } });
+  const shown =
+    (screen.isOpen && id === state.otherId) ||
+    ((screen.isOpen || hotbar.visible) && id === state.player?.id);
+  if (shown) send({ action: "delta", data: { id, put, remove, maxWeight } });
 });
 
 content.subscribe((file) => {

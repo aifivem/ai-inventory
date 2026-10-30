@@ -299,7 +299,9 @@ export const inventorySchema: PanelSchema = {
         drop: gridSpec({ despawnMinutes: int(1, 240) }),
         trunk: gridSpec(),
         glovebox: gridSpec(),
+        noWeaponWheel: { type: "bool" },
       },
+      defaults: { noWeaponWheel: true },
     },
   },
   tabs: [
@@ -731,6 +733,12 @@ export const inventorySchema: PanelSchema = {
               hint: "ADMIN_H_COLUMNS",
               min: 6,
               max: 14,
+            },
+            {
+              widget: "switch",
+              path: "noWeaponWheel",
+              label: "ADMIN_F_NO_WHEEL",
+              hint: "ADMIN_H_NO_WHEEL",
             },
           ],
         },

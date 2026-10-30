@@ -15303,7 +15303,8 @@ function readSettings(raw) {
 			despawnMinutes: int$5(drop.despawnMinutes, 15, 1, 240)
 		},
 		trunk: grid(s.trunk, 6, 8e4),
-		glovebox: grid(s.glovebox, 2, 1e4)
+		glovebox: grid(s.glovebox, 2, 1e4),
+		noWeaponWheel: s.noWeaponWheel !== !1
 	};
 }
 function parseIngredients(text) {
@@ -15738,8 +15739,10 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 				player: gridSpec(),
 				drop: gridSpec({ despawnMinutes: int$4(1, 240) }),
 				trunk: gridSpec(),
-				glovebox: gridSpec()
-			}
+				glovebox: gridSpec(),
+				noWeaponWheel: { type: "bool" }
+			},
+			defaults: { noWeaponWheel: !0 }
 		}
 	},
 	tabs: [
@@ -16183,6 +16186,11 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 						hint: "ADMIN_H_COLUMNS",
 						min: 6,
 						max: 14
+					}, {
+						widget: "switch",
+						path: "noWeaponWheel",
+						label: "ADMIN_F_NO_WHEEL",
+						hint: "ADMIN_H_NO_WHEEL"
 					}]
 				},
 				{

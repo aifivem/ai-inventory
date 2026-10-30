@@ -17,6 +17,10 @@ interface InventoryState {
   bench: BenchView | null;
   /** Recipe being crafted: index and when it ends (screen clock). */
   crafting: { index: number; endsAt: number } | null;
+  /** The quick slots bar shows (Tab) while the screen is closed. */
+  hotbar: boolean;
+  /** The open key as bound now (the screen closes on it). */
+  openKey: string;
   /** The character's name and the clothes column. */
   profile: { name: string; clothes: ClothesState } | null;
 }
@@ -30,6 +34,8 @@ const initialState: InventoryState = {
   bench: null,
   crafting: null,
   profile: null,
+  hotbar: false,
+  openKey: "",
 };
 
 function applyDelta(
@@ -56,6 +62,9 @@ const inventory = createSlice({
         action.payload.map((item) => [item.name, item]),
       );
     },
+    hotbarSet(state, action: PayloadAction<boolean>) {
+      state.hotbar = action.payload;
+    },
     profileSet(
       state,
       action: PayloadAction<{ name: string; clothes: ClothesState }>,
@@ -71,9 +80,11 @@ const inventory = createSlice({
         other: InventoryView | null;
         shop: ShopView | null;
         bench: BenchView | null;
+        key: string;
       }>,
     ) {
       state.open = true;
+      state.openKey = action.payload.key;
       state.other = action.payload.other;
       state.shop = action.payload.shop;
       state.bench = action.payload.bench;
@@ -120,5 +131,6 @@ export const {
   deltaApplied,
   craftingSet,
   profileSet,
+  hotbarSet,
 } = inventory.actions;
 export default inventory.reducer;

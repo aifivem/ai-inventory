@@ -30,6 +30,8 @@ export interface Settings {
   drop: GridSize & { despawnMinutes: number };
   trunk: GridSize;
   glovebox: GridSize;
+  /** GTA's weapon wheel and scroll weapon switching stay off (weapons come from the inventory's quick slots). */
+  noWeaponWheel: boolean;
 }
 
 export interface Place extends Point {
@@ -96,6 +98,7 @@ export function readSettings(raw: unknown): Settings {
     },
     trunk: grid(s.trunk, 6, 80_000),
     glovebox: grid(s.glovebox, 2, 10_000),
+    noWeaponWheel: s.noWeaponWheel !== false,
   };
 }
 

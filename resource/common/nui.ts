@@ -120,6 +120,8 @@ export type NuiMessage =
         other: InventoryView | null;
         shop: ShopView | null;
         bench: BenchView | null;
+        /** The open key as bound now: the screen closes on it too. */
+        key: string;
       };
     }
   | {
@@ -128,6 +130,8 @@ export type NuiMessage =
     }
   | { action: "profile"; data: { name: string; clothes: ClothesState } }
   | { action: "close"; data: null }
+  /** The quick slots bar at the bottom while the inventory is closed (Tab). */
+  | { action: "hotbar"; data: boolean }
   | { action: "otherClosed"; data: null };
 
 /** NUI -> client callbacks (fetchNui names). */
@@ -141,6 +145,7 @@ export const NUI = {
   craft: "craft",
   detach: "detach",
   clothes: "clothes",
+  worldPed: "worldPed",
 } as const;
 
 /** Parsers for boundary data. */
@@ -152,6 +157,21 @@ const int = (v: unknown, min: number, max: number): number | null =>
     : null;
 const id = (v: unknown): string | null =>
   typeof v === "string" && v.length > 0 && v.length <= 96 ? v : null;
+
+/** The equipment column's character area (screen shares 0 - 1), or null to hide the character. */
+export function toPedArea(
+  v: unknown,
+): { x: number; top: number; bottom: number } | null {
+  if (!isObj(v) || v.show !== true) return null;
+  const share = (n: unknown): number | null =>
+    typeof n === "number" && n >= 0 && n <= 1 ? n : null;
+  const x = share(v.x);
+  const top = share(v.top);
+  const bottom = share(v.bottom);
+  if (x === null || top === null || bottom === null || bottom <= top)
+    return null;
+  return { x, top, bottom };
+}
 
 export function toMoveInput(v: unknown): MoveInput | null {
   if (!isObj(v)) return null;

@@ -1,4 +1,6 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { Occupancy } from "../../../../resource/common/grid";
 import type { ClothesId } from "../../../../resource/common/clothes";
 import bag from "../../assets/clothes/bag.svg";
@@ -17,7 +19,7 @@ import { imageUrl, tint } from "../../lib/cell";
 import { useLang } from "../../lib/lang";
 import { cn } from "../../lib/utils";
 import { useAppSelector } from "../../store";
-import { toggleClothes } from "../actions";
+import { setWorldPed, toggleClothes } from "../actions";
 
 const SLOT_VH = 7.4;
 const ICONS: Record<ClothesId, string> = {
@@ -37,6 +39,65 @@ const ICONS: Record<ClothesId, string> = {
 /** Clothes on each side of the character, top to bottom like Tarkov's gear screen. */
 const LEFT: ClothesId[] = ["hat", "ear", "mask", "glasses", "neck", "bracelet"];
 const RIGHT: ClothesId[] = ["shirt", "vest", "bag", "watch", "pants", "shoes"];
+
+const PED_KEY = "ai-inventory:ped";
+
+function storedPedShown(): boolean {
+  try {
+    return localStorage.getItem(PED_KEY) !== "0";
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * The space between the clothes columns where the game draws a copy of the character; its place on screen goes to
+ * the client on open, on resize and when the switch under it changes.
+ */
+function PedArea() {
+  const t = useLang();
+  const ref = useRef<HTMLDivElement>(null);
+  const [shown, setShown] = useState(storedPedShown);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const report = () => {
+      const r = el.getBoundingClientRect();
+      setWorldPed({
+        x: (r.left + r.width / 2) / window.innerWidth,
+        top: r.top / window.innerHeight,
+        bottom: r.bottom / window.innerHeight,
+        show: shown,
+      });
+    };
+    report();
+    const observer = new ResizeObserver(report);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [shown]);
+  const toggle = () => {
+    const next = !shown;
+    setShown(next);
+    try {
+      localStorage.setItem(PED_KEY, next ? "1" : "0");
+    } catch {
+      // Private storage off: the choice lasts until the screen closes.
+    }
+  };
+  return (
+    <div className="flex min-w-0 flex-1 flex-col items-center">
+      <div ref={ref} className="min-h-0 w-full flex-1" />
+      <button
+        type="button"
+        onClick={toggle}
+        className="flex items-center gap-[0.6vh] rounded-[0.2vh] border-[0.1vh] border-white/12 bg-[rgba(16,16,16,0.86)] px-[1vh] py-[0.5vh] text-[1.1vh] font-semibold text-white/60 uppercase transition-colors duration-150 hover:border-white/30 hover:text-white active:[transform:scale(0.97)]"
+      >
+        <FontAwesomeIcon icon={shown ? faEyeSlash : faEye} />
+        {t(shown ? "UI_PED_HIDE" : "UI_PED_SHOW")}
+      </button>
+    </div>
+  );
+}
 
 /** Small caps heading with a hairline running to the right edge. */
 function SectionTitle({ label }: { label: string }) {
@@ -91,7 +152,7 @@ function ClothesSlot({ id }: { id: ClothesId }) {
 }
 
 /** The stacks keys 1-5 use: whatever covers each of the first five cells of the top row. */
-function QuickSlots() {
+export function QuickSlots() {
   const view = useAppSelector((s) => s.inventory.player);
   const items = useAppSelector((s) => s.inventory.items);
   const slots = useMemo(() => {
@@ -153,7 +214,7 @@ function QuickSlots() {
 
 /**
  * The left of the screen (tgiann grid layout): worn clothes in two columns around the character the game draws in the
- * middle, the quick slots below. Clothes are not items: a click takes a piece off or puts it back on.
+ * middle (with a show / hide switch under it), the quick slots below. Clothes are not items: a click takes a piece off or puts it back on.
  */
 export function Equipment() {
   const t = useLang();
@@ -170,6 +231,7 @@ export function Equipment() {
       <SectionTitle label={t("UI_EQUIPMENT")} />
       <div className="flex min-h-0 flex-1 justify-between">
         {profile && column(LEFT)}
+        <PedArea />
         {profile && column(RIGHT)}
       </div>
       <SectionTitle label={t("UI_QUICK_SLOTS_TITLE")} />

@@ -3,7 +3,7 @@ import { Locale } from "common";
 import { EVENTS } from "common/events";
 import { toPanel, type OpenTarget } from "common/nui";
 import { drops } from "./drops";
-import { screen } from "./screen";
+import { hotbar, screen } from "./screen";
 import { state, toView } from "./state";
 import { useItem } from "./use";
 
@@ -43,14 +43,25 @@ function contextTarget(): OpenTarget {
   return { kind: "self" };
 }
 
-new Keybind({
+const openBind = new Keybind({
   name: "inventory_open",
   description: Locale("KEYBIND_OPEN"),
-  defaultKey: "TAB",
+  defaultKey: "F1",
+  hint: "always",
   onPressed: () => {
     if (screen.isOpen) return screen.close();
     void screen.open(contextTarget());
   },
+});
+
+screen.openKey = () => openBind.currentKey.toUpperCase();
+
+new Keybind({
+  name: "inventory_hotbar",
+  description: Locale("KEYBIND_HOTBAR_BAR"),
+  defaultKey: "TAB",
+  hint: "always",
+  onPressed: () => hotbar.toggle(),
 });
 
 /** Keys 1-5 use whatever covers the first five cells of the top row. */
