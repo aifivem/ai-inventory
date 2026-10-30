@@ -97,6 +97,12 @@
             "pattern": "^[a-z0-9_-]{2,48}$"
           }
         },
+        "rarity": {
+          "description": "Rarity: Tints the item's box (Rarities tab). None: a plain box.",
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 48
+        },
         "use": {
           "type": "object",
           "properties": {
