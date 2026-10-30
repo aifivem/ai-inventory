@@ -1,0 +1,115 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ai-inventory/data/settings.json",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "This file's JSON Schema (for editors)."
+    },
+    "columns": {
+      "description": "Columns: Cells per row in every inventory. Changing it with items stored can push items out of place.",
+      "type": "integer",
+      "minimum": 6,
+      "maximum": 14
+    },
+    "player": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "description": "Rows: Rows of cells; the width is the Columns setting.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "maxWeight": {
+          "description": "Weight limit: Grams. 0 means no weight limit.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000000
+        }
+      },
+      "required": [
+        "rows",
+        "maxWeight"
+      ]
+    },
+    "drop": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "description": "Rows: Rows of cells; the width is the Columns setting.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "maxWeight": {
+          "description": "Weight limit: Grams. 0 means no weight limit.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000000
+        },
+        "despawnMinutes": {
+          "description": "Disappears after: Items on the ground disappear when nobody touched them for this long.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 240
+        }
+      },
+      "required": [
+        "rows",
+        "maxWeight",
+        "despawnMinutes"
+      ]
+    },
+    "trunk": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "description": "Rows: Rows of cells; the width is the Columns setting.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "maxWeight": {
+          "description": "Weight limit: Grams. 0 means no weight limit.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000000
+        }
+      },
+      "required": [
+        "rows",
+        "maxWeight"
+      ]
+    },
+    "glovebox": {
+      "type": "object",
+      "properties": {
+        "rows": {
+          "description": "Rows: Rows of cells; the width is the Columns setting.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "maxWeight": {
+          "description": "Weight limit: Grams. 0 means no weight limit.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000000
+        }
+      },
+      "required": [
+        "rows",
+        "maxWeight"
+      ]
+    }
+  },
+  "required": [
+    "columns",
+    "player",
+    "drop",
+    "trunk",
+    "glovebox"
+  ]
+}

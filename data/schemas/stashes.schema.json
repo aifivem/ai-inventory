@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ai-inventory/data/stashes.json",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "This file's JSON Schema (for editors)."
+    }
+  },
+  "patternProperties": {
+    "^[a-z0-9_]{2,32}$": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "description": "Stash name",
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 48
+        },
+        "coords": {
+          "description": "Place: Stand where players should open it and use your position.",
+          "type": "object",
+          "required": [
+            "x",
+            "y",
+            "z"
+          ],
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "z": {
+              "type": "number"
+            }
+          }
+        },
+        "radius": {
+          "description": "Reach: How close a player must be to open it.",
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 30
+        },
+        "jobs": {
+          "description": "Jobs: Empty lets everyone in; otherwise only characters with one of these jobs.",
+          "type": "array",
+          "maxItems": 30,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "maxLength": 48,
+            "pattern": "^[a-z0-9_-]{2,48}$"
+          }
+        },
+        "gangs": {
+          "description": "Gangs: Characters in one of these gangs may open it too.",
+          "type": "array",
+          "maxItems": 30,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "maxLength": 48,
+            "pattern": "^[a-z0-9_-]{2,48}$"
+          }
+        },
+        "personal": {
+          "description": "One per character: On: every character has its own contents. Off: everyone who may open it shares one.",
+          "type": "boolean"
+        },
+        "rows": {
+          "description": "Rows: Rows of cells; the width is the Columns setting.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "maxWeight": {
+          "description": "Weight limit: Grams. 0 means no weight limit.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000000
+        }
+      },
+      "required": [
+        "label",
+        "coords",
+        "radius",
+        "jobs",
+        "gangs",
+        "personal",
+        "rows",
+        "maxWeight"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

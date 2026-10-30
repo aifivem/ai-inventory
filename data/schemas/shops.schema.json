@@ -1,0 +1,113 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ai-inventory/data/shops.json",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "This file's JSON Schema (for editors)."
+    }
+  },
+  "patternProperties": {
+    "^[a-z0-9_]{2,32}$": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "description": "Shop name",
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 48
+        },
+        "coords": {
+          "description": "Place: Stand where players should open it and use your position.",
+          "type": "object",
+          "required": [
+            "x",
+            "y",
+            "z"
+          ],
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "z": {
+              "type": "number"
+            }
+          }
+        },
+        "radius": {
+          "description": "Reach: How close a player must be to open it.",
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 30
+        },
+        "jobs": {
+          "description": "Jobs: Empty lets everyone in; otherwise only characters with one of these jobs.",
+          "type": "array",
+          "maxItems": 30,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "maxLength": 48,
+            "pattern": "^[a-z0-9_-]{2,48}$"
+          }
+        },
+        "blip": {
+          "description": "Map blip: Shows the shop on the map.",
+          "type": "boolean"
+        },
+        "accounts": {
+          "description": "Paid from: Money accounts tried in order (cash, bank).",
+          "type": "array",
+          "maxItems": 5,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "maxLength": 32,
+            "pattern": "^[a-z0-9_]{2,32}$"
+          }
+        },
+        "items": {
+          "description": "Products",
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "description": "Item",
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 48,
+                "pattern": "^[a-z0-9_-]{2,48}$"
+              },
+              "price": {
+                "description": "Price",
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 100000000
+              }
+            },
+            "required": [
+              "name",
+              "price"
+            ]
+          }
+        }
+      },
+      "required": [
+        "label",
+        "coords",
+        "radius",
+        "jobs",
+        "blip",
+        "accounts",
+        "items"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

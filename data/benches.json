@@ -1,4 +1,5 @@
 {
+  "$schema": "./schemas/benches.schema.json",
   "workshop_bench": {
     "label": "Workbench",
     "coords": {

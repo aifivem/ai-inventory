@@ -1,4 +1,5 @@
 {
+  "$schema": "./schemas/items.schema.json",
   "ammo-22": {
     "label": ".22 Long Rifle",
     "description": "",

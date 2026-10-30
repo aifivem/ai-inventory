@@ -1,0 +1,195 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ai-inventory/data/items.json",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "This file's JSON Schema (for editors)."
+    }
+  },
+  "patternProperties": {
+    "^[a-z0-9_-]{2,48}$": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "description": "Name",
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 48
+        },
+        "description": {
+          "description": "Description",
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 240
+        },
+        "weight": {
+          "description": "Weight: Grams per unit (1000 g = 1 kg).",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        },
+        "size": {
+          "type": "object",
+          "properties": {
+            "w": {
+              "description": "Width: Cells from left to right; height is cells from top to bottom. Players can turn an item while dragging it.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8
+            },
+            "h": {
+              "description": "Height",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 8
+            }
+          },
+          "required": [
+            "w",
+            "h"
+          ]
+        },
+        "stack": {
+          "description": "Stack size: Most units in one stack. 1 makes every unit separate, for items with their own data.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "type": {
+          "description": "Kind: Weapons are held when used, ammo reloads the held weapon, attachments go on it.",
+          "enum": [
+            "item",
+            "weapon",
+            "ammo",
+            "component"
+          ]
+        },
+        "usable": {
+          "description": "Can be used: Off: using does nothing unless a script handles this item.",
+          "type": "boolean"
+        },
+        "consume": {
+          "description": "Used up per use: Units removed each time it is used. 0 keeps it.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "close": {
+          "description": "Close the inventory: Closes the inventory screen when the item is used.",
+          "type": "boolean"
+        },
+        "image": {
+          "description": "Picture: File name in the inventory's images folder (water.png) or a full https link. Empty shows an icon.",
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 200
+        },
+        "aliases": {
+          "description": "Other names: Names other scripts use for this item (for example pistol_ammo), so they still work.",
+          "type": "array",
+          "maxItems": 30,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "maxLength": 48,
+            "pattern": "^[a-z0-9_-]{2,48}$"
+          }
+        },
+        "use": {
+          "type": "object",
+          "properties": {
+            "anim": {
+              "description": "Animation",
+              "enum": [
+                "none",
+                "eat",
+                "drink",
+                "bandage",
+                "armour"
+              ]
+            },
+            "time": {
+              "description": "Use time: How long the animation plays before the item takes effect.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 60000
+            },
+            "status": {
+              "type": "object",
+              "properties": {
+                "hunger": {
+                  "description": "Hunger: Added to the player's needs when used (minus lowers them). Needs a HUD that tracks them.",
+                  "type": "number",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "thirst": {
+                  "description": "Thirst",
+                  "type": "number",
+                  "minimum": -100,
+                  "maximum": 100
+                },
+                "stress": {
+                  "description": "Stress",
+                  "type": "number",
+                  "minimum": -100,
+                  "maximum": 100
+                }
+              },
+              "required": []
+            }
+          },
+          "required": []
+        },
+        "weapon": {
+          "type": "object",
+          "properties": {
+            "ammo": {
+              "description": "Ammo item: Item name the weapon loads (for example ammo-9).",
+              "type": "string",
+              "minLength": 0,
+              "maxLength": 48
+            },
+            "throwable": {
+              "description": "Thrown: Grenades and the like: the stack count is the ammo.",
+              "type": "boolean"
+            }
+          },
+          "required": []
+        },
+        "component": {
+          "type": "object",
+          "properties": {
+            "hashes": {
+              "description": "Attachment hashes: GTA component names this attachment can be (COMPONENT_AT_PI_FLSH); the first one the held weapon takes is used.",
+              "type": "array",
+              "maxItems": 20,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_]{2,64}$"
+              }
+            }
+          },
+          "required": []
+        }
+      },
+      "required": [
+        "label",
+        "weight",
+        "size",
+        "stack",
+        "type",
+        "usable",
+        "consume",
+        "close",
+        "image",
+        "aliases"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

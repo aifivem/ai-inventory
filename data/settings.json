@@ -1,4 +1,5 @@
 {
+  "$schema": "./schemas/settings.schema.json",
   "columns": 10,
   "player": {
     "rows": 6,

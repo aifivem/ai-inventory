@@ -1,4 +1,5 @@
 {
+  "$schema": "./schemas/stashes.schema.json",
   "mrpd_lockers": {
     "label": "Police Locker",
     "coords": {

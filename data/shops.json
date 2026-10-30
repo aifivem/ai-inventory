@@ -1,4 +1,5 @@
 {
+  "$schema": "./schemas/shops.schema.json",
   "shop_innocence": {
     "label": "24/7 Supermarket",
     "coords": {
