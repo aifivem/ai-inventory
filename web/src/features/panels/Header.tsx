@@ -23,7 +23,7 @@ function Hint({ keys, text }: { keys: ReactNode; text: string }) {
   );
 }
 
-/** "ESC to close" with the round door button (tgiann-ui EscHint). */
+/** "ESC to close" with the round door button (aicore-ui). */
 function EscClose() {
   const t = useLang();
   const [before = "", after = ""] = t("UI_ESC_CLOSE").split("{0}");

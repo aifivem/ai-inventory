@@ -2,7 +2,7 @@ import type { ComponentProps } from "react";
 import { DropdownMenu as MenuPrimitive } from "radix-ui";
 import { cn } from "../../lib/utils";
 
-/** Radix dropdown menu, TGIANN floating surface (tgiann-ui components.md): #161616, ring, ambient shadow, white-alpha row on hover. */
+/** Radix dropdown menu, TGIANN floating surface (aicore-ui): #161616, ring, ambient shadow, white-alpha row on hover. */
 export const DropdownMenu = MenuPrimitive.Root;
 export const DropdownMenuTrigger = MenuPrimitive.Trigger;
 
