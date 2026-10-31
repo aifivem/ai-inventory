@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/aifivem/ai-inventory/compare/v0.2.0...v0.2.1) (2026-10-31)
+
+
+### Miscellaneous Chores
+
+* rebuild with the current lib ([26a7f09](https://github.com/aifivem/ai-inventory/commit/26a7f09e96d404819c05bc78019bee17cbecba71))
+
 ## [0.2.0](https://github.com/aifivem/ai-inventory/compare/v0.1.0...v0.2.0) (2026-10-31)
 
 
