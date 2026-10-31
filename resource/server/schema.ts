@@ -1,4 +1,6 @@
 import {
+  ACCESS_FIELDS,
+  accessFields,
   BLIP_STYLE_FIELDS,
   PLACE_PED_SPEC,
   placePedFields,
@@ -55,14 +57,7 @@ const place = (labelKey: string): WidgetSpec[] => [
     step: 0.5,
     unit: "m",
   },
-  {
-    widget: "tags",
-    lookup: "job",
-    path: "jobs",
-    label: "ADMIN_F_JOBS",
-    hint: "ADMIN_H_JOBS",
-    placeholder: "ADMIN_P_JOBS",
-  },
+  ...accessFields(),
 ];
 const gridFields = (path: string): WidgetSpec[] => [
   {
@@ -88,7 +83,7 @@ const placeSections = {
   label: text(48),
   coords: { type: "vec3" } as DataSpec,
   radius: spec.num(0.5, 30),
-  jobs: names,
+  ...ACCESS_FIELDS,
 };
 
 export const inventorySchema: PanelSchema = {
@@ -251,7 +246,6 @@ export const inventorySchema: PanelSchema = {
       },
       sections: {
         ...placeSections,
-        gangs: names,
         personal: { type: "bool" },
         rows: spec.int(1, 50),
         maxWeight: spec.int(0, 10_000_000),
@@ -641,14 +635,6 @@ export const inventorySchema: PanelSchema = {
           desc: "ADMIN_C_STASH_DESC",
           fields: [
             ...place("ADMIN_F_STASH_LABEL"),
-            {
-              widget: "tags",
-              lookup: "gang",
-              path: "gangs",
-              label: "ADMIN_F_GANGS",
-              hint: "ADMIN_H_GANGS",
-              placeholder: "ADMIN_P_GANGS",
-            },
             {
               widget: "switch",
               path: "personal",

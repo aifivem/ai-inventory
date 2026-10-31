@@ -5,7 +5,7 @@ import {
   requestModel,
   Zones,
 } from "@aicore-fivem/lib/client";
-import { isRecord, readFinite } from "@aicore-fivem/lib/shared";
+import { isRecord, nearestOf, readFinite } from "@aicore-fivem/lib/shared";
 import { Locale, ResourceName } from "common";
 import { EVENTS } from "common/events";
 import type { DropPoint } from "common/nui";
@@ -68,13 +68,9 @@ class Drops {
   /** The id of the closest drop within `range` metres. */
   nearest(range: number): string | null {
     const [x = 0, y = 0, z = 0] = GetEntityCoords(cache.ped, false);
-    let best: string | null = null;
-    let bestDistance = range;
-    for (const point of this.points.values()) {
-      const distance = Math.hypot(point.x - x, point.y - y, point.z - z);
-      if (distance < bestDistance) [best, bestDistance] = [point.id, distance];
-    }
-    return best;
+    return (
+      nearestOf(this.points.values(), { x, y, z }, (p) => p, range)?.id ?? null
+    );
   }
 
   private async spawn(point: DropPoint): Promise<void> {

@@ -5006,5 +5006,37 @@
     "image": "",
     "aliases": [],
     "stack": 1
+  },
+  "diving_gear": {
+    "label": "Diving Gear",
+    "description": "An air tank and a mask for breathing underwater.",
+    "weight": 30000,
+    "size": {
+      "w": 2,
+      "h": 2
+    },
+    "stack": 1,
+    "type": "item",
+    "usable": true,
+    "consume": 0,
+    "close": true,
+    "image": "diving_gear.png",
+    "aliases": []
+  },
+  "diving_fill": {
+    "label": "Diving Tube",
+    "description": "Refills the air tank of your diving gear.",
+    "weight": 3000,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "item",
+    "usable": true,
+    "consume": 0,
+    "close": false,
+    "image": "diving_tube.png",
+    "aliases": []
   }
 }

@@ -94,15 +94,24 @@
           "maximum": 30
         },
         "jobs": {
-          "description": "Jobs: Empty lets everyone in; otherwise only characters with one of these jobs.",
+          "description": "Jobs: Only members of these jobs can use it. Leave jobs and gangs empty for everyone.",
           "type": "array",
-          "maxItems": 30,
           "uniqueItems": true,
           "items": {
-            "type": "string",
-            "maxLength": 48,
-            "pattern": "^[a-z0-9_-]{2,48}$"
+            "type": "string"
           }
+        },
+        "gangs": {
+          "description": "Gangs: Members of these gangs can use it too.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "onDuty": {
+          "description": "Only on duty: Job members must be on duty in that job.",
+          "type": "boolean"
         },
         "blip": {
           "description": "Map blip: Shows the shop on the map.",
@@ -177,7 +186,6 @@
         "label",
         "coords",
         "radius",
-        "jobs",
         "blip",
         "blipStyle",
         "accounts",

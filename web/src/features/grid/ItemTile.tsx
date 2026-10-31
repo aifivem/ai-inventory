@@ -7,7 +7,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "../../components/ui/tooltip";
-import { CELL_GAP_VH, CELL_VH, imageUrl, kg, tint } from "../../lib/cell";
+import { formatWeight } from "@aicore-fivem/lib/shared";
+import { CELL_GAP_VH, CELL_VH, imageUrl, tint } from "../../lib/cell";
 import { useLang } from "../../lib/lang";
 import { cn } from "../../lib/utils";
 import { itemUse } from "../actions";
@@ -67,7 +68,7 @@ export function CornerLabels({
         {t("UI_COUNT", count)}
       </span>
       <span className="absolute top-[0.6vh] right-[0.6vh] text-[1vh] leading-none font-medium tabular-nums">
-        {t("UI_KG", kg(grams))}
+        {formatWeight(grams)}
       </span>
     </>
   );
@@ -187,7 +188,7 @@ export const ItemTile = memo(function ItemTile({
         <p className="mt-[0.6vh] text-text-3 tabular-nums">
           {t(
             "UI_STACK_INFO",
-            kg((def?.weight ?? 0) * stack.count),
+            formatWeight((def?.weight ?? 0) * stack.count),
             stack.count,
           )}
         </p>

@@ -45,26 +45,24 @@
           "maximum": 30
         },
         "jobs": {
-          "description": "Jobs: Empty lets everyone in; otherwise only characters with one of these jobs.",
+          "description": "Jobs: Only members of these jobs can use it. Leave jobs and gangs empty for everyone.",
           "type": "array",
-          "maxItems": 30,
           "uniqueItems": true,
           "items": {
-            "type": "string",
-            "maxLength": 48,
-            "pattern": "^[a-z0-9_-]{2,48}$"
+            "type": "string"
           }
         },
         "gangs": {
-          "description": "Gangs: Characters in one of these gangs may open it too.",
+          "description": "Gangs: Members of these gangs can use it too.",
           "type": "array",
-          "maxItems": 30,
           "uniqueItems": true,
           "items": {
-            "type": "string",
-            "maxLength": 48,
-            "pattern": "^[a-z0-9_-]{2,48}$"
+            "type": "string"
           }
+        },
+        "onDuty": {
+          "description": "Only on duty: Job members must be on duty in that job.",
+          "type": "boolean"
         },
         "personal": {
           "description": "One per character: On: every character has its own contents. Off: everyone who may open it shares one.",
@@ -87,8 +85,6 @@
         "label",
         "coords",
         "radius",
-        "jobs",
-        "gangs",
         "personal",
         "rows",
         "maxWeight"

@@ -1,4 +1,4 @@
-import { isRecord } from "@aicore-fivem/lib/shared";
+import { isRecord, normalizePlate } from "@aicore-fivem/lib/shared";
 import type { Stash } from "common/content";
 import { EVENTS } from "common/events";
 import type { InventoryKind, Metadata, Panel, Stack } from "common/nui";
@@ -46,8 +46,8 @@ export function resolve(inv: unknown): Inventory | undefined {
   return (
     inventories.get(inv) ??
     inventories.get(`stash:${inv}`) ??
-    inventories.get(`trunk:${inv.toUpperCase()}`) ??
-    inventories.get(`glovebox:${inv.toUpperCase()}`)
+    inventories.get(`trunk:${normalizePlate(inv)}`) ??
+    inventories.get(`glovebox:${normalizePlate(inv)}`)
   );
 }
 
@@ -181,9 +181,12 @@ export function registerStash(
     y: coords?.y ?? 0,
     z: coords?.z ?? 0,
     radius: 3,
-    jobs: Object.keys(groups),
-    grades: groups,
-    gangs: [],
+    access: {
+      jobs: Object.keys(groups),
+      gangs: [],
+      grades: groups,
+      onDuty: false,
+    },
     personal,
     size: { rows: rowsFor(slots), maxWeight },
     scriptOnly: !coords || owner !== undefined,

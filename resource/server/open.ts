@@ -1,5 +1,5 @@
 import { VEHICLE_BAGS } from "@aicore-fivem/shared";
-import { asArgs, fail } from "@aicore-fivem/lib/shared";
+import { asArgs, fail, normalizePlate } from "@aicore-fivem/lib/shared";
 import {
   coordsOf,
   entityCoords,
@@ -7,7 +7,9 @@ import {
   isNear,
   onClientCallback,
   onClientEvent,
+  online,
   optionalExport,
+  plateOf,
   stateBoolean,
   stateNumber,
   vehicleFromNet,
@@ -15,7 +17,7 @@ import {
 import { nearPlace } from "common/content";
 import { EVENTS } from "common/events";
 import { toOpenTarget, type OpenResult, type OpenTarget } from "common/nui";
-import { allowed, charIdOf, setReach } from "./access";
+import { charIdOf, setReach } from "./access";
 import { scriptStashes } from "./api";
 import { content } from "./content";
 import { drops } from "./drops";
@@ -28,8 +30,6 @@ const DENIED = fail("INV_ERR_DENIED");
 const GONE = fail("INV_ERR_GONE");
 const TRUNK_REACH = 4;
 
-const plateOf = (vehicle: number): string =>
-  GetVehicleNumberPlateText(vehicle).trim().toUpperCase();
 /** Trunks of vehicles a vehicles resource marks as owned (`ai:owned` state bag) are stored; others are temporary. */
 const owned = new EntityState(VEHICLE_BAGS.owned, stateBoolean);
 const isOwned = (vehicle: number): boolean => owned.get(vehicle) === true;
@@ -51,7 +51,7 @@ async function adoptPlateRow(kind: string, vehicleId: number, id: string) {
   const registered: unknown =
     optionalExport("ai-vehicles")?.GetVehicle(vehicleId)?.plate;
   if (typeof registered === "string" && registered.trim() !== "")
-    await renameInventory(`${kind}:${registered.trim().toUpperCase()}`, id);
+    await renameInventory(`${kind}:${normalizePlate(registered)}`, id);
 }
 
 /**
@@ -113,7 +113,7 @@ async function open(source: number, target: OpenTarget): Promise<OpenResult> {
       const p = coordsOf(source);
       if (!stash || stash.scriptOnly || !nearPlace(stash, p.x, p.y, p.z))
         return FAR;
-      if (!allowed(source, stash)) return DENIED;
+      if (!online.allows(source, stash.access)) return DENIED;
       const charId = charIdOf(source);
       if (charId === null) return DENIED;
       const id = stash.personal
@@ -168,7 +168,7 @@ async function open(source: number, target: OpenTarget): Promise<OpenResult> {
           : content.benches.get(target.id);
       const p = coordsOf(source);
       if (!place || !nearPlace(place, p.x, p.y, p.z)) return FAR;
-      if (!allowed(source, place)) return DENIED;
+      if (!online.allows(source, place.access)) return DENIED;
       inventories.close(source);
       return {
         ok: true,

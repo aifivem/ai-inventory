@@ -1,23 +1,6 @@
 import { online, PlayerMap } from "@aicore-fivem/lib/server";
-import type { Place } from "common/content";
 import { inventories } from "./registry";
 import type { Inventory } from "./inventory";
-
-/** Whether the player's character has one of the jobs (at its minimum grade) or gangs; an empty list lets everyone in. */
-export function allowed(
-  source: number,
-  place: Place & { gangs?: string[]; grades?: Record<string, number> },
-): boolean {
-  const gangs = place.gangs ?? [];
-  if (place.jobs.length === 0 && gangs.length === 0) return true;
-  if (gangs.length > 0 && online.gangs(source).some((g) => gangs.includes(g)))
-    return true;
-  const grades = place.grades ?? {};
-  return place.jobs.some((job) => {
-    const grade = online.jobGrade(source, job);
-    return grade !== null && grade >= (grades[job] ?? 0);
-  });
-}
 
 export const charIdOf = (source: number): number | null =>
   online.character(source)?.id ?? null;

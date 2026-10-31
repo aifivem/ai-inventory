@@ -15,7 +15,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "../../components/ui/tooltip";
-import { CELL_VH, kg } from "../../lib/cell";
+import { formatWeight } from "@aicore-fivem/lib/shared";
+import { CELL_VH } from "../../lib/cell";
 import { useLang } from "../../lib/lang";
 import { cn } from "../../lib/utils";
 import { useAppSelector } from "../../store";
@@ -70,7 +71,6 @@ export function PanelFrame({
 }
 
 function Weight({ view }: { view: InventoryView }) {
-  const t = useLang();
   const items = useAppSelector((state) => state.inventory.items);
   const weight = view.stacks.reduce(
     (sum, s) => sum + (items[s.name]?.weight ?? 0) * s.count,
@@ -78,9 +78,9 @@ function Weight({ view }: { view: InventoryView }) {
   );
   return (
     <span className="shrink-0 text-[1.2vh] whitespace-nowrap uppercase tabular-nums">
-      <span className="font-semibold text-white">{kg(weight)}</span>
+      <span className="font-semibold text-white">{formatWeight(weight)}</span>
       <span className="text-white/50">
-        {view.maxWeight > 0 ? ` / ${t("UI_KG", kg(view.maxWeight))}` : ""}
+        {view.maxWeight > 0 ? ` / ${formatWeight(view.maxWeight)}` : ""}
       </span>
     </span>
   );

@@ -1,4 +1,4 @@
-import { cache, TickLoop } from "@aicore-fivem/lib/client";
+import { cache, ScriptCamera, TickLoop } from "@aicore-fivem/lib/client";
 import { ResourceName } from "common";
 
 /** The screen area (0 - 1) the equipment column keeps for the character. */
@@ -48,8 +48,8 @@ function screenPoint(sx: number, sy: number, depth: number): Vec {
  */
 class WorldPed {
   private ped = 0;
-  /** The view held still while the copy shows on foot (0 = the game camera). */
-  private cam = 0;
+  /** The view held still while the copy shows on foot (stopped = the game camera). */
+  private readonly view = new ScriptCamera();
   private area: PedArea | null = null;
   private readonly history: Vec[] = [];
   private readonly frame = new TickLoop(() => this.place());
@@ -116,29 +116,17 @@ class WorldPed {
    * has to follow the vehicle, so it stays the game's.
    */
   private holdView(): void {
-    if (this.cam || cache.vehicle !== false) return;
+    if (this.view.active || cache.vehicle !== false) return;
     const [x = 0, y = 0, z = 0] = GetFinalRenderedCamCoord();
     const [rx = 0, ry = 0, rz = 0] = GetFinalRenderedCamRot(2);
-    this.cam = CreateCamWithParams(
-      "DEFAULT_SCRIPTED_CAMERA",
-      x,
-      y,
-      z,
-      rx,
-      ry,
-      rz,
-      GetFinalRenderedCamFov(),
-      true,
-      2,
+    this.view.start(
+      { x, y, z },
+      { rotation: { x: rx, y: ry, z: rz }, fov: GetFinalRenderedCamFov() },
     );
-    RenderScriptCams(true, false, 0, true, false);
   }
 
   private releaseView(): void {
-    if (!this.cam) return;
-    RenderScriptCams(false, false, 0, true, false);
-    DestroyCam(this.cam, false);
-    this.cam = 0;
+    this.view.stop();
   }
 
   private create(): void {

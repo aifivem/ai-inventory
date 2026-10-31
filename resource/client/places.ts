@@ -1,13 +1,12 @@
-import { type BlipStyle, type PlacePed } from "@aicore-fivem/lib/shared";
 import {
-  hasJob,
-  inGang,
-  onMembershipChange,
-  Points,
-} from "@aicore-fivem/lib/client";
+  RecordObjects,
+  type BlipStyle,
+  type PlacePed,
+} from "@aicore-fivem/lib/shared";
+import { allows, onMembershipChange, Points } from "@aicore-fivem/lib/client";
 import { Locale } from "common";
-import type { Place } from "common/content";
-import { content } from "./content";
+import { readBench, readShop, readStash, type Place } from "common/content";
+import { world } from "./content";
 import { screen } from "./screen";
 
 type Kind = "shop" | "stash" | "bench";
@@ -22,48 +21,40 @@ const ICON: Record<Kind, string> = {
   bench: "screwdriver-wrench",
 };
 
-/** Shops, stashes and crafting benches from the panel, a map blip for shops that want one. Rebuilt when the panel changes them. */
+/**
+ * Shops, stashes and crafting benches from the panel, a map blip for shops that want one. An edited record rebuilds
+ * only its own point; a locked place shows only to who may open it (the server's `online.allows` decides the same).
+ */
 const points = new Points();
-
-/** The server's access rule (`server/access.ts`) on the client: a locked place shows only to who may open it. */
-function mayUse(
-  place: Place & { gangs?: string[]; grades?: Record<string, number> },
-): boolean {
-  const gangs = place.gangs ?? [];
-  if (place.jobs.length === 0 && gangs.length === 0) return true;
-  if (gangs.length > 0 && inGang(gangs)) return true;
-  const grades = place.grades ?? {};
-  return place.jobs.some((job) => hasJob([job], grades[job] ?? 0));
-}
 
 function add(
   kind: Kind,
+  id: string,
   place: Place,
   blip?: BlipStyle | null,
   ped?: PlacePed | null,
-): void {
-  points.add(`${kind}:${place.id}`, {
+): () => void {
+  const key = `${kind}:${id}`;
+  points.add(key, {
     coords: { x: place.x, y: place.y, z: place.z },
     label: Locale(PROMPT[kind], place.label),
     icon: ICON[kind],
     radius: place.radius,
     ped: ped ?? undefined,
     blip: blip ? { ...blip, label: place.label } : undefined,
-    canShow: () => mayUse(place),
-    onPressed: () => screen.open({ kind, id: place.id }),
+    canShow: () => allows(place.access),
+    onPressed: () => screen.open({ kind, id }),
   });
+  return () => points.remove(key);
 }
 
-function rebuild(): void {
-  points.clear();
-  for (const shop of content.shops.values())
-    add("shop", shop, shop.blip ? shop.blipStyle : null, shop.ped);
-  for (const stash of content.stashes.values()) add("stash", stash);
-  for (const bench of content.benches.values()) add("bench", bench);
-}
-
-rebuild();
+new RecordObjects(world, "shops", readShop, (id, shop) =>
+  add("shop", id, shop, shop.blip ? shop.blipStyle : null, shop.ped),
+);
+new RecordObjects(world, "stashes", readStash, (id, stash) =>
+  add("stash", id, stash),
+);
+new RecordObjects(world, "benches", readBench, (id, bench) =>
+  add("bench", id, bench),
+);
 onMembershipChange(() => points.refresh());
-content.subscribe((file) => {
-  if (file === "shops" || file === "stashes" || file === "benches") rebuild();
-});

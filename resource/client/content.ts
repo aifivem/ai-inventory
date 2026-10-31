@@ -3,7 +3,8 @@ import { FILES, InventoryContent } from "common/content";
 import type { BenchView, ItemView, ShopView } from "common/nui";
 
 /** Items, shops, stashes, benches and settings as the panel has them now (cached files, then live changes). */
-export const content = new InventoryContent(new AdminWorld([...FILES]));
+export const world = new AdminWorld([...FILES]);
+export const content = new InventoryContent(world);
 
 export function itemViews(): ItemView[] {
   return [...content.items.byName.values()].map((d) => ({

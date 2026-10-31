@@ -6,8 +6,11 @@ import {
   num,
   record,
   str,
+  readAccess,
   readPlacePed,
+  type AccessRule,
   type PlacePed,
+  type RecordReader,
 } from "@aicore-fivem/lib/shared";
 import { ItemList } from "./items";
 
@@ -42,8 +45,8 @@ export interface Place extends Point {
   label: string;
   /** Metres from the point where it can be opened. */
   radius: number;
-  /** Empty = everyone; otherwise one of these jobs (on duty not required). */
-  jobs: string[];
+  /** Who may open it (the record's `jobs` / `gangs` / `onDuty`; script stashes: jobs at a minimum grade). */
+  access: AccessRule;
 }
 
 /** A shop's map blip when its record has none (qb-shops' 24/7 blip). */
@@ -59,12 +62,9 @@ export interface Shop extends Place {
 }
 
 export interface Stash extends Place {
-  gangs: string[];
   /** Every character gets its own copy. */
   personal: boolean;
   size: GridSize;
-  /** Lowest grade per job a script asked for (ox `groups = { police = 2 }`); missing = any grade. */
-  grades?: Record<string, number>;
   /** Only a server script may open it (no place in the world, or one fixed owner): the client `open` is refused. */
   scriptOnly?: boolean;
 }
@@ -136,24 +136,12 @@ function readPlace(id: string, v: Record<string, unknown>): Place {
     y: num(c.y, 0),
     z: num(c.z, 0),
     radius: num(v.radius, 2, 0.5, 30),
-    jobs: names(v.jobs),
+    access: readAccess(v),
   };
 }
 
-function readRecords<T>(
-  raw: unknown,
-  read: (id: string, v: Record<string, unknown>) => T | null,
-): Map<string, T> {
-  const out = new Map<string, T>();
-  for (const [id, value] of Object.entries(record(raw))) {
-    const item = read(id, record(value));
-    if (item) out.set(id, item);
-  }
-  return out;
-}
-
-export const readShops = (raw: unknown): Map<string, Shop> =>
-  readRecords(raw, (id, v) => ({
+/** One shop record (`records("shops", readShop)`). */
+export const readShop: RecordReader<Shop> = (id, v) => ({
     ...readPlace(id, v),
     ped: readPlacePed(v.ped),
     blip: bool(v.blip, true),
@@ -164,18 +152,17 @@ export const readShops = (raw: unknown): Map<string, Shop> =>
       const name = str(r.name, "").toLowerCase();
       return name ? [{ name, price: int(r.price, 0, 0, 100_000_000) }] : [];
     }),
-  }));
+});
 
-export const readStashes = (raw: unknown): Map<string, Stash> =>
-  readRecords(raw, (id, v) => ({
-    ...readPlace(id, v),
-    gangs: names(v.gangs),
-    personal: bool(v.personal, false),
-    size: grid(v, 6, 100_000),
-  }));
+/** One stash record. */
+export const readStash: RecordReader<Stash> = (id, v) => ({
+  ...readPlace(id, v),
+  personal: bool(v.personal, false),
+  size: grid(v, 6, 100_000),
+});
 
-export const readBenches = (raw: unknown): Map<string, Bench> =>
-  readRecords(raw, (id, v) => ({
+/** One crafting bench record. */
+export const readBench: RecordReader<Bench> = (id, v) => ({
     ...readPlace(id, v),
     recipes: (Array.isArray(v.recipes) ? v.recipes : []).flatMap((row) => {
       const r = record(row);
@@ -190,12 +177,13 @@ export const readBenches = (raw: unknown): Map<string, Bench> =>
         },
       ];
     }),
-  }));
+});
 
 /** Where the content comes from: the server's AdminPanel or a client's AdminWorld. */
 interface ContentSource {
   get(file: string): unknown;
   onChange(file: string, handler: () => void): void;
+  records<T>(file: string, readOne: RecordReader<T>): ReadonlyMap<string, T>;
 }
 
 /** Rarities from the panel: key -> colour. */
@@ -221,41 +209,44 @@ export const FILES = [
   "stashes",
   "benches",
 ] as const;
-export type ContentFile = (typeof FILES)[number];
 
-/** Every panel file, parsed once and again after each change; `subscribe` hears which file changed. */
+/** Files parsed whole again after each change; `subscribe` hears which one changed. */
+type WholeFile = "items" | "rarities" | "settings";
+
+/**
+ * Every panel file: items, rarities and settings parsed again after each change, shops, stashes and benches kept
+ * per record by the source (`records`: one edit re-reads one record; client points follow with `RecordObjects`).
+ */
 export class InventoryContent {
   items: ItemList;
   settings: Settings;
-  shops: Map<string, Shop>;
-  stashes: Map<string, Stash>;
-  benches: Map<string, Bench>;
+  readonly shops: ReadonlyMap<string, Shop>;
+  readonly stashes: ReadonlyMap<string, Stash>;
+  readonly benches: ReadonlyMap<string, Bench>;
   /** Rarity key -> colour (`#rrggbb`). */
   rarities: Map<string, string>;
-  private readonly listeners: Array<(file: ContentFile) => void> = [];
+  private readonly listeners: Array<(file: WholeFile) => void> = [];
 
   constructor(private readonly source: ContentSource) {
     this.items = new ItemList(source.get("items"));
     this.settings = readSettings(source.get("settings"));
-    this.shops = readShops(source.get("shops"));
-    this.stashes = readStashes(source.get("stashes"));
-    this.benches = readBenches(source.get("benches"));
+    this.shops = source.records("shops", readShop);
+    this.stashes = source.records("stashes", readStash);
+    this.benches = source.records("benches", readBench);
     this.rarities = readRarities(source.get("rarities"));
-    for (const file of FILES) source.onChange(file, () => this.reload(file));
+    for (const file of ["items", "rarities", "settings"] as const)
+      source.onChange(file, () => this.reload(file));
   }
 
-  subscribe(listener: (file: ContentFile) => void): void {
+  subscribe(listener: (file: WholeFile) => void): void {
     this.listeners.push(listener);
   }
 
-  private reload(file: ContentFile): void {
+  private reload(file: WholeFile): void {
     const raw = this.source.get(file);
     if (file === "items") this.items = new ItemList(raw);
     else if (file === "settings") this.settings = readSettings(raw);
-    else if (file === "shops") this.shops = readShops(raw);
-    else if (file === "stashes") this.stashes = readStashes(raw);
-    else if (file === "rarities") this.rarities = readRarities(raw);
-    else this.benches = readBenches(raw);
+    else this.rarities = readRarities(raw);
     for (const listener of this.listeners) listener(file);
   }
 }

@@ -3,11 +3,11 @@ import {
   aiLog,
   coordsOf,
   onClientCallback,
+  online,
   resourceExport,
 } from "@aicore-fivem/lib/server";
 import { nearPlace } from "common/content";
 import { EVENTS, type ActionResult } from "common/events";
-import { allowed } from "./access";
 import { content } from "./content";
 import { drops } from "./drops";
 import { inventories } from "./registry";
@@ -46,7 +46,7 @@ onClientCallback(
     const p = coordsOf(source);
     if (!shop || !inventory || !nearPlace(shop, p.x, p.y, p.z))
       return fail("INV_ERR_FAR");
-    if (!allowed(source, shop)) return fail("INV_ERR_DENIED");
+    if (!online.allows(source, shop.access)) return fail("INV_ERR_DENIED");
     const product = shop.items.find((row) => row.name === name);
     const def = content.items.get(name);
     if (!product || !def) return fail("INV_ERR_GONE");
@@ -83,7 +83,7 @@ onClientCallback(
     const p = coordsOf(source);
     if (!bench || !recipe || !inventory || !nearPlace(bench, p.x, p.y, p.z))
       return fail("INV_ERR_FAR");
-    if (!allowed(source, bench)) return fail("INV_ERR_DENIED");
+    if (!online.allows(source, bench.access)) return fail("INV_ERR_DENIED");
     if (crafting.has(source)) return fail("INV_ERR_BUSY");
     const result = content.items.get(recipe.result);
     if (!result) return fail("INV_ERR_GONE");

@@ -88,7 +88,61 @@ function readVec3(value) {
 const fail = (error) => ({
 	ok: !1,
 	error
-}), isPublic = (rule) => rule.jobs.length === 0 && rule.gangs.length === 0, BLIP_STYLE_FIELDS = {
+}), normalizePlate = (plate) => plate.trim().toUpperCase(), names$3 = (v) => Array.isArray(v) ? v.filter((x) => typeof x == "string") : [];
+function readAccess(value) {
+	let v = record(value), grades = {};
+	for (let [name, grade] of Object.entries(record(v.grades))) typeof grade == "number" && Number.isInteger(grade) && grade >= 0 && (grades[name] = grade);
+	return {
+		jobs: names$3(v.jobs),
+		gangs: names$3(v.gangs),
+		grades,
+		onDuty: bool(v.onDuty, !1)
+	};
+}
+const isPublic = (rule) => rule.jobs.length === 0 && rule.gangs.length === 0, ACCESS_FIELDS = {
+	jobs: {
+		type: "names",
+		lookup: "job",
+		optional: !0
+	},
+	gangs: {
+		type: "names",
+		lookup: "gang",
+		optional: !0
+	},
+	onDuty: {
+		type: "bool",
+		optional: !0
+	}
+};
+function accessFields() {
+	return [
+		{
+			widget: "tags",
+			lookup: "job",
+			path: "jobs",
+			label: "ADMIN_F_ACCESS_JOBS",
+			hint: "ADMIN_H_ACCESS_JOBS",
+			placeholder: "ADMIN_P_ACCESS_JOBS"
+		},
+		{
+			widget: "tags",
+			lookup: "gang",
+			path: "gangs",
+			label: "ADMIN_F_ACCESS_GANGS",
+			hint: "ADMIN_H_ACCESS_GANGS",
+			placeholder: "ADMIN_P_ACCESS_GANGS"
+		},
+		{
+			widget: "switch",
+			path: "onDuty",
+			label: "ADMIN_F_ACCESS_ON_DUTY",
+			hint: "ADMIN_H_ACCESS_ON_DUTY"
+		}
+	];
+}
+// ../../../packages/lib/src/shared/blipStyle.ts
+const BLIP_STYLE_FIELDS = {
 	sprite: {
 		type: "number",
 		min: 0,
@@ -117,7 +171,7 @@ function readBlipStyle(value, fallback) {
 }
 // ../../../packages/lib/src/shared/records.ts
 const isObject = (value) => typeof value == "object" && !!value && !Array.isArray(value);
-function readRecords$1(raw, readOne) {
+function readRecords(raw, readOne) {
 	let out = new Map();
 	if (!isObject(raw)) return out;
 	for (let key in raw) {
@@ -157,7 +211,7 @@ var FileViews = class {
 	}
 	reset(raw) {
 		this.map.clear();
-		for (let [key, value] of readRecords$1(raw, this.readOne)) this.map.set(key, value);
+		for (let [key, value] of readRecords(raw, this.readOne)) this.map.set(key, value);
 	}
 	update(key, value, whole) {
 		if (key === void 0) return this.reset(whole);
@@ -15822,6 +15876,8 @@ async function createDatabaseTables(resource, file) {
 		else for (let [name, definition] of statement.columns) columns.has(name) || (await mysql.query(`ALTER TABLE \`${statement.table}\` ADD COLUMN ${definition}`), log$2.info(`^2added column ${statement.table}.${name}^7 (${resource})`));
 	}
 }
+// ../../../packages/lib/src/fivem/byResource.ts
+const plateOf = (vehicle) => GetVehicleNumberPlateText(vehicle).trim().toUpperCase();
 let log$1 = null;
 var ScheduledJob = class {
 	interval;
@@ -16205,18 +16261,10 @@ function readPlace(id, v) {
 		y: num(c.y, 0),
 		z: num(c.z, 0),
 		radius: num(v.radius, 2, .5, 30),
-		jobs: names$1(v.jobs)
+		access: readAccess(v)
 	};
 }
-function readRecords(raw, read) {
-	let out = new Map();
-	for (let [id, value] of Object.entries(record(raw))) {
-		let item = read(id, record(value));
-		item && out.set(id, item);
-	}
-	return out;
-}
-const readShops = (raw) => readRecords(raw, (id, v) => ({
+const readShop = (id, v) => ({
 	...readPlace(id, v),
 	ped: readPlacePed(v.ped),
 	blip: bool(v.blip, !0),
@@ -16229,12 +16277,11 @@ const readShops = (raw) => readRecords(raw, (id, v) => ({
 			price: int(r.price, 0, 0, 1e8)
 		}] : [];
 	})
-})), readStashes = (raw) => readRecords(raw, (id, v) => ({
+}), readStash = (id, v) => ({
 	...readPlace(id, v),
-	gangs: names$1(v.gangs),
 	personal: bool(v.personal, !1),
 	size: grid(v, 6, 1e5)
-})), readBenches = (raw) => readRecords(raw, (id, v) => ({
+}), readBench = (id, v) => ({
 	...readPlace(id, v),
 	recipes: (Array.isArray(v.recipes) ? v.recipes : []).flatMap((row) => {
 		let r = record(row), result = str(r.result, "").toLowerCase();
@@ -16245,7 +16292,7 @@ const readShops = (raw) => readRecords(raw, (id, v) => ({
 			ingredients: parseIngredients(str(r.ingredients, "", 400))
 		}] : [];
 	})
-}));
+});
 function readRarities(raw) {
 	let out = new Map();
 	if (typeof raw != "object" || !raw) return out;
@@ -16255,14 +16302,6 @@ function readRarities(raw) {
 	}
 	return out;
 }
-const FILES = [
-	"items",
-	"rarities",
-	"settings",
-	"shops",
-	"stashes",
-	"benches"
-];
 var InventoryContent = class {
 	source;
 	items;
@@ -16273,15 +16312,19 @@ var InventoryContent = class {
 	rarities;
 	listeners = [];
 	constructor(source) {
-		this.source = source, this.items = new ItemList(source.get("items")), this.settings = readSettings(source.get("settings")), this.shops = readShops(source.get("shops")), this.stashes = readStashes(source.get("stashes")), this.benches = readBenches(source.get("benches")), this.rarities = readRarities(source.get("rarities"));
-		for (let file of FILES) source.onChange(file, () => this.reload(file));
+		this.source = source, this.items = new ItemList(source.get("items")), this.settings = readSettings(source.get("settings")), this.shops = source.records("shops", readShop), this.stashes = source.records("stashes", readStash), this.benches = source.records("benches", readBench), this.rarities = readRarities(source.get("rarities"));
+		for (let file of [
+			"items",
+			"rarities",
+			"settings"
+		]) source.onChange(file, () => this.reload(file));
 	}
 	subscribe(listener) {
 		this.listeners.push(listener);
 	}
 	reload(file) {
 		let raw = this.source.get(file);
-		file === "items" ? this.items = new ItemList(raw) : file === "settings" ? this.settings = readSettings(raw) : file === "shops" ? this.shops = readShops(raw) : file === "stashes" ? this.stashes = readStashes(raw) : file === "rarities" ? this.rarities = readRarities(raw) : this.benches = readBenches(raw);
+		file === "items" ? this.items = new ItemList(raw) : file === "settings" ? this.settings = readSettings(raw) : this.rarities = readRarities(raw);
 		for (let listener of this.listeners) listener(file);
 	}
 };
@@ -16326,14 +16369,7 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 		step: .5,
 		unit: "m"
 	},
-	{
-		widget: "tags",
-		lookup: "job",
-		path: "jobs",
-		label: "ADMIN_F_JOBS",
-		hint: "ADMIN_H_JOBS",
-		placeholder: "ADMIN_P_JOBS"
-	}
+	...accessFields()
 ], gridFields = (path) => [{
 	widget: "number",
 	path: `${path}rows`,
@@ -16354,7 +16390,7 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 	label: text(48),
 	coords: { type: "vec3" },
 	radius: spec.num(.5, 30),
-	jobs: names
+	...ACCESS_FIELDS
 }, content = new InventoryContent(new AdminPanel({
 	title: "ADMIN_TITLE",
 	icon: "box-open",
@@ -16558,7 +16594,6 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 			},
 			sections: {
 				...placeSections,
-				gangs: names,
 				personal: { type: "bool" },
 				rows: spec.int(1, 50),
 				maxWeight: spec.int(0, 1e7)
@@ -16980,14 +17015,6 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 				desc: "ADMIN_C_STASH_DESC",
 				fields: [
 					...place("ADMIN_F_STASH_LABEL"),
-					{
-						widget: "tags",
-						lookup: "gang",
-						path: "gangs",
-						label: "ADMIN_F_GANGS",
-						hint: "ADMIN_H_GANGS",
-						placeholder: "ADMIN_P_GANGS"
-					},
 					{
 						widget: "switch",
 						path: "personal",
@@ -17548,15 +17575,6 @@ every(3e4, () => {
 	resource === ResourceName && saveNow("resource stop");
 });
 // resource/server/access.ts
-function allowed(source, place) {
-	let gangs = place.gangs ?? [];
-	if (place.jobs.length === 0 && gangs.length === 0 || gangs.length > 0 && online.gangs(source).some((g) => gangs.includes(g))) return !0;
-	let grades = place.grades ?? {};
-	return place.jobs.some((job) => {
-		let grade = online.jobGrade(source, job);
-		return grade !== null && grade >= (grades[job] ?? 0);
-	});
-}
 const charIdOf = (source) => online.character(source)?.id ?? null, reach = new PlayerMap();
 function setReach(source, check) {
 	reach.set(source, check);
@@ -17671,7 +17689,7 @@ onClientCallback(EVENTS.buy, {
 }, (source, shopId, name, count) => {
 	let shop = content.shops.get(shopId), inventory = inventories.playerOf(source), p = coordsOf(source);
 	if (!shop || !inventory || !nearPlace(shop, p.x, p.y, p.z)) return fail("INV_ERR_FAR");
-	if (!allowed(source, shop)) return fail("INV_ERR_DENIED");
+	if (!online.allows(source, shop.access)) return fail("INV_ERR_DENIED");
 	let product = shop.items.find((row) => row.name === name), def = content.items.get(name);
 	if (!product || !def) return fail("INV_ERR_GONE");
 	if (!inventory.planAdd(def, count, {})) return fail("INV_ERR_NO_SPACE");
@@ -17696,7 +17714,7 @@ onClientCallback(EVENTS.craft, {
 }, (source, benchId, index) => {
 	let bench = content.benches.get(benchId), recipe = bench?.recipes[index], inventory = inventories.playerOf(source), p = coordsOf(source);
 	if (!bench || !recipe || !inventory || !nearPlace(bench, p.x, p.y, p.z)) return fail("INV_ERR_FAR");
-	if (!allowed(source, bench)) return fail("INV_ERR_DENIED");
+	if (!online.allows(source, bench.access)) return fail("INV_ERR_DENIED");
 	if (crafting.has(source)) return fail("INV_ERR_BUSY");
 	let result = content.items.get(recipe.result);
 	if (!result) return fail("INV_ERR_GONE");
@@ -17914,7 +17932,7 @@ function resolve(inv) {
 	}
 	if (typeof inv != "string") return;
 	let asSource = Number(inv);
-	return Number.isInteger(asSource) && asSource > 0 ? inventories.playerOf(asSource) : inventories.get(inv) ?? inventories.get(`stash:${inv}`) ?? inventories.get(`trunk:${inv.toUpperCase()}`) ?? inventories.get(`glovebox:${inv.toUpperCase()}`);
+	return Number.isInteger(asSource) && asSource > 0 ? inventories.playerOf(asSource) : inventories.get(inv) ?? inventories.get(`stash:${inv}`) ?? inventories.get(`trunk:${normalizePlate(inv)}`) ?? inventories.get(`glovebox:${normalizePlate(inv)}`);
 }
 const metaOf = (v) => isRecord(v) ? { ...v } : {};
 function addItem(inv, name, count, metadata, slot) {
@@ -17954,9 +17972,12 @@ function registerStash(name, label, slots, maxWeight, access = {}) {
 		y: coords?.y ?? 0,
 		z: coords?.z ?? 0,
 		radius: 3,
-		jobs: Object.keys(groups),
-		grades: groups,
-		gangs: [],
+		access: {
+			jobs: Object.keys(groups),
+			gangs: [],
+			grades: groups,
+			onDuty: !1
+		},
 		personal,
 		size: {
 			rows: rowsFor(slots),
@@ -18027,12 +18048,12 @@ function definitionView(name) {
 	} : null;
 }
 // resource/server/open.ts
-const FAR = fail("INV_ERR_FAR"), DENIED = fail("INV_ERR_DENIED"), GONE = fail("INV_ERR_GONE"), plateOf = (vehicle) => GetVehicleNumberPlateText(vehicle).trim().toUpperCase(), owned = new EntityState(VEHICLE_BAGS.owned, stateBoolean), isOwned = (vehicle) => owned.get(vehicle) === !0, vehicleIds = new EntityState(VEHICLE_BAGS.id, stateNumber), temporary = new Map(), adopted = new Set();
+const FAR = fail("INV_ERR_FAR"), DENIED = fail("INV_ERR_DENIED"), GONE = fail("INV_ERR_GONE"), owned = new EntityState(VEHICLE_BAGS.owned, stateBoolean), isOwned = (vehicle) => owned.get(vehicle) === !0, vehicleIds = new EntityState(VEHICLE_BAGS.id, stateNumber), temporary = new Map(), adopted = new Set();
 async function adoptPlateRow(kind, vehicleId, id) {
 	if (adopted.has(id) || inventories.get(id)) return;
 	adopted.add(id);
 	let registered = optionalExport("ai-vehicles")?.GetVehicle(vehicleId)?.plate;
-	typeof registered == "string" && registered.trim() !== "" && await renameInventory(`${kind}:${registered.trim().toUpperCase()}`, id);
+	typeof registered == "string" && registered.trim() !== "" && await renameInventory(`${kind}:${normalizePlate(registered)}`, id);
 }
 async function vehicleInventory(vehicle, kind) {
 	let plate = plateOf(vehicle), shape = {
@@ -18085,7 +18106,7 @@ async function open(source, target) {
 		case "stash": {
 			let stash = content.stashes.get(target.id) ?? scriptStashes.get(target.id), p = coordsOf(source);
 			if (!stash || stash.scriptOnly || !nearPlace(stash, p.x, p.y, p.z)) return FAR;
-			if (!allowed(source, stash)) return DENIED;
+			if (!online.allows(source, stash.access)) return DENIED;
 			let charId = charIdOf(source);
 			if (charId === null) return DENIED;
 			let id = stash.personal ? `stash:${stash.id}:${charId}` : `stash:${stash.id}`, inventory = await inventories.load(id, {
@@ -18128,7 +18149,7 @@ async function open(source, target) {
 		case "shop":
 		case "bench": {
 			let place = target.kind === "shop" ? content.shops.get(target.id) : content.benches.get(target.id), p = coordsOf(source);
-			return !place || !nearPlace(place, p.x, p.y, p.z) ? FAR : allowed(source, place) ? (inventories.close(source), {
+			return !place || !nearPlace(place, p.x, p.y, p.z) ? FAR : online.allows(source, place.access) ? (inventories.close(source), {
 				ok: !0,
 				other: null,
 				panel: {
