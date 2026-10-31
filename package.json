@@ -7,7 +7,7 @@
   "author": {
     "name": "TGIANN"
   },
-  "repository": "github:TGIANN/ai-inventory",
+  "repository": "github:aifivem/ai-inventory",
   "type": "module",
   "fxDependencies": [
     "/onesync",

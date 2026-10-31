@@ -3,11 +3,11 @@
   "shop_innocence": {
     "label": "24/7 Supermarket",
     "coords": {
-      "x": 25.74,
-      "y": -1347.29,
-      "z": 29.49
+      "x": 24.47,
+      "y": -1346.62,
+      "z": 29.5
     },
-    "radius": 2.5,
+    "radius": 1.5,
     "jobs": [],
     "blip": true,
     "accounts": [
@@ -39,16 +39,1065 @@
         "name": "radio",
         "price": 250
       }
-    ]
+    ],
+    "ped": {
+      "model": "mp_m_shopkeep_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": 24.47,
+        "y": -1346.62,
+        "z": 29.5,
+        "heading": 271.66
+      }
+    }
   },
-  "ammunation_pillbox": {
+  "247supermarket2": {
+    "label": "24/7 Supermarket",
+    "coords": {
+      "x": -3039.54,
+      "y": 584.38,
+      "z": 7.91
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "water",
+        "price": 5
+      },
+      {
+        "name": "sprunk",
+        "price": 7
+      },
+      {
+        "name": "burger",
+        "price": 10
+      },
+      {
+        "name": "bandage",
+        "price": 25
+      },
+      {
+        "name": "phone",
+        "price": 350
+      },
+      {
+        "name": "radio",
+        "price": 250
+      }
+    ],
+    "ped": {
+      "model": "mp_m_shopkeep_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": -3039.54,
+        "y": 584.38,
+        "z": 7.91,
+        "heading": 17.27
+      }
+    }
+  },
+  "247supermarket3": {
+    "label": "24/7 Supermarket",
+    "coords": {
+      "x": -3242.97,
+      "y": 1000.01,
+      "z": 12.83
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "water",
+        "price": 5
+      },
+      {
+        "name": "sprunk",
+        "price": 7
+      },
+      {
+        "name": "burger",
+        "price": 10
+      },
+      {
+        "name": "bandage",
+        "price": 25
+      },
+      {
+        "name": "phone",
+        "price": 350
+      },
+      {
+        "name": "radio",
+        "price": 250
+      }
+    ],
+    "ped": {
+      "model": "mp_m_shopkeep_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": -3242.97,
+        "y": 1000.01,
+        "z": 12.83,
+        "heading": 357.57
+      }
+    }
+  },
+  "247supermarket4": {
+    "label": "24/7 Supermarket",
+    "coords": {
+      "x": 1728.07,
+      "y": 6415.63,
+      "z": 35.04
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "water",
+        "price": 5
+      },
+      {
+        "name": "sprunk",
+        "price": 7
+      },
+      {
+        "name": "burger",
+        "price": 10
+      },
+      {
+        "name": "bandage",
+        "price": 25
+      },
+      {
+        "name": "phone",
+        "price": 350
+      },
+      {
+        "name": "radio",
+        "price": 250
+      }
+    ],
+    "ped": {
+      "model": "mp_m_shopkeep_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": 1728.07,
+        "y": 6415.63,
+        "z": 35.04,
+        "heading": 242.95
+      }
+    }
+  },
+  "247supermarket5": {
+    "label": "24/7 Supermarket",
+    "coords": {
+      "x": 1959.82,
+      "y": 3740.48,
+      "z": 32.34
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "water",
+        "price": 5
+      },
+      {
+        "name": "sprunk",
+        "price": 7
+      },
+      {
+        "name": "burger",
+        "price": 10
+      },
+      {
+        "name": "bandage",
+        "price": 25
+      },
+      {
+        "name": "phone",
+        "price": 350
+      },
+      {
+        "name": "radio",
+        "price": 250
+      }
+    ],
+    "ped": {
+      "model": "mp_m_shopkeep_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": 1959.82,
+        "y": 3740.48,
+        "z": 32.34,
+        "heading": 301.57
+      }
+    }
+  },
+  "247supermarket6": {
+    "label": "24/7 Supermarket",
+    "coords": {
+      "x": 549.13,
+      "y": 2670.85,
+      "z": 42.16
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "water",
+        "price": 5
+      },
+      {
+        "name": "sprunk",
+        "price": 7
+      },
+      {
+        "name": "burger",
+        "price": 10
+      },
+      {
+        "name": "bandage",
+        "price": 25
+      },
+      {
+        "name": "phone",
+        "price": 350
+      },
+      {
+        "name": "radio",
+        "price": 250
+      }
+    ],
+    "ped": {
+      "model": "mp_m_shopkeep_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": 549.13,
+        "y": 2670.85,
+        "z": 42.16,
+        "heading": 99.39
+      }
+    }
+  },
+  "247supermarket7": {
+    "label": "24/7 Supermarket",
+    "coords": {
+      "x": 2677.47,
+      "y": 3279.76,
+      "z": 55.24
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "water",
+        "price": 5
+      },
+      {
+        "name": "sprunk",
+        "price": 7
+      },
+      {
+        "name": "burger",
+        "price": 10
+      },
+      {
+        "name": "bandage",
+        "price": 25
+      },
+      {
+        "name": "phone",
+        "price": 350
+      },
+      {
+        "name": "radio",
+        "price": 250
+      }
+    ],
+    "ped": {
+      "model": "mp_m_shopkeep_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": 2677.47,
+        "y": 3279.76,
+        "z": 55.24,
+        "heading": 335.08
+      }
+    }
+  },
+  "247supermarket8": {
+    "label": "24/7 Supermarket",
+    "coords": {
+      "x": 2556.66,
+      "y": 380.84,
+      "z": 108.62
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "water",
+        "price": 5
+      },
+      {
+        "name": "sprunk",
+        "price": 7
+      },
+      {
+        "name": "burger",
+        "price": 10
+      },
+      {
+        "name": "bandage",
+        "price": 25
+      },
+      {
+        "name": "phone",
+        "price": 350
+      },
+      {
+        "name": "radio",
+        "price": 250
+      }
+    ],
+    "ped": {
+      "model": "mp_m_shopkeep_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": 2556.66,
+        "y": 380.84,
+        "z": 108.62,
+        "heading": 356.67
+      }
+    }
+  },
+  "247supermarket9": {
+    "label": "24/7 Supermarket",
+    "coords": {
+      "x": 372.66,
+      "y": 326.98,
+      "z": 103.57
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "water",
+        "price": 5
+      },
+      {
+        "name": "sprunk",
+        "price": 7
+      },
+      {
+        "name": "burger",
+        "price": 10
+      },
+      {
+        "name": "bandage",
+        "price": 25
+      },
+      {
+        "name": "phone",
+        "price": 350
+      },
+      {
+        "name": "radio",
+        "price": 250
+      }
+    ],
+    "ped": {
+      "model": "mp_m_shopkeep_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": 372.66,
+        "y": 326.98,
+        "z": 103.57,
+        "heading": 253.73
+      }
+    }
+  },
+  "ltdgasoline": {
+    "label": "LTD Gasoline",
+    "coords": {
+      "x": -47.02,
+      "y": -1758.23,
+      "z": 29.42
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "water",
+        "price": 5
+      },
+      {
+        "name": "sprunk",
+        "price": 7
+      },
+      {
+        "name": "burger",
+        "price": 10
+      },
+      {
+        "name": "bandage",
+        "price": 25
+      },
+      {
+        "name": "phone",
+        "price": 350
+      },
+      {
+        "name": "radio",
+        "price": 250
+      }
+    ],
+    "ped": {
+      "model": "mp_m_shopkeep_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": -47.02,
+        "y": -1758.23,
+        "z": 29.42,
+        "heading": 45.05
+      }
+    }
+  },
+  "ltdgasoline2": {
+    "label": "LTD Gasoline",
+    "coords": {
+      "x": -706.06,
+      "y": -913.97,
+      "z": 19.22
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "water",
+        "price": 5
+      },
+      {
+        "name": "sprunk",
+        "price": 7
+      },
+      {
+        "name": "burger",
+        "price": 10
+      },
+      {
+        "name": "bandage",
+        "price": 25
+      },
+      {
+        "name": "phone",
+        "price": 350
+      },
+      {
+        "name": "radio",
+        "price": 250
+      }
+    ],
+    "ped": {
+      "model": "mp_m_shopkeep_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": -706.06,
+        "y": -913.97,
+        "z": 19.22,
+        "heading": 88.04
+      }
+    }
+  },
+  "ltdgasoline3": {
+    "label": "LTD Gasoline",
+    "coords": {
+      "x": -1820.02,
+      "y": 794.03,
+      "z": 138.09
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "water",
+        "price": 5
+      },
+      {
+        "name": "sprunk",
+        "price": 7
+      },
+      {
+        "name": "burger",
+        "price": 10
+      },
+      {
+        "name": "bandage",
+        "price": 25
+      },
+      {
+        "name": "phone",
+        "price": 350
+      },
+      {
+        "name": "radio",
+        "price": 250
+      }
+    ],
+    "ped": {
+      "model": "mp_m_shopkeep_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": -1820.02,
+        "y": 794.03,
+        "z": 138.09,
+        "heading": 135.45
+      }
+    }
+  },
+  "ltdgasoline4": {
+    "label": "LTD Gasoline",
+    "coords": {
+      "x": 1164.71,
+      "y": -322.94,
+      "z": 69.21
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "water",
+        "price": 5
+      },
+      {
+        "name": "sprunk",
+        "price": 7
+      },
+      {
+        "name": "burger",
+        "price": 10
+      },
+      {
+        "name": "bandage",
+        "price": 25
+      },
+      {
+        "name": "phone",
+        "price": 350
+      },
+      {
+        "name": "radio",
+        "price": 250
+      }
+    ],
+    "ped": {
+      "model": "mp_m_shopkeep_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": 1164.71,
+        "y": -322.94,
+        "z": 69.21,
+        "heading": 101.72
+      }
+    }
+  },
+  "ltdgasoline5": {
+    "label": "LTD Gasoline",
+    "coords": {
+      "x": 1697.87,
+      "y": 4922.96,
+      "z": 42.06
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "water",
+        "price": 5
+      },
+      {
+        "name": "sprunk",
+        "price": 7
+      },
+      {
+        "name": "burger",
+        "price": 10
+      },
+      {
+        "name": "bandage",
+        "price": 25
+      },
+      {
+        "name": "phone",
+        "price": 350
+      },
+      {
+        "name": "radio",
+        "price": 250
+      }
+    ],
+    "ped": {
+      "model": "mp_m_shopkeep_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": 1697.87,
+        "y": 4922.96,
+        "z": 42.06,
+        "heading": 324.71
+      }
+    }
+  },
+  "robsliquor": {
+    "label": "Rob's Liquor",
+    "coords": {
+      "x": -1221.58,
+      "y": -908.15,
+      "z": 12.33
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "water",
+        "price": 5
+      },
+      {
+        "name": "sprunk",
+        "price": 7
+      }
+    ],
+    "ped": {
+      "model": "mp_m_shopkeep_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": -1221.58,
+        "y": -908.15,
+        "z": 12.33,
+        "heading": 35.49
+      }
+    }
+  },
+  "robsliquor2": {
+    "label": "Rob's Liquor",
+    "coords": {
+      "x": -1486.59,
+      "y": -377.68,
+      "z": 40.16
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "water",
+        "price": 5
+      },
+      {
+        "name": "sprunk",
+        "price": 7
+      }
+    ],
+    "ped": {
+      "model": "mp_m_shopkeep_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": -1486.59,
+        "y": -377.68,
+        "z": 40.16,
+        "heading": 139.51
+      }
+    }
+  },
+  "robsliquor3": {
+    "label": "Rob's Liquor",
+    "coords": {
+      "x": -2966.39,
+      "y": 391.42,
+      "z": 15.04
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "water",
+        "price": 5
+      },
+      {
+        "name": "sprunk",
+        "price": 7
+      }
+    ],
+    "ped": {
+      "model": "mp_m_shopkeep_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": -2966.39,
+        "y": 391.42,
+        "z": 15.04,
+        "heading": 87.48
+      }
+    }
+  },
+  "robsliquor4": {
+    "label": "Rob's Liquor",
+    "coords": {
+      "x": 1165.17,
+      "y": 2710.88,
+      "z": 38.16
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "water",
+        "price": 5
+      },
+      {
+        "name": "sprunk",
+        "price": 7
+      }
+    ],
+    "ped": {
+      "model": "mp_m_shopkeep_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": 1165.17,
+        "y": 2710.88,
+        "z": 38.16,
+        "heading": 179.43
+      }
+    }
+  },
+  "robsliquor5": {
+    "label": "Rob's Liquor",
+    "coords": {
+      "x": 1134.2,
+      "y": -982.91,
+      "z": 46.42
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "water",
+        "price": 5
+      },
+      {
+        "name": "sprunk",
+        "price": 7
+      }
+    ],
+    "ped": {
+      "model": "mp_m_shopkeep_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": 1134.2,
+        "y": -982.91,
+        "z": 46.42,
+        "heading": 277.24
+      }
+    }
+  },
+  "hardware": {
+    "label": "Hardware Store",
+    "coords": {
+      "x": 45.68,
+      "y": -1749.04,
+      "z": 29.61
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "lockpick",
+        "price": 200
+      },
+      {
+        "name": "weapon_wrench",
+        "price": 250
+      },
+      {
+        "name": "weapon_hammer",
+        "price": 250
+      },
+      {
+        "name": "phone",
+        "price": 850
+      },
+      {
+        "name": "radio",
+        "price": 250
+      },
+      {
+        "name": "binoculars",
+        "price": 50
+      },
+      {
+        "name": "firework1",
+        "price": 50
+      },
+      {
+        "name": "firework2",
+        "price": 50
+      },
+      {
+        "name": "firework3",
+        "price": 50
+      },
+      {
+        "name": "firework4",
+        "price": 50
+      }
+    ],
+    "ped": {
+      "model": "mp_m_waremech_01",
+      "scenario": "WORLD_HUMAN_CLIPBOARD",
+      "coords": {
+        "x": 45.68,
+        "y": -1749.04,
+        "z": 29.61,
+        "heading": 53.13
+      }
+    }
+  },
+  "hardware2": {
+    "label": "Hardware Store",
+    "coords": {
+      "x": 2747.71,
+      "y": 3472.85,
+      "z": 55.67
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "lockpick",
+        "price": 200
+      },
+      {
+        "name": "weapon_wrench",
+        "price": 250
+      },
+      {
+        "name": "weapon_hammer",
+        "price": 250
+      },
+      {
+        "name": "phone",
+        "price": 850
+      },
+      {
+        "name": "radio",
+        "price": 250
+      },
+      {
+        "name": "binoculars",
+        "price": 50
+      },
+      {
+        "name": "firework1",
+        "price": 50
+      },
+      {
+        "name": "firework2",
+        "price": 50
+      },
+      {
+        "name": "firework3",
+        "price": 50
+      },
+      {
+        "name": "firework4",
+        "price": 50
+      }
+    ],
+    "ped": {
+      "model": "mp_m_waremech_01",
+      "scenario": "WORLD_HUMAN_CLIPBOARD",
+      "coords": {
+        "x": 2747.71,
+        "y": 3472.85,
+        "z": 55.67,
+        "heading": 255.08
+      }
+    }
+  },
+  "hardware3": {
+    "label": "Hardware Store",
+    "coords": {
+      "x": -421.83,
+      "y": 6136.13,
+      "z": 31.88
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "lockpick",
+        "price": 200
+      },
+      {
+        "name": "weapon_wrench",
+        "price": 250
+      },
+      {
+        "name": "weapon_hammer",
+        "price": 250
+      },
+      {
+        "name": "phone",
+        "price": 850
+      },
+      {
+        "name": "radio",
+        "price": 250
+      },
+      {
+        "name": "binoculars",
+        "price": 50
+      },
+      {
+        "name": "firework1",
+        "price": 50
+      },
+      {
+        "name": "firework2",
+        "price": 50
+      },
+      {
+        "name": "firework3",
+        "price": 50
+      },
+      {
+        "name": "firework4",
+        "price": 50
+      }
+    ],
+    "ped": {
+      "model": "mp_m_waremech_01",
+      "scenario": "WORLD_HUMAN_CLIPBOARD",
+      "coords": {
+        "x": -421.83,
+        "y": 6136.13,
+        "z": 31.88,
+        "heading": 228.2
+      }
+    }
+  },
+  "ammunation": {
     "label": "Ammu-Nation",
     "coords": {
-      "x": 22.09,
-      "y": -1107.28,
-      "z": 29.8
+      "x": -661.96,
+      "y": -933.53,
+      "z": 21.83
     },
-    "radius": 2.5,
+    "radius": 1.5,
     "jobs": [],
     "blip": true,
     "accounts": [
@@ -76,6 +1125,871 @@
         "name": "armour",
         "price": 1000
       }
+    ],
+    "ped": {
+      "model": "s_m_y_ammucity_01",
+      "scenario": "WORLD_HUMAN_COP_IDLES",
+      "coords": {
+        "x": -661.96,
+        "y": -933.53,
+        "z": 21.83,
+        "heading": 177.05
+      }
+    }
+  },
+  "ammunation2": {
+    "label": "Ammu-Nation",
+    "coords": {
+      "x": 809.68,
+      "y": -2159.13,
+      "z": 29.62
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "weapon_pistol",
+        "price": 2500
+      },
+      {
+        "name": "ammo-9",
+        "price": 5
+      },
+      {
+        "name": "weapon_knife",
+        "price": 300
+      },
+      {
+        "name": "at_flashlight",
+        "price": 200
+      },
+      {
+        "name": "armour",
+        "price": 1000
+      }
+    ],
+    "ped": {
+      "model": "s_m_y_ammucity_01",
+      "scenario": "WORLD_HUMAN_COP_IDLES",
+      "coords": {
+        "x": 809.68,
+        "y": -2159.13,
+        "z": 29.62,
+        "heading": 1.43
+      }
+    }
+  },
+  "ammunation3": {
+    "label": "Ammu-Nation",
+    "coords": {
+      "x": 1692.67,
+      "y": 3761.38,
+      "z": 34.71
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "weapon_pistol",
+        "price": 2500
+      },
+      {
+        "name": "ammo-9",
+        "price": 5
+      },
+      {
+        "name": "weapon_knife",
+        "price": 300
+      },
+      {
+        "name": "at_flashlight",
+        "price": 200
+      },
+      {
+        "name": "armour",
+        "price": 1000
+      }
+    ],
+    "ped": {
+      "model": "s_m_y_ammucity_01",
+      "scenario": "WORLD_HUMAN_COP_IDLES",
+      "coords": {
+        "x": 1692.67,
+        "y": 3761.38,
+        "z": 34.71,
+        "heading": 227.65
+      }
+    }
+  },
+  "ammunation4": {
+    "label": "Ammu-Nation",
+    "coords": {
+      "x": -331.23,
+      "y": 6085.37,
+      "z": 31.45
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "weapon_pistol",
+        "price": 2500
+      },
+      {
+        "name": "ammo-9",
+        "price": 5
+      },
+      {
+        "name": "weapon_knife",
+        "price": 300
+      },
+      {
+        "name": "at_flashlight",
+        "price": 200
+      },
+      {
+        "name": "armour",
+        "price": 1000
+      }
+    ],
+    "ped": {
+      "model": "s_m_y_ammucity_01",
+      "scenario": "WORLD_HUMAN_COP_IDLES",
+      "coords": {
+        "x": -331.23,
+        "y": 6085.37,
+        "z": 31.45,
+        "heading": 228.02
+      }
+    }
+  },
+  "ammunation5": {
+    "label": "Ammu-Nation",
+    "coords": {
+      "x": 253.63,
+      "y": -51.02,
+      "z": 69.94
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "weapon_pistol",
+        "price": 2500
+      },
+      {
+        "name": "ammo-9",
+        "price": 5
+      },
+      {
+        "name": "weapon_knife",
+        "price": 300
+      },
+      {
+        "name": "at_flashlight",
+        "price": 200
+      },
+      {
+        "name": "armour",
+        "price": 1000
+      }
+    ],
+    "ped": {
+      "model": "s_m_y_ammucity_01",
+      "scenario": "WORLD_HUMAN_COP_IDLES",
+      "coords": {
+        "x": 253.63,
+        "y": -51.02,
+        "z": 69.94,
+        "heading": 72.91
+      }
+    }
+  },
+  "ammunation_pillbox": {
+    "label": "Ammu-Nation",
+    "coords": {
+      "x": 23,
+      "y": -1105.67,
+      "z": 29.8
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "weapon_pistol",
+        "price": 2500
+      },
+      {
+        "name": "ammo-9",
+        "price": 5
+      },
+      {
+        "name": "weapon_knife",
+        "price": 300
+      },
+      {
+        "name": "at_flashlight",
+        "price": 200
+      },
+      {
+        "name": "armour",
+        "price": 1000
+      }
+    ],
+    "ped": {
+      "model": "s_m_y_ammucity_01",
+      "scenario": "WORLD_HUMAN_COP_IDLES",
+      "coords": {
+        "x": 23,
+        "y": -1105.67,
+        "z": 29.8,
+        "heading": 162.91
+      }
+    }
+  },
+  "ammunation7": {
+    "label": "Ammu-Nation",
+    "coords": {
+      "x": 2567.48,
+      "y": 292.59,
+      "z": 108.73
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "weapon_pistol",
+        "price": 2500
+      },
+      {
+        "name": "ammo-9",
+        "price": 5
+      },
+      {
+        "name": "weapon_knife",
+        "price": 300
+      },
+      {
+        "name": "at_flashlight",
+        "price": 200
+      },
+      {
+        "name": "armour",
+        "price": 1000
+      }
+    ],
+    "ped": {
+      "model": "s_m_y_ammucity_01",
+      "scenario": "WORLD_HUMAN_COP_IDLES",
+      "coords": {
+        "x": 2567.48,
+        "y": 292.59,
+        "z": 108.73,
+        "heading": 349.68
+      }
+    }
+  },
+  "ammunation8": {
+    "label": "Ammu-Nation",
+    "coords": {
+      "x": -1118.59,
+      "y": 2700.05,
+      "z": 18.55
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "weapon_pistol",
+        "price": 2500
+      },
+      {
+        "name": "ammo-9",
+        "price": 5
+      },
+      {
+        "name": "weapon_knife",
+        "price": 300
+      },
+      {
+        "name": "at_flashlight",
+        "price": 200
+      },
+      {
+        "name": "armour",
+        "price": 1000
+      }
+    ],
+    "ped": {
+      "model": "s_m_y_ammucity_01",
+      "scenario": "WORLD_HUMAN_COP_IDLES",
+      "coords": {
+        "x": -1118.59,
+        "y": 2700.05,
+        "z": 18.55,
+        "heading": 221.89
+      }
+    }
+  },
+  "ammunation9": {
+    "label": "Ammu-Nation",
+    "coords": {
+      "x": 841.92,
+      "y": -1035.32,
+      "z": 28.19
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "weapon_pistol",
+        "price": 2500
+      },
+      {
+        "name": "ammo-9",
+        "price": 5
+      },
+      {
+        "name": "weapon_knife",
+        "price": 300
+      },
+      {
+        "name": "at_flashlight",
+        "price": 200
+      },
+      {
+        "name": "armour",
+        "price": 1000
+      }
+    ],
+    "ped": {
+      "model": "s_m_y_ammucity_01",
+      "scenario": "WORLD_HUMAN_COP_IDLES",
+      "coords": {
+        "x": 841.92,
+        "y": -1035.32,
+        "z": 28.19,
+        "heading": 1.56
+      }
+    }
+  },
+  "ammunation10": {
+    "label": "Ammu-Nation",
+    "coords": {
+      "x": -1304.19,
+      "y": -395.12,
+      "z": 36.7
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "weapon_pistol",
+        "price": 2500
+      },
+      {
+        "name": "ammo-9",
+        "price": 5
+      },
+      {
+        "name": "weapon_knife",
+        "price": 300
+      },
+      {
+        "name": "at_flashlight",
+        "price": 200
+      },
+      {
+        "name": "armour",
+        "price": 1000
+      }
+    ],
+    "ped": {
+      "model": "s_m_y_ammucity_01",
+      "scenario": "WORLD_HUMAN_COP_IDLES",
+      "coords": {
+        "x": -1304.19,
+        "y": -395.12,
+        "z": 36.7,
+        "heading": 75.03
+      }
+    }
+  },
+  "ammunation11": {
+    "label": "Ammu-Nation",
+    "coords": {
+      "x": -3173.31,
+      "y": 1088.85,
+      "z": 20.84
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "weapon_pistol",
+        "price": 2500
+      },
+      {
+        "name": "ammo-9",
+        "price": 5
+      },
+      {
+        "name": "weapon_knife",
+        "price": 300
+      },
+      {
+        "name": "at_flashlight",
+        "price": 200
+      },
+      {
+        "name": "armour",
+        "price": 1000
+      }
+    ],
+    "ped": {
+      "model": "s_m_y_ammucity_01",
+      "scenario": "WORLD_HUMAN_COP_IDLES",
+      "coords": {
+        "x": -3173.31,
+        "y": 1088.85,
+        "z": 20.84,
+        "heading": 244.18
+      }
+    }
+  },
+  "weedshop": {
+    "label": "Smoke On The Water",
+    "coords": {
+      "x": -1168.26,
+      "y": -1573.2,
+      "z": 4.66
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "weapon_poolcue",
+        "price": 100
+      }
+    ],
+    "ped": {
+      "model": "a_m_y_hippy_01",
+      "scenario": "WORLD_HUMAN_SMOKING",
+      "coords": {
+        "x": -1168.26,
+        "y": -1573.2,
+        "z": 4.66,
+        "heading": 105.24
+      }
+    }
+  },
+  "seaword": {
+    "label": "Sea Word",
+    "coords": {
+      "x": -1687.03,
+      "y": -1072.18,
+      "z": 13.15
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [],
+    "ped": {
+      "model": "a_m_y_beach_01",
+      "scenario": "WORLD_HUMAN_STAND_IMPATIENT",
+      "coords": {
+        "x": -1687.03,
+        "y": -1072.18,
+        "z": 13.15,
+        "heading": 52.93
+      }
+    }
+  },
+  "leisureshop": {
+    "label": "Leisure Shop",
+    "coords": {
+      "x": -1505.91,
+      "y": 1511.95,
+      "z": 115.29
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "parachute",
+        "price": 2500
+      },
+      {
+        "name": "binoculars",
+        "price": 50
+      }
+    ],
+    "ped": {
+      "model": "a_m_y_beach_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": -1505.91,
+        "y": 1511.95,
+        "z": 115.29,
+        "heading": 257.13
+      }
+    }
+  },
+  "police": {
+    "label": "Police Shop",
+    "coords": {
+      "x": 461.8498,
+      "y": -981.0677,
+      "z": 30.6896
+    },
+    "radius": 1.5,
+    "jobs": [
+      "police"
+    ],
+    "blip": false,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "weapon_pistol",
+        "price": 0
+      },
+      {
+        "name": "weapon_stungun",
+        "price": 0
+      },
+      {
+        "name": "weapon_pumpshotgun",
+        "price": 0
+      },
+      {
+        "name": "weapon_smg",
+        "price": 0
+      },
+      {
+        "name": "weapon_carbinerifle",
+        "price": 0
+      },
+      {
+        "name": "weapon_nightstick",
+        "price": 0
+      },
+      {
+        "name": "weapon_flashlight",
+        "price": 0
+      },
+      {
+        "name": "ammo-9",
+        "price": 0
+      },
+      {
+        "name": "ammo-shotgun",
+        "price": 0
+      },
+      {
+        "name": "ammo-rifle",
+        "price": 0
+      },
+      {
+        "name": "armour",
+        "price": 0
+      },
+      {
+        "name": "radio",
+        "price": 0
+      }
+    ],
+    "ped": {
+      "model": "mp_m_securoguard_01",
+      "scenario": "WORLD_HUMAN_COP_IDLES",
+      "coords": {
+        "x": 461.8498,
+        "y": -981.0677,
+        "z": 30.6896,
+        "heading": 91.5892
+      }
+    }
+  },
+  "ambulance": {
+    "label": "Ambulance Shop",
+    "coords": {
+      "x": 309.93,
+      "y": -602.94,
+      "z": 43.29
+    },
+    "radius": 1.5,
+    "jobs": [
+      "ambulance"
+    ],
+    "blip": false,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "radio",
+        "price": 0
+      },
+      {
+        "name": "bandage",
+        "price": 0
+      },
+      {
+        "name": "weapon_flashlight",
+        "price": 0
+      },
+      {
+        "name": "weapon_fireextinguisher",
+        "price": 0
+      }
+    ],
+    "ped": {
+      "model": "s_m_m_doctor_01",
+      "scenario": "WORLD_HUMAN_STAND_MOBILE",
+      "coords": {
+        "x": 309.93,
+        "y": -602.94,
+        "z": 43.29,
+        "heading": 71.082
+      }
+    }
+  },
+  "mechanic": {
+    "label": "Mechanic Shop",
+    "coords": {
+      "x": -343.66,
+      "y": -140.78,
+      "z": 39.02
+    },
+    "radius": 1.5,
+    "jobs": [
+      "mechanic"
+    ],
+    "blip": false,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "repairkit",
+        "price": 5000
+      }
     ]
+  },
+  "mechanic2": {
+    "label": "Mechanic Shop",
+    "coords": {
+      "x": 1189.36,
+      "y": 2641,
+      "z": 38.44
+    },
+    "radius": 1.5,
+    "jobs": [
+      "mechanic2"
+    ],
+    "blip": false,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "repairkit",
+        "price": 5000
+      }
+    ]
+  },
+  "mechanic3": {
+    "label": "Mechanic Shop",
+    "coords": {
+      "x": -1156.56,
+      "y": -1999.85,
+      "z": 13.19
+    },
+    "radius": 1.5,
+    "jobs": [
+      "mechanic3"
+    ],
+    "blip": false,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "repairkit",
+        "price": 5000
+      }
+    ]
+  },
+  "bennys": {
+    "label": "Mechanic Shop",
+    "coords": {
+      "x": -195.8,
+      "y": -1318.24,
+      "z": 31.08
+    },
+    "radius": 1.5,
+    "jobs": [
+      "bennys"
+    ],
+    "blip": false,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "repairkit",
+        "price": 5000
+      }
+    ]
+  },
+  "beeker": {
+    "label": "Mechanic Shop",
+    "coords": {
+      "x": 100.92,
+      "y": 6616,
+      "z": 32.47
+    },
+    "radius": 1.5,
+    "jobs": [
+      "beeker"
+    ],
+    "blip": false,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "repairkit",
+        "price": 5000
+      }
+    ]
+  },
+  "prison": {
+    "label": "Canteen Shop",
+    "coords": {
+      "x": 1777.59,
+      "y": 2560.52,
+      "z": 44.62
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": true,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "water",
+        "price": 4
+      }
+    ]
+  },
+  "blackmarket": {
+    "label": "Black Market",
+    "coords": {
+      "x": -594.7032,
+      "y": -1616.3647,
+      "z": 33.0105
+    },
+    "radius": 1.5,
+    "jobs": [],
+    "blip": false,
+    "accounts": [
+      "cash",
+      "bank"
+    ],
+    "items": [
+      {
+        "name": "electronickit",
+        "price": 5000
+      },
+      {
+        "name": "drill",
+        "price": 5000
+      }
+    ],
+    "ped": {
+      "model": "a_m_y_smartcaspat_01",
+      "scenario": "WORLD_HUMAN_SMOKING",
+      "coords": {
+        "x": -594.7032,
+        "y": -1616.3647,
+        "z": 33.0105,
+        "heading": 170.6846
+      }
+    }
   }
 }

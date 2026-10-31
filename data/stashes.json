@@ -3,9 +3,9 @@
   "mrpd_lockers": {
     "label": "Police Locker",
     "coords": {
-      "x": 461.57,
-      "y": -995.94,
-      "z": 30.69
+      "x": 453.075,
+      "y": -980.124,
+      "z": 30.889
     },
     "radius": 1.5,
     "jobs": [
