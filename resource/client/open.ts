@@ -4,10 +4,11 @@ import {
   nearestVehicle,
   onServerEvent,
 } from "@aicore-fivem/lib/client";
+import { asArgs } from "@aicore-fivem/lib/shared";
 import { Locale } from "common";
 import { EVENTS } from "common/events";
 import { hotbarSlot } from "common/grid";
-import { toPanel, type OpenTarget } from "common/nui";
+import { toPanel, toShopView, type OpenTarget } from "common/nui";
 import { drops } from "./drops";
 import { hotbar, screen } from "./screen";
 import { state, toView } from "./state";
@@ -94,6 +95,11 @@ onServerEvent(
       ] as const,
   },
   (view, panel) => screen.show(view, panel),
+);
+onServerEvent(
+  EVENTS.scriptShop,
+  { args: ([shop]) => asArgs(toShopView(shop)) },
+  (shop) => screen.show(null, null, shop),
 );
 onServerEvent(EVENTS.forceClose, () => screen.otherClosed());
 onServerEvent(

@@ -216,3 +216,17 @@ export function toPanel(v: unknown): Panel | null {
   const key = id(v.id);
   return key ? { kind: v.kind, id: key } : null;
 }
+
+/** A shop a script opened (`EVENTS.scriptShop`): label and `{ name, price }` products. */
+export function toShopView(v: unknown): ShopView | null {
+  if (!isRecord(v) || !Array.isArray(v.items)) return null;
+  const key = id(v.id);
+  if (!key || typeof v.label !== "string") return null;
+  const items = (v.items as unknown[]).flatMap((row) => {
+    if (!isRecord(row)) return [];
+    const name = id(row.name);
+    const price = readInt(row.price, 0, 1_000_000_000);
+    return name && price !== null ? [{ name, price }] : [];
+  });
+  return { id: key, label: v.label, items };
+}

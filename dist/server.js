@@ -450,6 +450,12 @@ const CORE = {
 	pvpStateKey: "ai:pvp",
 	medicalStateKey: "ai:medical",
 	clientDeadEvent: "ai-core:client:dead",
+	mdtStateKey: "ai:mdt",
+	billsEvent: "ai-core:client:bills",
+	payBillCallback: "ai-core:payBill",
+	clientSeatbeltEvent: "ai-core:client:seatbelt",
+	stressRelayEvent: "ai-core:client:stress",
+	notifyStateKey: "ai:notify",
 	charactersCallback: "ai-core:characters",
 	createCharacterCallback: "ai-core:createCharacter",
 	deleteCharacterCallback: "ai-core:deleteCharacter",
@@ -483,7 +489,8 @@ const CORE = {
 	progressForCallback: "ai-lib:progressFor",
 	progressForCancelEvent: "ai-lib:client:progressForCancel",
 	minigameForCallback: "ai-lib:minigameFor",
-	zoneEvent: "ai-lib:client:zone"
+	zoneEvent: "ai-lib:client:zone",
+	modelPointEvent: "ai-lib:client:modelPoint"
 }, named = new Set();
 function registerExport(name, handler) {
 	named.add(name), globalThis.exports(name, handler);
@@ -667,7 +674,7 @@ function toPatch(value) {
 		default: return null;
 	}
 }
-const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(value)), core$17 = resourceExport(CORE.resource), ERR = {
+const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(value)), core$25 = resourceExport(CORE.resource), ERR = {
 	type: "ADMIN_ERR_TYPE",
 	range: "ADMIN_ERR_RANGE",
 	length: "ADMIN_ERR_LENGTH",
@@ -681,7 +688,7 @@ const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(va
 		if (cached && Date.now() - cached.at < 2e3) return cached.values.size > 0 ? cached.values : null;
 		let list = [];
 		try {
-			list = core$17.GetLookupValues(source);
+			list = core$25.GetLookupValues(source);
 		} catch {}
 		let values = new Set(Array.isArray(list) ? list.filter((v) => typeof v == "string") : []);
 		return this.lists.set(source, {
@@ -946,7 +953,7 @@ function writeSchema(resource, name, text, log) {
 	(0, node_fs_promises.mkdir)(dir, { recursive: !0 }).then(() => (0, node_fs_promises.writeFile)(`${dir}/${name}.schema.json`, text, "utf8")).catch((error) => log.error(`writing ${resource}/${path} failed`, error));
 }
 // ../../../packages/lib/src/server/admin/panel.ts
-const core$16 = resourceExport(CORE.resource);
+const core$24 = resourceExport(CORE.resource);
 var AdminPanel = class {
 	schema;
 	data = new Map();
@@ -965,7 +972,7 @@ var AdminPanel = class {
 		registerExport("AdminPanelSnapshot", () => this.snapshot()), registerExport("AdminPanelData", () => this.dataSnapshot()), registerExport("AdminPanelSummary", () => this.summary()), registerExport("AdminPanelApply", (admin, patch) => this.apply(admin, patch)), onClientCallback(ADMIN.worldChangesCallback(this.resource), () => Object.fromEntries(this.worldChanges), { rate: {
 			count: 4,
 			windowMs: 1e4
-		} }), setImmediate(() => core$16.RegisterAdminPanel(this.resource));
+		} }), setImmediate(() => core$24.RegisterAdminPanel(this.resource));
 	}
 	get(file) {
 		return this.data.get(file) ?? {};
@@ -1079,7 +1086,7 @@ var AdminPanel = class {
 		let spec = this.schema.files[file], data = this.get(file), value = key === void 0 ? data : data[key] ?? null;
 		this.dataFiles.get(file)?.write(data), this.views.changed(file, key, value);
 		for (let handler of this.handlers.get(file) ?? []) handler(key, value);
-		if (core$16.AdminPanelChanged({
+		if (core$24.AdminPanelChanged({
 			resource: this.resource,
 			file,
 			key,
@@ -1127,7 +1134,7 @@ function notify(source, text, kind = "info", duration) {
 }
 resourceExport(CORE.resource);
 // ../../../packages/lib/src/server/online.ts
-const core$14 = resourceExport(CORE.resource);
+const core$22 = resourceExport(CORE.resource);
 function reindex(index, source, before, after) {
 	for (let name of before) {
 		let set = index.get(name);
@@ -1155,11 +1162,11 @@ var OnlinePlayers = class {
 				gangs: [],
 				gangNames: [],
 				duty: null
-			}), this.setJobs(source, core$14.GetJobs(source) ?? []), this.setGangs(source, core$14.GetGangs(source) ?? []), this.setDuty(source, core$14.GetDutyJob(source));
+			}), this.setJobs(source, core$22.GetJobs(source) ?? []), this.setGangs(source, core$22.GetGangs(source) ?? []), this.setDuty(source, core$22.GetDutyJob(source));
 		};
 		on(CORE.playerLoadedEvent, load), on(CORE.playerUnloadedEvent, (source) => this.drop(source)), on(CORE.jobsChangedEvent, (source, jobs) => this.setJobs(source, jobs)), on(CORE.gangsChangedEvent, (source, gangs) => this.setGangs(source, gangs)), on(CORE.dutyChangedEvent, (source, job) => this.setDuty(source, job));
-		for (let source of core$14.GetLoadedSources()) {
-			let character = core$14.GetCharacter(source);
+		for (let source of core$22.GetLoadedSources()) {
+			let character = core$22.GetCharacter(source);
 			character && load(source, character);
 		}
 	}
@@ -1256,7 +1263,7 @@ var OnlinePlayers = class {
 	}
 };
 const EMPTY = new Set(), online = new OnlinePlayers();
-resourceExport(CORE.resource);
+resourceExport(CORE.resource), resourceExport(CORE.resource);
 // ../../../packages/lib/src/server/vehicle.ts
 function entityFromNet(netId, type) {
 	if (readId(netId) === null) return 0;
@@ -1540,7 +1547,7 @@ function progressFor(source, options) {
 	});
 }
 // ../../../packages/lib/src/server/definitions.ts
-const core$11 = resourceExport("ai-core");
+const core$18 = resourceExport("ai-core");
 new class {
 	jobs = new Map();
 	gangs = new Map();
@@ -1551,11 +1558,11 @@ new class {
 	}
 	job(name) {
 		let def = this.jobs.get(name);
-		return def === void 0 && this.jobs.set(name, def = core$11.GetJobDefinition(name) ?? null), def;
+		return def === void 0 && this.jobs.set(name, def = core$18.GetJobDefinition(name) ?? null), def;
 	}
 	gang(name) {
 		let def = this.gangs.get(name);
-		return def === void 0 && this.gangs.set(name, def = core$11.GetGangDefinition(name) ?? null), def;
+		return def === void 0 && this.gangs.set(name, def = core$18.GetGangDefinition(name) ?? null), def;
 	}
 }();
 // ../../../packages/lib/src/server/command.ts
@@ -16099,7 +16106,7 @@ var Mirror = class {
 		DoesEntityExist(entity) && (Entity(entity).state.set(this.key, value ?? null, !0), this.put(entity, value));
 	}
 };
-resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource);
+resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource);
 // resource/common/locale.ts
 const Locale = createLocale(), ResourceName = GetCurrentResourceName();
 IsDuplicityVersion();
@@ -17194,6 +17201,7 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 	delta: "ai-inventory:client:delta",
 	layout: "ai-inventory:client:layout",
 	forceOpen: "ai-inventory:client:forceOpen",
+	scriptShop: "ai-inventory:client:scriptShop",
 	ground: "ai-inventory:client:ground",
 	forceClose: "ai-inventory:client:forceClose",
 	drops: "ai-inventory:client:drops",
@@ -17711,8 +17719,35 @@ const drops = new class {
 every(6e4, () => drops.sweep(), { name: "dropSweep" }), every(2e3, () => {
 	drops.size > 0 && drops.followAll();
 }, { name: "dropFollow" });
-// resource/server/shop.ts
-const core = resourceExport("ai-core");
+// resource/server/scriptShops.ts
+const SCRIPT_SHOP_ACCOUNTS = ["cash", "bank"], scriptShops = new class {
+	shops = new Map();
+	opened = new PlayerMap();
+	register(id, label, items) {
+		this.shops.set(id, {
+			id,
+			label,
+			items
+		});
+	}
+	open(source, id) {
+		let shop = this.shops.get(id);
+		if (!shop || !inventories.playerOf(source)) return !1;
+		inventories.close(source), this.opened.set(source, id);
+		let view = {
+			id: shop.id,
+			label: shop.label,
+			items: shop.items.filter((row) => content.items.get(row.name))
+		};
+		return emitNet(EVENTS.scriptShop, source, view), !0;
+	}
+	openFor(source, id) {
+		return this.opened.get(source) === id ? this.shops.get(id) : void 0;
+	}
+	close(source) {
+		this.opened.delete(source);
+	}
+}(), core = resourceExport("ai-core");
 function pay(source, accounts, price, reason) {
 	return price <= 0 || accounts.some((account) => core.RemoveMoney(source, account, price, reason));
 }
@@ -17727,14 +17762,20 @@ onClientCallback(EVENTS.buy, {
 	},
 	lock: !0
 }, (source, shopId, name, count) => {
-	let shop = content.shops.get(shopId), inventory = inventories.playerOf(source), p = coordsOf(source);
-	if (!shop || !inventory || !nearPlace(shop, p.x, p.y, p.z)) return fail("INV_ERR_FAR");
-	if (!online.allows(source, shop.access)) return fail("INV_ERR_DENIED");
+	let inventory = inventories.playerOf(source);
+	if (!inventory) return fail("INV_ERR_FAR");
+	let placeShop = content.shops.get(shopId), shop = placeShop ?? scriptShops.openFor(source, shopId);
+	if (!shop) return fail("INV_ERR_FAR");
+	if (placeShop) {
+		let p = coordsOf(source);
+		if (!nearPlace(placeShop, p.x, p.y, p.z)) return fail("INV_ERR_FAR");
+		if (!online.allows(source, placeShop.access)) return fail("INV_ERR_DENIED");
+	}
 	let product = shop.items.find((row) => row.name === name), def = content.items.get(name);
 	if (!product || !def) return fail("INV_ERR_GONE");
 	if (!inventory.planAdd(def, count, {})) return fail("INV_ERR_NO_SPACE");
 	let price = product.price * count;
-	return pay(source, shop.accounts, price, `shop:${shop.id}`) ? (inventory.add(def, count), aiLog("purchases", `bought ${count}x ${def.name} for $${price} at ${shop.id}`, {
+	return pay(source, placeShop?.accounts ?? SCRIPT_SHOP_ACCOUNTS, price, `shop:${shop.id}`) ? (inventory.add(def, count), aiLog("purchases", `bought ${count}x ${def.name} for $${price} at ${shop.id}`, {
 		source,
 		metadata: {
 			shop: shop.id,
@@ -18209,7 +18250,9 @@ async function open(source, target) {
 onClientCallback(EVENTS.open, {
 	args: ([raw]) => asArgs(toOpenTarget(raw)),
 	lock: !0
-}, (source, target) => inventories.playerOf(source) ? open(source, target) : fail("INV_ERR_BUSY")), onClientEvent(EVENTS.close, (source) => inventories.close(source));
+}, (source, target) => inventories.playerOf(source) ? (scriptShops.close(source), open(source, target)) : fail("INV_ERR_BUSY")), onClientEvent(EVENTS.close, (source) => {
+	scriptShops.close(source), inventories.close(source);
+});
 // resource/server/move.ts
 const OK = { ok: !0 }, weightFits = (inv, extra) => inv.maxWeight <= 0 || inv.weight + extra <= inv.maxWeight;
 function moveStack(a, b, m) {
@@ -18353,7 +18396,14 @@ onClientCallback(EVENTS.move, {
 	});
 }), registerExport("ClearInventory", (inv) => {
 	resolve(inv)?.clear();
-}), registerExport("OpenInventory", (source, inv) => typeof source == "number" && forceOpen(source, inv)), registerExport("Items", (name) => typeof name == "string" ? definitionView(name) : Object.fromEntries([...content.items.byName.keys()].map((k) => [k, definitionView(k)])));
+}), registerExport("OpenInventory", (source, inv) => typeof source == "number" && forceOpen(source, inv)), registerExport("RegisterShop", (name, label, items) => {
+	if (typeof name != "string" || name === "" || !Array.isArray(items)) return;
+	let products = items.flatMap((row) => isRecord(row) && typeof row.name == "string" && typeof row.price == "number" && Number.isInteger(row.price) && row.price >= 0 ? [{
+		name: row.name.toLowerCase(),
+		price: row.price
+	}] : []);
+	scriptShops.register(name, typeof label == "string" && label !== "" ? label : name, products);
+}), registerExport("OpenShop", (source, name) => typeof source == "number" && typeof name == "string" && scriptShops.open(source, name)), registerExport("Items", (name) => typeof name == "string" ? definitionView(name) : Object.fromEntries([...content.items.byName.keys()].map((k) => [k, definitionView(k)])));
 function groupsOf(groups) {
 	return typeof groups == "string" ? { [groups]: 0 } : Array.isArray(groups) ? Object.fromEntries(groups.filter((g) => typeof g == "string").map((g) => [g, 0])) : isRecord(groups) ? Object.fromEntries(Object.entries(groups).map(([job, grade]) => [job, typeof grade == "number" ? grade : 0])) : {};
 }

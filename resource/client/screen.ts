@@ -14,6 +14,7 @@ import {
   type NuiMessage,
   type OpenTarget,
   type Panel,
+  type ShopView,
 } from "common/nui";
 import { benchView, content, itemViews, shopView } from "./content";
 import { state, toView } from "./state";
@@ -68,18 +69,23 @@ class Screen {
     if (reply) this.show(toView(reply.other), toPanel(reply.panel));
   }
 
-  /** Shows the screen with what the server already granted (an `open` answer or a script's force open). */
-  show(other: InventoryView | null, panel: Panel | null): void {
+  /** Shows the screen with what the server already granted (an `open` answer, a script's force open or shop). */
+  show(
+    other: InventoryView | null,
+    panel: Panel | null,
+    scriptShop: ShopView | null = null,
+  ): void {
     if (!state.player) return;
     this.setup();
     state.otherId = other?.id ?? null;
-    this.panel = panel !== null;
+    this.panel = panel !== null || scriptShop !== null;
     send({ action: "player", data: state.player });
     page.open({
       action: "open",
       data: {
         other,
-        shop: panel?.kind === "shop" ? shopView(panel.id) : null,
+        shop:
+          scriptShop ?? (panel?.kind === "shop" ? shopView(panel.id) : null),
         bench: panel?.kind === "bench" ? benchView(panel.id) : null,
         key: this.openKey(),
       },

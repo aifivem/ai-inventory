@@ -17,6 +17,7 @@ import {
 } from "@aicore-fivem/lib/server";
 import { nearPlace } from "common/content";
 import { EVENTS } from "common/events";
+import { scriptShops } from "./scriptShops";
 import { toOpenTarget, type OpenResult, type OpenTarget } from "common/nui";
 import { setReach } from "./access";
 import { scriptStashes } from "./api";
@@ -201,8 +202,12 @@ onClientCallback(
   { args: ([raw]) => asArgs(toOpenTarget(raw)), lock: true },
   (source, target) => {
     if (!inventories.playerOf(source)) return fail("INV_ERR_BUSY");
+    scriptShops.close(source);
     return open(source, target);
   },
 );
 
-onClientEvent(EVENTS.close, (source) => inventories.close(source));
+onClientEvent(EVENTS.close, (source) => {
+  scriptShops.close(source);
+  inventories.close(source);
+});

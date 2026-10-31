@@ -11,6 +11,7 @@ import { EVENTS, type ActionResult } from "common/events";
 import { content } from "./content";
 import { drops } from "./drops";
 import { inventories } from "./registry";
+import { SCRIPT_SHOP_ACCOUNTS, scriptShops } from "./scriptShops";
 
 const core = resourceExport("ai-core");
 
@@ -41,18 +42,25 @@ onClientCallback(
     lock: true,
   },
   (source, shopId, name, count): ActionResult => {
-    const shop = content.shops.get(shopId);
     const inventory = inventories.playerOf(source);
-    const p = coordsOf(source);
-    if (!shop || !inventory || !nearPlace(shop, p.x, p.y, p.z))
-      return fail("INV_ERR_FAR");
-    if (!online.allows(source, shop.access)) return fail("INV_ERR_DENIED");
+    if (!inventory) return fail("INV_ERR_FAR");
+    // A panel shop is checked by place and access; a script shop by being open for this player (its script checked).
+    const placeShop = content.shops.get(shopId);
+    const shop = placeShop ?? scriptShops.openFor(source, shopId);
+    if (!shop) return fail("INV_ERR_FAR");
+    if (placeShop) {
+      const p = coordsOf(source);
+      if (!nearPlace(placeShop, p.x, p.y, p.z)) return fail("INV_ERR_FAR");
+      if (!online.allows(source, placeShop.access))
+        return fail("INV_ERR_DENIED");
+    }
     const product = shop.items.find((row) => row.name === name);
     const def = content.items.get(name);
     if (!product || !def) return fail("INV_ERR_GONE");
     if (!inventory.planAdd(def, count, {})) return fail("INV_ERR_NO_SPACE");
     const price = product.price * count;
-    if (!pay(source, shop.accounts, price, `shop:${shop.id}`))
+    const accounts = placeShop?.accounts ?? SCRIPT_SHOP_ACCOUNTS;
+    if (!pay(source, accounts, price, `shop:${shop.id}`))
       return fail("INV_ERR_MONEY");
     inventory.add(def, count);
     aiLog(

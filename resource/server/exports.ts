@@ -1,4 +1,5 @@
 import { registerExport } from "@aicore-fivem/lib/server";
+import { isRecord } from "@aicore-fivem/lib/shared";
 import {
   addItem,
   canCarry,
@@ -11,6 +12,7 @@ import {
   resolve,
 } from "./api";
 import { content } from "./content";
+import { scriptShops } from "./scriptShops";
 import { registerUsable, type UseHandler } from "./use";
 
 /** ai-inventory's own exports (`exports["ai-inventory"]`); ox_inventory and qb-inventory names are in `compat/`. */
@@ -89,6 +91,34 @@ registerExport(
   "OpenInventory",
   (source: unknown, inv: unknown) =>
     typeof source === "number" && forceOpen(source, inv),
+);
+registerExport(
+  "RegisterShop",
+  (name: unknown, label: unknown, items: unknown) => {
+    if (typeof name !== "string" || name === "" || !Array.isArray(items))
+      return;
+    const products = (items as unknown[]).flatMap((row) =>
+      isRecord(row) &&
+      typeof row.name === "string" &&
+      typeof row.price === "number" &&
+      Number.isInteger(row.price) &&
+      row.price >= 0
+        ? [{ name: row.name.toLowerCase(), price: row.price }]
+        : [],
+    );
+    scriptShops.register(
+      name,
+      typeof label === "string" && label !== "" ? label : name,
+      products,
+    );
+  },
+);
+registerExport(
+  "OpenShop",
+  (source: unknown, name: unknown) =>
+    typeof source === "number" &&
+    typeof name === "string" &&
+    scriptShops.open(source, name),
 );
 registerExport("Items", (name?: unknown) =>
   typeof name === "string"
