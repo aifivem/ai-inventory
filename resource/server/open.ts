@@ -38,20 +38,35 @@ const vehicleIds = new EntityState(VEHICLE_BAGS.id, stateNumber);
 
 /** Entity -> ids of the temporary trunk / glovebox of an unowned vehicle (they go with the entity). */
 const temporary = new Map<number, string[]>();
-/** Vehicle inventory ids whose plate-keyed row was already moved over this session. */
-const adopted = new Set<string>();
+/** Vehicle inventory id -> its plate row move in flight; every opener waits for it before loading. */
+const adopting = new Map<string, Promise<void>>();
+
+/** The plate ai-vehicles registered for the vehicle (the one on the car may be fake), null when unknown. */
+function registeredPlate(vehicleId: number): string | null {
+  const plate: unknown =
+    optionalExport("ai-vehicles")?.GetVehicle(vehicleId)?.plate;
+  return typeof plate === "string" && plate.trim() !== ""
+    ? normalizePlate(plate)
+    : null;
+}
 
 /**
- * Trunks used to be stored under the plate: the first open of `<kind>:v<id>` moves the row stored under the
- * vehicle's registered plate (a fake plate on it changes nothing).
+ * Trunks used to be stored under the plate: loading `<kind>:v<id>` from the database first moves the row stored
+ * under the vehicle's registered plate (a fake plate on it changes nothing).
  */
-async function adoptPlateRow(kind: string, vehicleId: number, id: string) {
-  if (adopted.has(id) || inventories.get(id)) return;
-  adopted.add(id);
-  const registered: unknown =
-    optionalExport("ai-vehicles")?.GetVehicle(vehicleId)?.plate;
-  if (typeof registered === "string" && registered.trim() !== "")
-    await renameInventory(`${kind}:${normalizePlate(registered)}`, id);
+function adoptPlateRow(
+  kind: string,
+  plate: string | null,
+  id: string,
+): Promise<void> {
+  const running = adopting.get(id);
+  if (running) return running;
+  if (plate === null || inventories.get(id)) return Promise.resolve();
+  const move = renameInventory(`${kind}:${plate}`, id).finally(() =>
+    adopting.delete(id),
+  );
+  adopting.set(id, move);
+  return move;
 }
 
 /**
@@ -73,13 +88,14 @@ async function vehicleInventory(
         persistent: true,
       });
     const id = `${kind}:v${vehicleId}`;
-    await adoptPlateRow(kind, vehicleId, id);
+    const registered = registeredPlate(vehicleId);
+    await adoptPlateRow(kind, registered, id);
     const inventory = await inventories.load(id, {
       ...shape,
       persistent: true,
     });
     inventory.label = plate;
-    inventories.alias(`${kind}:${plate}`, id);
+    if (registered !== null) inventories.alias(`${kind}:${registered}`, id);
     return inventory;
   }
   const id = `${kind}:tmp:${vehicle}`;

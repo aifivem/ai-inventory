@@ -447,6 +447,7 @@ const CORE = {
 	clientDefinitionsEvent: "ai-core:client:definitions",
 	vehicleTypeCallback: "ai-core:vehicleType",
 	interactionStateKey: "ai:interaction",
+	pvpStateKey: "ai:pvp",
 	charactersCallback: "ai-core:characters",
 	createCharacterCallback: "ai-core:createCharacter",
 	deleteCharacterCallback: "ai-core:deleteCharacter",
@@ -954,7 +955,7 @@ var AdminPanel = class {
 	constructor(schema) {
 		this.schema = schema;
 		for (let [name, spec] of Object.entries(schema.files)) this.load(name, spec);
-		registerExport("AdminPanelSnapshot", () => this.snapshot()), registerExport("AdminPanelSummary", () => this.summary()), registerExport("AdminPanelApply", (admin, patch) => this.apply(admin, patch)), onClientCallback(ADMIN.worldChangesCallback(this.resource), () => Object.fromEntries(this.worldChanges), { rate: {
+		registerExport("AdminPanelSnapshot", () => this.snapshot()), registerExport("AdminPanelData", () => this.dataSnapshot()), registerExport("AdminPanelSummary", () => this.summary()), registerExport("AdminPanelApply", (admin, patch) => this.apply(admin, patch)), onClientCallback(ADMIN.worldChangesCallback(this.resource), () => Object.fromEntries(this.worldChanges), { rate: {
 			count: 4,
 			windowMs: 1e4
 		} }), setImmediate(() => core$16.RegisterAdminPanel(this.resource));
@@ -982,8 +983,11 @@ var AdminPanel = class {
 			resource: this.resource,
 			schema: this.schema,
 			texts: loadLocaleTexts(),
-			data: clone(Object.fromEntries(this.data))
+			data: this.dataSnapshot()
 		};
+	}
+	dataSnapshot() {
+		return clone(Object.fromEntries(this.data));
 	}
 	summary() {
 		let data = {}, index = {};
@@ -1325,7 +1329,9 @@ var AreaStream = class {
 	cells = new Map();
 	followers = new PlayerMap({ onDrop: (source, f) => this.leave(source, f) });
 	inCell = new Map();
-	alsoOf = new Map();
+	alsoOf = new PlayerMap({ onDrop: (_source, entries) => {
+		for (let entry of entries) entry.also = void 0;
+	} });
 	size_;
 	range;
 	chunk;
@@ -17468,11 +17474,21 @@ const inventories = new class {
 	holders = new Map();
 	open = new Map();
 	aliases = new Map();
+	aliasOf = new Map();
 	get(id) {
 		return this.byId.get(id) ?? this.byId.get(this.aliases.get(id) ?? "");
 	}
 	alias(name, id) {
-		name !== id && this.aliases.set(name, id);
+		if (name === id) return;
+		let old = this.aliasOf.get(id);
+		old !== void 0 && old !== name && this.aliases.get(old) === id && this.aliases.delete(old);
+		let previous = this.aliases.get(name);
+		previous !== void 0 && previous !== id && this.aliasOf.delete(previous), this.aliases.set(name, id), this.aliasOf.set(id, name);
+	}
+	forget(id) {
+		this.byId.delete(id);
+		let name = this.aliasOf.get(id);
+		name !== void 0 && (this.aliasOf.delete(id), this.aliases.get(name) === id && this.aliases.delete(name));
 	}
 	playerOf(source) {
 		return this.players.get(source);
@@ -17528,7 +17544,7 @@ const inventories = new class {
 		let inventory = this.byId.get(id);
 		if (inventory) {
 			for (let viewer of inventory.viewers) this.open.get(viewer) === id && (this.open.delete(viewer), emitNet(EVENTS.forceClose, viewer));
-			this.byId.delete(id);
+			this.forget(id);
 		}
 	}
 	rebuildAll() {
@@ -17563,7 +17579,7 @@ const inventories = new class {
 		let now = Date.now(), idle = [...this.byId.values()].filter((inv) => inv.kind !== "player" && inv.kind !== "drop" && !inv.pinned && inv.viewers.size === 0 && now - inv.lastUsed > 3e5);
 		if (idle.length !== 0) {
 			await this.save(idle);
-			for (let inv of idle) inv.viewers.size === 0 && !inv.dirty && this.byId.delete(inv.id);
+			for (let inv of idle) inv.viewers.size === 0 && !inv.dirty && this.forget(inv.id);
 		}
 	}
 }(), saveNow = (why) => {
@@ -18048,12 +18064,17 @@ function definitionView(name) {
 	} : null;
 }
 // resource/server/open.ts
-const FAR = fail("INV_ERR_FAR"), DENIED = fail("INV_ERR_DENIED"), GONE = fail("INV_ERR_GONE"), owned = new EntityState(VEHICLE_BAGS.owned, stateBoolean), isOwned = (vehicle) => owned.get(vehicle) === !0, vehicleIds = new EntityState(VEHICLE_BAGS.id, stateNumber), temporary = new Map(), adopted = new Set();
-async function adoptPlateRow(kind, vehicleId, id) {
-	if (adopted.has(id) || inventories.get(id)) return;
-	adopted.add(id);
-	let registered = optionalExport("ai-vehicles")?.GetVehicle(vehicleId)?.plate;
-	typeof registered == "string" && registered.trim() !== "" && await renameInventory(`${kind}:${normalizePlate(registered)}`, id);
+const FAR = fail("INV_ERR_FAR"), DENIED = fail("INV_ERR_DENIED"), GONE = fail("INV_ERR_GONE"), owned = new EntityState(VEHICLE_BAGS.owned, stateBoolean), isOwned = (vehicle) => owned.get(vehicle) === !0, vehicleIds = new EntityState(VEHICLE_BAGS.id, stateNumber), temporary = new Map(), adopting = new Map();
+function registeredPlate(vehicleId) {
+	let plate = optionalExport("ai-vehicles")?.GetVehicle(vehicleId)?.plate;
+	return typeof plate == "string" && plate.trim() !== "" ? normalizePlate(plate) : null;
+}
+function adoptPlateRow(kind, plate, id) {
+	let running = adopting.get(id);
+	if (running) return running;
+	if (plate === null || inventories.get(id)) return Promise.resolve();
+	let move = renameInventory(`${kind}:${plate}`, id).finally(() => adopting.delete(id));
+	return adopting.set(id, move), move;
 }
 async function vehicleInventory(vehicle, kind) {
 	let plate = plateOf(vehicle), shape = {
@@ -18067,13 +18088,13 @@ async function vehicleInventory(vehicle, kind) {
 			...shape,
 			persistent: !0
 		});
-		let id = `${kind}:v${vehicleId}`;
-		await adoptPlateRow(kind, vehicleId, id);
+		let id = `${kind}:v${vehicleId}`, registered = registeredPlate(vehicleId);
+		await adoptPlateRow(kind, registered, id);
 		let inventory = await inventories.load(id, {
 			...shape,
 			persistent: !0
 		});
-		return inventory.label = plate, inventories.alias(`${kind}:${plate}`, id), inventory;
+		return inventory.label = plate, registered !== null && inventories.alias(`${kind}:${registered}`, id), inventory;
 	}
 	let id = `${kind}:tmp:${vehicle}`, ids = temporary.get(vehicle) ?? [];
 	return ids.includes(id) || temporary.set(vehicle, [...ids, id]), inventories.load(id, {

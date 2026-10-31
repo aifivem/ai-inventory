@@ -5,8 +5,8 @@ import {
 } from "@aicore-fivem/lib/shared";
 import { allows, onMembershipChange, Points } from "@aicore-fivem/lib/client";
 import { Locale } from "common";
-import { readBench, readShop, readStash, type Place } from "common/content";
-import { world } from "./content";
+import type { Place } from "common/content";
+import { content, world } from "./content";
 import { screen } from "./screen";
 
 type Kind = "shop" | "stash" | "bench";
@@ -48,13 +48,14 @@ function add(
   return () => points.remove(key);
 }
 
-new RecordObjects(world, "shops", readShop, (id, shop) =>
+// The content views are updated before change handlers run, so each edit is parsed once.
+new RecordObjects(world, "shops", content.shops, (id, shop) =>
   add("shop", id, shop, shop.blip ? shop.blipStyle : null, shop.ped),
 );
-new RecordObjects(world, "stashes", readStash, (id, stash) =>
+new RecordObjects(world, "stashes", content.stashes, (id, stash) =>
   add("stash", id, stash),
 );
-new RecordObjects(world, "benches", readBench, (id, bench) =>
+new RecordObjects(world, "benches", content.benches, (id, bench) =>
   add("bench", id, bench),
 );
 onMembershipChange(() => points.refresh());

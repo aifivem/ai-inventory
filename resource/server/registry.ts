@@ -33,14 +33,33 @@ class Inventories {
   private readonly open = new Map<number, string>();
   /** Other names of an inventory: `trunk:<plate>` of an owned vehicle stored under its vehicle id. */
   private readonly aliases = new Map<string, string>();
+  /** Inventory id -> its alias (one each, gone when the inventory leaves memory). */
+  private readonly aliasOf = new Map<string, string>();
 
   get(id: string): Inventory | undefined {
     return this.byId.get(id) ?? this.byId.get(this.aliases.get(id) ?? "");
   }
 
-  /** Lets scripts find inventory `id` under `name` too (until another inventory takes the name). */
+  /** Lets scripts find inventory `id` under `name` too (until another inventory takes the name or it unloads). */
   alias(name: string, id: string): void {
-    if (name !== id) this.aliases.set(name, id);
+    if (name === id) return;
+    const old = this.aliasOf.get(id);
+    if (old !== undefined && old !== name && this.aliases.get(old) === id)
+      this.aliases.delete(old);
+    const previous = this.aliases.get(name);
+    if (previous !== undefined && previous !== id)
+      this.aliasOf.delete(previous);
+    this.aliases.set(name, id);
+    this.aliasOf.set(id, name);
+  }
+
+  /** Forgets an inventory and its alias. */
+  private forget(id: string): void {
+    this.byId.delete(id);
+    const name = this.aliasOf.get(id);
+    if (name === undefined) return;
+    this.aliasOf.delete(id);
+    if (this.aliases.get(name) === id) this.aliases.delete(name);
   }
 
   playerOf(source: number): Inventory | undefined {
@@ -152,7 +171,7 @@ class Inventories {
         emitNet(EVENTS.forceClose, viewer);
       }
     }
-    this.byId.delete(id);
+    this.forget(id);
   }
 
   /** Re-lays every inventory after the item list or the settings changed; open screens get the new layout at once. */
@@ -203,7 +222,7 @@ class Inventories {
     if (idle.length === 0) return;
     await this.save(idle);
     for (const inv of idle)
-      if (inv.viewers.size === 0 && !inv.dirty) this.byId.delete(inv.id);
+      if (inv.viewers.size === 0 && !inv.dirty) this.forget(inv.id);
   }
 }
 
