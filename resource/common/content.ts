@@ -1,6 +1,8 @@
 import {
   bool,
   int,
+  readBlipStyle,
+  type BlipStyle,
   num,
   record,
   str,
@@ -44,10 +46,14 @@ export interface Place extends Point {
   jobs: string[];
 }
 
+/** A shop's map blip when its record has none (qb-shops' 24/7 blip). */
+export const SHOP_BLIP: BlipStyle = { sprite: 52, color: 0, scale: 0.6 };
+
 export interface Shop extends Place {
   /** NPC standing at the place (panel), null for none. */
   ped: PlacePed | null;
   blip: boolean;
+  blipStyle: BlipStyle;
   accounts: string[];
   items: Array<{ name: string; price: number }>;
 }
@@ -151,6 +157,7 @@ export const readShops = (raw: unknown): Map<string, Shop> =>
     ...readPlace(id, v),
     ped: readPlacePed(v.ped),
     blip: bool(v.blip, true),
+    blipStyle: readBlipStyle(v.blipStyle, SHOP_BLIP),
     accounts: names(v.accounts).length ? names(v.accounts) : ["cash", "bank"],
     items: (Array.isArray(v.items) ? v.items : []).flatMap((row) => {
       const r = record(row);

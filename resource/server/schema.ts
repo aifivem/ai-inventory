@@ -1,5 +1,11 @@
-import { PLACE_PED_SPEC, placePedFields, spec } from "@aicore-fivem/lib/shared";
+import {
+  BLIP_STYLE_FIELDS,
+  PLACE_PED_SPEC,
+  placePedFields,
+  spec,
+} from "@aicore-fivem/lib/shared";
 import type { DataSpec, PanelSchema, WidgetSpec } from "@aicore-fivem/shared";
+import { SHOP_BLIP } from "common/content";
 
 /** ai-inventory's panel: item definitions, shops, stashes, crafting benches and grid sizes. */
 
@@ -194,6 +200,7 @@ export const inventorySchema: PanelSchema = {
         radius: 2,
         jobs: [],
         blip: true,
+        blipStyle: SHOP_BLIP,
         accounts: ["cash", "bank"],
         items: [{ name: "water", price: 5 }],
       },
@@ -201,6 +208,7 @@ export const inventorySchema: PanelSchema = {
         ped: PLACE_PED_SPEC,
         ...placeSections,
         blip: { type: "bool" },
+        blipStyle: { type: "object", fields: BLIP_STYLE_FIELDS },
         accounts: {
           type: "names",
           lookup: "account",
@@ -559,6 +567,13 @@ export const inventorySchema: PanelSchema = {
               path: "blip",
               label: "ADMIN_F_BLIP",
               hint: "ADMIN_H_BLIP",
+            },
+            {
+              widget: "blip",
+              path: "blipStyle",
+              label: "ADMIN_F_BLIP_STYLE",
+              hint: "ADMIN_H_BLIP_STYLE",
+              showIf: { path: "blip", values: [true] },
             },
             {
               widget: "tags",

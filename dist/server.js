@@ -88,7 +88,35 @@ function readVec3(value) {
 const fail = (error) => ({
 	ok: !1,
 	error
-}), isObject = (value) => typeof value == "object" && !!value && !Array.isArray(value);
+}), isPublic = (rule) => rule.jobs.length === 0 && rule.gangs.length === 0, BLIP_STYLE_FIELDS = {
+	sprite: {
+		type: "number",
+		min: 0,
+		max: 1e3,
+		integer: !0
+	},
+	color: {
+		type: "number",
+		min: 0,
+		max: 100,
+		integer: !0
+	},
+	scale: {
+		type: "number",
+		min: .3,
+		max: 2
+	}
+};
+function readBlipStyle(value, fallback) {
+	let v = record(value);
+	return {
+		sprite: int(v.sprite, fallback.sprite, 0, 1e3),
+		color: int(v.color, fallback.color, 0, 100),
+		scale: num(v.scale, fallback.scale, .3, 2)
+	};
+}
+// ../../../packages/lib/src/shared/records.ts
+const isObject = (value) => typeof value == "object" && !!value && !Array.isArray(value);
 function readRecords$1(raw, readOne) {
 	let out = new Map();
 	if (!isObject(raw)) return out;
@@ -376,6 +404,7 @@ const CORE = {
 }, ADMIN = {
 	ace: "ai.admin",
 	openCallback: "ai-core:admin:open",
+	panelDataCallback: "ai-core:admin:panelData",
 	applyCallback: "ai-core:admin:apply",
 	closeEvent: "ai-core:admin:close",
 	showEvent: "ai-core:admin:show",
@@ -576,7 +605,7 @@ function toPatch(value) {
 		default: return null;
 	}
 }
-const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(value)), core$16 = resourceExport(CORE.resource), ERR = {
+const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(value)), core$17 = resourceExport(CORE.resource), ERR = {
 	type: "ADMIN_ERR_TYPE",
 	range: "ADMIN_ERR_RANGE",
 	length: "ADMIN_ERR_LENGTH",
@@ -590,7 +619,7 @@ const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(va
 		if (cached && Date.now() - cached.at < 2e3) return cached.values.size > 0 ? cached.values : null;
 		let list = [];
 		try {
-			list = core$16.GetLookupValues(source);
+			list = core$17.GetLookupValues(source);
 		} catch {}
 		let values = new Set(Array.isArray(list) ? list.filter((v) => typeof v == "string") : []);
 		return this.lists.set(source, {
@@ -855,7 +884,7 @@ function writeSchema(resource, name, text, log) {
 	(0, node_fs_promises.mkdir)(dir, { recursive: !0 }).then(() => (0, node_fs_promises.writeFile)(`${dir}/${name}.schema.json`, text, "utf8")).catch((error) => log.error(`writing ${resource}/${path} failed`, error));
 }
 // ../../../packages/lib/src/server/admin/panel.ts
-const core$15 = resourceExport(CORE.resource);
+const core$16 = resourceExport(CORE.resource);
 var AdminPanel = class {
 	schema;
 	data = new Map();
@@ -871,10 +900,10 @@ var AdminPanel = class {
 	constructor(schema) {
 		this.schema = schema;
 		for (let [name, spec] of Object.entries(schema.files)) this.load(name, spec);
-		registerExport("AdminPanelSnapshot", () => this.snapshot()), registerExport("AdminPanelApply", (admin, patch) => this.apply(admin, patch)), onClientCallback(ADMIN.worldChangesCallback(this.resource), () => Object.fromEntries(this.worldChanges), { rate: {
+		registerExport("AdminPanelSnapshot", () => this.snapshot()), registerExport("AdminPanelSummary", () => this.summary()), registerExport("AdminPanelApply", (admin, patch) => this.apply(admin, patch)), onClientCallback(ADMIN.worldChangesCallback(this.resource), () => Object.fromEntries(this.worldChanges), { rate: {
 			count: 4,
 			windowMs: 1e4
-		} }), setImmediate(() => core$15.RegisterAdminPanel(this.resource));
+		} }), setImmediate(() => core$16.RegisterAdminPanel(this.resource));
 	}
 	get(file) {
 		return this.data.get(file) ?? {};
@@ -900,6 +929,27 @@ var AdminPanel = class {
 			schema: this.schema,
 			texts: loadLocaleTexts(),
 			data: clone(Object.fromEntries(this.data))
+		};
+	}
+	summary() {
+		let data = {}, index = {};
+		for (let [file, spec] of Object.entries(this.schema.files)) {
+			let content = this.data.get(file);
+			if (spec.kind !== "records") {
+				data[file] = clone(content ?? {});
+				continue;
+			}
+			let labels = {};
+			for (let [key, record] of Object.entries(content ?? {})) labels[key] = labelOf(record, spec.labelPath) ?? key;
+			index[file] = labels;
+		}
+		return {
+			resource: this.resource,
+			schema: this.schema,
+			texts: loadLocaleTexts(),
+			data,
+			loaded: !1,
+			index
 		};
 	}
 	apply(admin, raw) {
@@ -964,7 +1014,7 @@ var AdminPanel = class {
 		let spec = this.schema.files[file], data = this.get(file), value = key === void 0 ? data : data[key] ?? null;
 		this.dataFiles.get(file)?.write(data), this.views.changed(file, key, value);
 		for (let handler of this.handlers.get(file) ?? []) handler(key, value);
-		if (core$15.AdminPanelChanged({
+		if (core$16.AdminPanelChanged({
 			resource: this.resource,
 			file,
 			key,
@@ -985,6 +1035,15 @@ var AdminPanel = class {
 		this.data.set(name, data), (filled || raw === null || !file.hasSchemaRef()) && file.write(data);
 	}
 };
+function labelOf(record, path) {
+	if (!path) return null;
+	let at = record;
+	for (let part of path.split(".")) {
+		if (typeof at != "object" || !at) return null;
+		at = at[part];
+	}
+	return typeof at == "string" && at !== "" ? at : null;
+}
 // ../../../packages/lib/src/server/log.ts
 function aiLog(channel, message, options) {
 	optionalExport("ai-core")?.Log(channel, message, options);
@@ -1003,7 +1062,7 @@ function notify(source, text, kind = "info", duration) {
 }
 resourceExport(CORE.resource);
 // ../../../packages/lib/src/server/online.ts
-const core$13 = resourceExport(CORE.resource);
+const core$14 = resourceExport(CORE.resource);
 function reindex(index, source, before, after) {
 	for (let name of before) {
 		let set = index.get(name);
@@ -1031,11 +1090,11 @@ var OnlinePlayers = class {
 				gangs: [],
 				gangNames: [],
 				duty: null
-			}), this.setJobs(source, core$13.GetJobs(source) ?? []), this.setGangs(source, core$13.GetGangs(source) ?? []), this.setDuty(source, core$13.GetDutyJob(source));
+			}), this.setJobs(source, core$14.GetJobs(source) ?? []), this.setGangs(source, core$14.GetGangs(source) ?? []), this.setDuty(source, core$14.GetDutyJob(source));
 		};
 		on(CORE.playerLoadedEvent, load), on(CORE.playerUnloadedEvent, (source) => this.drop(source)), on(CORE.jobsChangedEvent, (source, jobs) => this.setJobs(source, jobs)), on(CORE.gangsChangedEvent, (source, gangs) => this.setGangs(source, gangs)), on(CORE.dutyChangedEvent, (source, job) => this.setDuty(source, job));
-		for (let source of core$13.GetLoadedSources()) {
-			let character = core$13.GetCharacter(source);
+		for (let source of core$14.GetLoadedSources()) {
+			let character = core$14.GetCharacter(source);
 			character && load(source, character);
 		}
 	}
@@ -1103,6 +1162,20 @@ var OnlinePlayers = class {
 	onDutyIn(source, jobs) {
 		let duty = this.dutyJob(source);
 		return duty !== null && jobs.includes(duty);
+	}
+	allows(source, rule) {
+		if (isPublic(rule)) return !0;
+		let min = (name) => rule.grades[name] ?? 0;
+		for (let gang of rule.gangs) {
+			let grade = this.gangGrade(source, gang);
+			if (grade !== null && grade >= min(gang)) return !0;
+		}
+		let duty = rule.onDuty ? this.dutyJob(source) : null;
+		for (let job of rule.jobs) {
+			let grade = this.jobGrade(source, job);
+			if (grade !== null && grade >= min(job) && (!rule.onDuty || duty === job)) return !0;
+		}
+		return !1;
 	}
 	countOnDuty(jobs) {
 		this.start();
@@ -1396,6 +1469,25 @@ function progressFor(source, options) {
 		running.set(source, settle), triggerClientCallback(LIB_UI.progressForCallback, source, [bar], bar.duration + 15e3).then((answer) => settle(answer === !0 && GetGameTimer() - startedAt >= bar.duration * minRatio), () => settle(!1));
 	});
 }
+// ../../../packages/lib/src/server/definitions.ts
+const core$11 = resourceExport("ai-core");
+new class {
+	jobs = new Map();
+	gangs = new Map();
+	constructor() {
+		on(CORE.definitionsChangedEvent, (file, name) => {
+			typeof name == "string" && (file === "jobs" ? this.jobs.delete(name) : file === "gangs" && this.gangs.delete(name));
+		});
+	}
+	job(name) {
+		let def = this.jobs.get(name);
+		return def === void 0 && this.jobs.set(name, def = core$11.GetJobDefinition(name) ?? null), def;
+	}
+	gang(name) {
+		let def = this.gangs.get(name);
+		return def === void 0 && this.gangs.set(name, def = core$11.GetGangDefinition(name) ?? null), def;
+	}
+}();
 // ../../../packages/lib/src/server/command.ts
 const resource$3 = GetCurrentResourceName();
 createLogger(resource$3), new class {
@@ -16069,7 +16161,11 @@ var ItemList = class {
 	}
 };
 // resource/common/content.ts
-const names$1 = (v) => Array.isArray(v) ? v.filter((x) => typeof x == "string" && x !== "") : [], grid = (v, rows, weight) => {
+const SHOP_BLIP = {
+	sprite: 52,
+	color: 0,
+	scale: .6
+}, names$1 = (v) => Array.isArray(v) ? v.filter((x) => typeof x == "string" && x !== "") : [], grid = (v, rows, weight) => {
 	let g = record(v);
 	return {
 		rows: int(g.rows, rows, 1, 50),
@@ -16124,6 +16220,7 @@ const readShops = (raw) => readRecords(raw, (id, v) => ({
 	...readPlace(id, v),
 	ped: readPlacePed(v.ped),
 	blip: bool(v.blip, !0),
+	blipStyle: readBlipStyle(v.blipStyle, SHOP_BLIP),
 	accounts: names$1(v.accounts).length ? names$1(v.accounts) : ["cash", "bank"],
 	items: (Array.isArray(v.items) ? v.items : []).flatMap((row) => {
 		let r = record(row), name = str(r.name, "").toLowerCase();
@@ -16400,6 +16497,7 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 				radius: 2,
 				jobs: [],
 				blip: !0,
+				blipStyle: SHOP_BLIP,
 				accounts: ["cash", "bank"],
 				items: [{
 					name: "water",
@@ -16410,6 +16508,10 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 				ped: PLACE_PED_SPEC,
 				...placeSections,
 				blip: { type: "bool" },
+				blipStyle: {
+					type: "object",
+					fields: BLIP_STYLE_FIELDS
+				},
 				accounts: {
 					type: "names",
 					lookup: "account",
@@ -16804,6 +16906,16 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 							path: "blip",
 							label: "ADMIN_F_BLIP",
 							hint: "ADMIN_H_BLIP"
+						},
+						{
+							widget: "blip",
+							path: "blipStyle",
+							label: "ADMIN_F_BLIP_STYLE",
+							hint: "ADMIN_H_BLIP_STYLE",
+							showIf: {
+								path: "blip",
+								values: [!0]
+							}
 						},
 						{
 							widget: "tags",

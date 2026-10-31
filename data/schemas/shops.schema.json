@@ -108,6 +108,32 @@
           "description": "Map blip: Shows the shop on the map.",
           "type": "boolean"
         },
+        "blipStyle": {
+          "description": "Blip look: Picture, colour and size of the shop's map blip.",
+          "type": "object",
+          "properties": {
+            "sprite": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000
+            },
+            "color": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "scale": {
+              "type": "number",
+              "minimum": 0.3,
+              "maximum": 2
+            }
+          },
+          "required": [
+            "sprite",
+            "color",
+            "scale"
+          ]
+        },
         "accounts": {
           "description": "Paid from: Money accounts tried in order (cash, bank).",
           "type": "array",
@@ -153,6 +179,7 @@
         "radius",
         "jobs",
         "blip",
+        "blipStyle",
         "accounts",
         "items"
       ]

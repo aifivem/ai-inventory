@@ -1,4 +1,4 @@
-import { type PlacePed } from "@aicore-fivem/lib/shared";
+import { type BlipStyle, type PlacePed } from "@aicore-fivem/lib/shared";
 import {
   hasJob,
   inGang,
@@ -21,7 +21,6 @@ const ICON: Record<Kind, string> = {
   stash: "box-archive",
   bench: "screwdriver-wrench",
 };
-const SHOP_BLIP = { sprite: 52, color: 2, scale: 0.7 };
 
 /** Shops, stashes and crafting benches from the panel, a map blip for shops that want one. Rebuilt when the panel changes them. */
 const points = new Points();
@@ -40,7 +39,7 @@ function mayUse(
 function add(
   kind: Kind,
   place: Place,
-  blip = false,
+  blip?: BlipStyle | null,
   ped?: PlacePed | null,
 ): void {
   points.add(`${kind}:${place.id}`, {
@@ -49,7 +48,7 @@ function add(
     icon: ICON[kind],
     radius: place.radius,
     ped: ped ?? undefined,
-    blip: blip ? { ...SHOP_BLIP, label: place.label } : undefined,
+    blip: blip ? { ...blip, label: place.label } : undefined,
     canShow: () => mayUse(place),
     onPressed: () => screen.open({ kind, id: place.id }),
   });
@@ -58,7 +57,7 @@ function add(
 function rebuild(): void {
   points.clear();
   for (const shop of content.shops.values())
-    add("shop", shop, shop.blip, shop.ped);
+    add("shop", shop, shop.blip ? shop.blipStyle : null, shop.ped);
   for (const stash of content.stashes.values()) add("stash", stash);
   for (const bench of content.benches.values()) add("bench", bench);
 }
