@@ -6,6 +6,26 @@ import type { Size } from "./grid";
 export type ItemType = "item" | "weapon" | "ammo" | "component";
 export type UseAnim = "none" | "eat" | "drink" | "bandage" | "armour";
 
+/** The animation each use kind plays under the progress bar ("none" plays nothing). */
+export const USE_ANIMS: Record<
+  UseAnim,
+  { dict: string; clip: string; flag: number } | undefined
+> = {
+  none: undefined,
+  eat: {
+    dict: "mp_player_inteat@burger",
+    clip: "mp_player_int_eat_burger",
+    flag: 49,
+  },
+  drink: { dict: "mp_player_intdrink", clip: "loop_bottle", flag: 49 },
+  bandage: {
+    dict: "missheistdockssetup1clipboard@idle_a",
+    clip: "idle_a",
+    flag: 49,
+  },
+  armour: { dict: "clothingshirt", clip: "try_shirt_positive_d", flag: 49 },
+};
+
 export interface ItemDef {
   name: string;
   label: string;

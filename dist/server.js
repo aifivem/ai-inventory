@@ -238,6 +238,11 @@ function readPlacePed(value) {
 		coords
 	};
 }
+// ../../../packages/lib/src/shared/grid.ts
+const OFFSET = 16384, clampCell = (v) => Math.max(-16e3, Math.min(16e3, v)), gridCell = (x, y, size) => ({
+	cx: clampCell(Math.floor(x / size)),
+	cy: clampCell(Math.floor(y / size))
+}), cellKey = (cx, cy) => (clampCell(cx) + OFFSET) * 32768 + (clampCell(cy) + OFFSET);
 // ../../../packages/lib/src/shared/index.ts
 function isRecord(value) {
 	return typeof value == "object" && !!value && !Array.isArray(value);
@@ -361,6 +366,8 @@ const CORE = {
 	clientCancelProgressEvent: "ai-core:client:cancelProgress",
 	clientDefinitionsEvent: "ai-core:client:definitions",
 	vehicleTypeCallback: "ai-core:vehicleType",
+	progressForCallback: "ai-core:progressFor",
+	progressForCancelEvent: "ai-core:client:progressForCancel",
 	interactionStateKey: "ai:interaction",
 	charactersCallback: "ai-core:characters",
 	createCharacterCallback: "ai-core:createCharacter",
@@ -504,11 +511,26 @@ function onClientCallback(name, first, second) {
 		}
 	});
 }
-const pending$2 = new Map();
+const pending$1 = new Map();
+let nextId = 0;
 onNet(responseEvent(resource$4), (id, ok, result) => {
-	let entry = typeof id == "number" ? pending$2.get(id) : void 0;
-	entry && entry.source === Number(globalThis.source) && (pending$2.delete(id), clearTimeout(entry.timer), ok === !0 ? entry.resolve(result) : entry.reject(Error("client callback failed")));
+	let entry = typeof id == "number" ? pending$1.get(id) : void 0;
+	entry && entry.source === Number(globalThis.source) && (pending$1.delete(id), clearTimeout(entry.timer), ok === !0 ? entry.resolve(result) : entry.reject(Error("client callback failed")));
 });
+function triggerClientCallback(name, source, args = [], timeoutMs = 3e4) {
+	let id = ++nextId;
+	return new Promise((resolve, reject) => {
+		let timer = setTimeout(() => {
+			pending$1.delete(id), reject(Error(`client callback ${name} timed out for ${source}`));
+		}, timeoutMs);
+		pending$1.set(id, {
+			source,
+			resolve,
+			reject,
+			timer
+		}), emitNet(requestEvent(name), source, resource$4, id, ...args);
+	});
+}
 // ../../../packages/lib/src/server/admin/patch.ts
 function toPatch(value) {
 	if (!isRecord(value) || typeof value.file != "string") return null;
@@ -967,6 +989,15 @@ function aiLog(channel, message, options) {
 function aiLogChannels(channels) {
 	optionalExport("ai-core")?.LogChannels(channels);
 }
+// ../../../packages/lib/src/server/notify.ts
+function notify(source, text, kind = "info", duration) {
+	let notification = {
+		text,
+		kind,
+		duration
+	};
+	emitNet(CORE.clientNotifyEvent, source, notification);
+}
 resourceExport(CORE.resource);
 // ../../../packages/lib/src/server/online.ts
 const core$13 = resourceExport(CORE.resource);
@@ -1157,36 +1188,211 @@ function onCharacter(handlers) {
 		}
 	});
 }
-// ../../../packages/lib/src/server/pending.ts
-var PendingActions = class {
-	actions = new PlayerMap();
-	minRatio;
-	next = 0;
-	constructor(options = {}) {
-		this.minRatio = options.minRatio ?? .8, on(CORE.playerUnloadedEvent, (source) => this.actions.delete(source));
-	}
-	start(source, data, durationMs) {
-		return this.next = this.next >= 2147483647 ? 1 : this.next + 1, this.actions.set(source, {
-			token: this.next,
-			data,
-			startedAt: GetGameTimer(),
-			durationMs
-		}), this.next;
-	}
-	take(source, token) {
-		let action = this.actions.get(source);
-		return !action || action.token !== token ? null : (this.actions.delete(source), GetGameTimer() - action.startedAt >= action.durationMs * this.minRatio ? action.data : null);
-	}
-	peek(source) {
-		return this.actions.get(source)?.data ?? null;
-	}
-	cancel(source) {
-		this.actions.delete(source);
+// ../../../packages/lib/src/server/areaStream.ts
+var AreaStream = class {
+	options;
+	items = new Map();
+	cells = new Map();
+	followers = new PlayerMap({ onDrop: (source, f) => this.leave(source, f) });
+	inCell = new Map();
+	alsoOf = new Map();
+	size_;
+	range;
+	chunk;
+	stale = !1;
+	constructor(options) {
+		this.options = options, this.size_ = options.cellSize ?? 64, this.range = options.range ?? 1, this.chunk = options.chunk ?? 50;
 	}
 	get size() {
-		return this.actions.size;
+		return this.items.size;
+	}
+	get(id) {
+		return this.items.get(id)?.item;
+	}
+	*values() {
+		for (let entry of this.items.values()) yield entry.item;
+	}
+	cellOf(x, y) {
+		return gridCell(x, y, this.size_);
+	}
+	countAt(x, y) {
+		let { cx, cy } = this.cellOf(x, y);
+		return this.cells.get(cellKey(cx, cy))?.size ?? 0;
+	}
+	*around(x, y, cells = 1) {
+		let { cx, cy } = this.cellOf(x, y);
+		for (let dx = -cells; dx <= cells; dx++) for (let dy = -cells; dy <= cells; dy++) for (let entry of this.cells.get(cellKey(cx + dx, cy + dy)) ?? []) yield entry.item;
+	}
+	set(item, resend = !0) {
+		this.stale && this.followAll();
+		let { cx, cy } = this.cellOf(item.x, item.y), also = this.options.alsoTo?.(item), entry = this.items.get(item.id);
+		if (!entry) {
+			let fresh = {
+				item,
+				cx,
+				cy,
+				also: void 0
+			};
+			this.items.set(item.id, fresh), this.file(fresh), this.setAlso(fresh, also);
+			let put = [this.options.view(item)];
+			for (let source of this.who(cx, cy, also)) this.send(source, put, []);
+			return;
+		}
+		let before = this.who(entry.cx, entry.cy, entry.also);
+		(entry.cx !== cx || entry.cy !== cy) && (this.unfile(entry), entry.cx = cx, entry.cy = cy, this.file(entry)), entry.item = item, this.setAlso(entry, also);
+		let after = this.who(cx, cy, also), gone = [item.id];
+		for (let source of before) after.has(source) || this.send(source, [], gone);
+		let put = [this.options.view(item)];
+		for (let source of after) (resend || !before.has(source)) && this.send(source, put, []);
+	}
+	delete(id) {
+		let entry = this.items.get(id);
+		if (!entry) return;
+		this.items.delete(id), this.unfile(entry);
+		let gone = [id];
+		for (let source of this.who(entry.cx, entry.cy, entry.also)) this.send(source, [], gone);
+		this.setAlso(entry, void 0);
+	}
+	load(items) {
+		for (let item of items) {
+			let old = this.items.get(item.id);
+			old && (this.unfile(old), this.setAlso(old, void 0));
+			let { cx, cy } = this.cellOf(item.x, item.y), entry = {
+				item,
+				cx,
+				cy,
+				also: void 0
+			};
+			this.items.set(item.id, entry), this.file(entry), this.setAlso(entry, this.options.alsoTo?.(item));
+		}
+		for (let [source, f] of this.followers) this.snapshot(source, f);
+	}
+	recipients(id) {
+		let entry = this.items.get(id);
+		return entry ? this.who(entry.cx, entry.cy, entry.also) : new Set();
+	}
+	knows(source, id) {
+		let entry = this.items.get(id);
+		if (!entry) return !1;
+		if (entry.also === source) return !0;
+		let f = this.followers.get(source);
+		return f !== void 0 && Math.abs(f.cx - entry.cx) <= this.range && Math.abs(f.cy - entry.cy) <= this.range;
+	}
+	start(source, at = coordsOf(source)) {
+		let { cx, cy } = this.cellOf(at.x, at.y), old = this.followers.get(source);
+		old && this.leave(source, old);
+		let f = {
+			cx,
+			cy
+		};
+		this.followers.set(source, f), this.enter(source, f), this.snapshot(source, f);
+	}
+	follow(source, cx, cy) {
+		let f = this.followers.get(source);
+		if (!f) {
+			let fresh = {
+				cx,
+				cy
+			};
+			return this.followers.set(source, fresh), this.enter(source, fresh), this.snapshot(source, fresh);
+		}
+		this.move(source, f, cx, cy);
+	}
+	followReported(source, cx, cy) {
+		let p = coordsOf(source), real = this.cellOf(p.x, p.y);
+		return Math.abs(real.cx - cx) > 1 || Math.abs(real.cy - cy) > 1 ? !1 : (this.follow(source, cx, cy), !0);
+	}
+	followAll() {
+		if (this.items.size === 0) this.stale = !0;
+		else {
+			this.stale = !1;
+			for (let [source, f] of this.followers) {
+				let p = coordsOf(source), { cx, cy } = this.cellOf(p.x, p.y);
+				this.move(source, f, cx, cy);
+			}
+		}
+	}
+	stop(source, tell = !1) {
+		let f = this.followers.get(source);
+		f && (this.followers.delete(source), this.leave(source, f), tell && this.emit(source, !0, [], []));
+	}
+	following(source) {
+		return this.followers.has(source);
+	}
+	move(source, f, cx, cy) {
+		if (f.cx === cx && f.cy === cy) return;
+		let r = this.range, removes = [], puts = [];
+		for (let dx = -r; dx <= r; dx++) for (let dy = -r; dy <= r; dy++) {
+			let ox = f.cx + dx, oy = f.cy + dy;
+			if (Math.abs(ox - cx) > r || Math.abs(oy - cy) > r) for (let entry of this.cells.get(cellKey(ox, oy)) ?? []) entry.also !== source && removes.push(entry.item.id);
+			let nx = cx + dx, ny = cy + dy;
+			if (Math.abs(nx - f.cx) > r || Math.abs(ny - f.cy) > r) for (let entry of this.cells.get(cellKey(nx, ny)) ?? []) entry.also !== source && puts.push(this.options.view(entry.item));
+		}
+		this.leave(source, f), f.cx = cx, f.cy = cy, this.enter(source, f), (puts.length > 0 || removes.length > 0) && this.send(source, puts, removes);
+	}
+	snapshot(source, f) {
+		let puts = [], r = this.range;
+		for (let dx = -r; dx <= r; dx++) for (let dy = -r; dy <= r; dy++) for (let entry of this.cells.get(cellKey(f.cx + dx, f.cy + dy)) ?? []) puts.push(this.options.view(entry.item));
+		for (let entry of this.alsoOf.get(source) ?? []) (Math.abs(entry.cx - f.cx) > r || Math.abs(entry.cy - f.cy) > r) && puts.push(this.options.view(entry.item));
+		this.emit(source, !0, puts, []);
+	}
+	who(cx, cy, also) {
+		let out = new Set(), r = this.range;
+		for (let dx = -r; dx <= r; dx++) for (let dy = -r; dy <= r; dy++) for (let source of this.inCell.get(cellKey(cx + dx, cy + dy)) ?? []) out.add(source);
+		return also !== void 0 && out.add(also), out;
+	}
+	send(source, puts, removes) {
+		this.emit(source, !1, puts, removes);
+	}
+	emit(source, reset, puts, removes) {
+		let extra = this.options.extra?.() ?? [], { event } = this.options;
+		emitNet(event, source, reset, puts.slice(0, this.chunk), removes, ...extra);
+		for (let i = this.chunk; i < puts.length; i += this.chunk) emitNet(event, source, !1, puts.slice(i, i + this.chunk), [], ...extra);
+	}
+	setAlso(entry, also) {
+		if (entry.also === also) return;
+		if (entry.also !== void 0) {
+			let set = this.alsoOf.get(entry.also);
+			set?.delete(entry), set?.size === 0 && this.alsoOf.delete(entry.also);
+		}
+		if (entry.also = also, also === void 0) return;
+		let set = this.alsoOf.get(also);
+		set || this.alsoOf.set(also, set = new Set()), set.add(entry);
+	}
+	file(entry) {
+		let key = cellKey(entry.cx, entry.cy), set = this.cells.get(key);
+		set || this.cells.set(key, set = new Set()), set.add(entry);
+	}
+	unfile(entry) {
+		let key = cellKey(entry.cx, entry.cy), set = this.cells.get(key);
+		set?.delete(entry), set?.size === 0 && this.cells.delete(key);
+	}
+	enter(source, f) {
+		let key = cellKey(f.cx, f.cy), set = this.inCell.get(key);
+		set || this.inCell.set(key, set = new Set()), set.add(source);
+	}
+	leave(source, f) {
+		let key = cellKey(f.cx, f.cy), set = this.inCell.get(key);
+		set?.delete(source), set?.size === 0 && this.inCell.delete(key);
 	}
 };
+// ../../../packages/lib/src/server/progressFor.ts
+const running = new PlayerMap({ onDrop: (_source, settle) => settle(!1) });
+on(CORE.playerUnloadedEvent, (source) => {
+	let settle = running.get(source);
+	settle && settle(!1);
+});
+function progressFor(source, options) {
+	let previous = running.get(source);
+	previous && (previous(!1), emitNet(CORE.progressForCancelEvent, source));
+	let { minRatio = .8, ...bar } = options, startedAt = GetGameTimer();
+	return new Promise((resolve) => {
+		let done = !1, settle = (ok) => {
+			done || (done = !0, running.get(source) === settle && running.delete(source), resolve(ok));
+		};
+		running.set(source, settle), triggerClientCallback(CORE.progressForCallback, source, [bar], bar.duration + 15e3).then((answer) => settle(answer === !0 && GetGameTimer() - startedAt >= bar.duration * minRatio), () => settle(!1));
+	});
+}
 // ../../../packages/lib/src/server/command.ts
 const resource$3 = GetCurrentResourceName();
 createLogger(resource$3), new class {
@@ -15322,7 +15528,7 @@ var require_lib$3 = __commonJSMin(((exports) => {
 		parserCache.clearCache();
 	};
 }))();
-let pool = null, pending$1 = null, size = null, closed = !1;
+let pool = null, pending = null, size = null, closed = !1;
 function setPoolSize(connections) {
 	size = Math.max(1, Math.floor(connections));
 }
@@ -15349,7 +15555,7 @@ async function open$1() {
 	}
 }
 function getPool() {
-	return pool ? Promise.resolve(pool) : (pending$1 ??= open$1(), pending$1);
+	return pool ? Promise.resolve(pool) : (pending ??= open$1(), pending);
 }
 function isReady() {
 	return pool !== null;
@@ -15357,7 +15563,7 @@ function isReady() {
 async function closePool() {
 	closed = !0;
 	let current = pool;
-	pool = null, pending$1 = null, await current?.end();
+	pool = null, pending = null, await current?.end();
 }
 function fixBlobs(rows, fields) {
 	if (!Array.isArray(rows) || rows.length === 0 || !fields) return;
@@ -15652,7 +15858,7 @@ function every(ms, fn, options = {}) {
 	return options.active !== !1 && job.set(!0), job;
 }
 // ../../../packages/lib/src/fivem/state.ts
-const stateBoolean = (v) => typeof v == "boolean" ? v : void 0, isServer = IsDuplicityVersion();
+const stateNumber = (v) => typeof v == "number" && Number.isFinite(v) ? v : void 0, stateBoolean = (v) => typeof v == "boolean" ? v : void 0, isServer = IsDuplicityVersion();
 var Mirror = class {
 	key;
 	parse;
@@ -15710,9 +15916,9 @@ var Mirror = class {
 		DoesEntityExist(entity) && (Entity(entity).state.set(this.key, value ?? null, !0), this.put(entity, value));
 	}
 };
-resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), createLocale();
-// resource/common/resource.ts
-const ResourceName = GetCurrentResourceName();
+resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource);
+// resource/common/locale.ts
+const Locale = createLocale(), ResourceName = GetCurrentResourceName();
 IsDuplicityVersion();
 // resource/server/log.ts
 const log = createLogger(ResourceName);
@@ -15769,8 +15975,33 @@ async function saveInventories(list) {
 		}
 	}
 }
+async function renameInventory(from, to) {
+	await prepareDatabase(), await mysql.query("UPDATE IGNORE ai_inventory_inventories SET id = ? WHERE id = ?", [to, from]);
+}
 // resource/common/items.ts
-const KEY$1 = /^[a-z0-9_-]{2,48}$/, TYPES = [
+const USE_ANIMS = {
+	none: void 0,
+	eat: {
+		dict: "mp_player_inteat@burger",
+		clip: "mp_player_int_eat_burger",
+		flag: 49
+	},
+	drink: {
+		dict: "mp_player_intdrink",
+		clip: "loop_bottle",
+		flag: 49
+	},
+	bandage: {
+		dict: "missheistdockssetup1clipboard@idle_a",
+		clip: "idle_a",
+		flag: 49
+	},
+	armour: {
+		dict: "clothingshirt",
+		clip: "try_shirt_positive_d",
+		flag: 49
+	}
+}, KEY$1 = /^[a-z0-9_-]{2,48}$/, TYPES = [
 	"item",
 	"weapon",
 	"ammo",
@@ -16793,15 +17024,12 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 	forceClose: "ai-inventory:client:forceClose",
 	drops: "ai-inventory:client:drops",
 	weapon: "ai-inventory:client:weapon",
-	startUse: "ai-inventory:client:startUse",
 	components: "ai-inventory:client:components",
 	close: "ai-inventory:close",
-	cancelUse: "ai-inventory:cancelUse",
 	ammo: "ai-inventory:ammo",
 	open: "ai-inventory:open",
 	move: "ai-inventory:move",
 	use: "ai-inventory:use",
-	finishUse: "ai-inventory:finishUse",
 	give: "ai-inventory:give",
 	drop: "ai-inventory:drop",
 	buy: "ai-inventory:buy",
@@ -17097,8 +17325,12 @@ const inventories = new class {
 	players = new Map();
 	holders = new Map();
 	open = new Map();
+	aliases = new Map();
 	get(id) {
-		return this.byId.get(id);
+		return this.byId.get(id) ?? this.byId.get(this.aliases.get(id) ?? "");
+	}
+	alias(name, id) {
+		name !== id && this.aliases.set(name, id);
 	}
 	playerOf(source) {
 		return this.players.get(source);
@@ -17220,92 +17452,15 @@ function reachable(source, id) {
 	let open = inventories.openOf(source);
 	return !open || open.id !== id ? null : reach.get(source)?.() === !1 ? (inventories.close(source), null) : open;
 }
-// resource/server/dropAreas.ts
-const OFFSET = 16384, cellOf = (v) => Math.max(-16e3, Math.min(16e3, Math.floor(v / 64))), keyOf = (cx, cy) => (cx + OFFSET) * 32768 + (cy + OFFSET);
-var DropAreas = class {
-	cells = new Map();
-	followers = new PlayerMap({ onDrop: (source, follower) => this.forget(source, follower) });
-	inCell = new Map();
-	stale = !0;
-	count = 0;
-	get size() {
-		return this.count;
-	}
-	at(cell) {
-		return this.cells.get(cell);
-	}
-	*around(x, y) {
-		let cx = cellOf(x), cy = cellOf(y);
-		for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) yield* this.cells.get(keyOf(cx + dx, cy + dy)) ?? [];
-	}
-	add(drop) {
-		this.stale && this.followAll();
-		let cell = this.cells.get(drop.cell);
-		cell || this.cells.set(drop.cell, cell = new Set()), cell.add(drop), this.count++;
-		let cx = Math.floor(drop.cell / 32768) - OFFSET, cy = drop.cell % 32768 - OFFSET, put = [drop.point()];
-		for (let dx = -3; dx <= 3; dx++) for (let dy = -3; dy <= 3; dy++) for (let source of this.inCell.get(keyOf(cx + dx, cy + dy)) ?? []) this.followers.get(source)?.known.add(drop), drop.known.add(source), emitNet(EVENTS.drops, source, put, [], !1);
-	}
-	delete(drop) {
-		let cell = this.cells.get(drop.cell);
-		if (cell?.delete(drop)) {
-			cell.size === 0 && this.cells.delete(drop.cell), --this.count === 0 && (this.stale = !0);
-			for (let source of drop.known) this.followers.get(source)?.known.delete(drop), emitNet(EVENTS.drops, source, [], [drop.id], !1);
-			drop.known.clear();
-		}
-	}
-	start(source) {
-		this.stop(source);
-		let p = coordsOf(source), follower = {
-			cell: keyOf(cellOf(p.x), cellOf(p.y)),
-			known: new Set()
-		};
-		this.followers.set(source, follower), this.enter(source, follower.cell), this.diff(source, follower, cellOf(p.x), cellOf(p.y), !0);
-	}
-	stop(source) {
-		let follower = this.followers.get(source);
-		follower && (this.followers.delete(source), this.forget(source, follower));
-	}
-	followAll() {
-		this.stale = !1;
-		for (let [source, follower] of this.followers) {
-			let p = coordsOf(source), cx = cellOf(p.x), cy = cellOf(p.y), cell = keyOf(cx, cy);
-			cell !== follower.cell && (this.leave(source, follower.cell), follower.cell = cell, this.enter(source, cell), this.diff(source, follower, cx, cy, !1));
-		}
-	}
-	diff(source, follower, cx, cy, reset) {
-		let visible = new Set();
-		for (let dx = -3; dx <= 3; dx++) for (let dy = -3; dy <= 3; dy++) for (let drop of this.cells.get(keyOf(cx + dx, cy + dy)) ?? []) visible.add(drop);
-		let put = [], remove = [];
-		for (let drop of follower.known) visible.has(drop) || (follower.known.delete(drop), drop.known.delete(source), remove.push(drop.id));
-		for (let drop of visible) follower.known.has(drop) || (follower.known.add(drop), drop.known.add(source), put.push(drop.point()));
-		if (reset || put.length !== 0 || remove.length !== 0) {
-			emitNet(EVENTS.drops, source, put.slice(0, 100), remove, reset);
-			for (let i = 100; i < put.length; i += 100) emitNet(EVENTS.drops, source, put.slice(i, i + 100), [], !1);
-		}
-	}
-	enter(source, cell) {
-		let set = this.inCell.get(cell);
-		set || this.inCell.set(cell, set = new Set()), set.add(source);
-	}
-	leave(source, cell) {
-		let set = this.inCell.get(cell);
-		set?.delete(source), set?.size === 0 && this.inCell.delete(cell);
-	}
-	forget(source, follower) {
-		this.leave(source, follower.cell);
-		for (let drop of follower.known) drop.known.delete(source);
-	}
-}, Drop = class {
+var Drop = class {
 	id;
 	x;
 	y;
 	z;
-	cell;
 	owner;
 	inventory;
-	known = new Set();
-	constructor(id, x, y, z, cell, owner, inventory) {
-		this.id = id, this.x = x, this.y = y, this.z = z, this.cell = cell, this.owner = owner, this.inventory = inventory;
+	constructor(id, x, y, z, owner, inventory) {
+		this.id = id, this.x = x, this.y = y, this.z = z, this.owner = owner, this.inventory = inventory;
 	}
 	point() {
 		return {
@@ -17318,7 +17473,12 @@ var DropAreas = class {
 };
 const drops = new class {
 	byId = new Map();
-	areas = new DropAreas();
+	areas = new AreaStream({
+		event: EVENTS.drops,
+		view: (drop) => drop.point(),
+		range: 3,
+		chunk: 100
+	});
 	perOwner = new Map();
 	newDrop = new Cooldowns();
 	next = 0;
@@ -17333,7 +17493,7 @@ const drops = new class {
 	}
 	refusal(source, x, y) {
 		let charId = charIdOf(source);
-		return charId !== null && (this.perOwner.get(charId) ?? 0) >= content.settings.drop.maxPerPlayer || (this.areas.at(keyOf(cellOf(x), cellOf(y)))?.size ?? 0) >= 50 ? "INV_ERR_DROP_LIMIT" : this.newDrop.take(source, 1e3) ? null : "INV_ERR_TOO_FAST";
+		return charId !== null && (this.perOwner.get(charId) ?? 0) >= content.settings.drop.maxPerPlayer || this.areas.countAt(x, y) >= 50 ? "INV_ERR_DROP_LIMIT" : this.newDrop.take(source, 1e3) ? null : "INV_ERR_TOO_FAST";
 	}
 	create(x, y, z, owner) {
 		let id = `drop:${++this.next}`, { rows, maxWeight } = content.settings.drop, inventory = inventories.create(id, {
@@ -17342,8 +17502,8 @@ const drops = new class {
 			rows,
 			maxWeight,
 			persistent: !1
-		}, []), cell = keyOf(cellOf(x), cellOf(y)), drop = new Drop(id, x, y, z - .95, cell, owner, inventory);
-		return this.byId.set(id, drop), owner !== null && this.perOwner.set(owner, (this.perOwner.get(owner) ?? 0) + 1), this.areas.add(drop), drop;
+		}, []), drop = new Drop(id, x, y, z - .95, owner, inventory);
+		return this.byId.set(id, drop), owner !== null && this.perOwner.set(owner, (this.perOwner.get(owner) ?? 0) + 1), this.areas.set(drop), drop;
 	}
 	watch(source, drop) {
 		inventories.watch(source, drop.inventory), setReach(source, () => isNear(source, drop, 4));
@@ -17358,7 +17518,7 @@ const drops = new class {
 				let left = (this.perOwner.get(drop.owner) ?? 1) - 1;
 				left > 0 ? this.perOwner.set(drop.owner, left) : this.perOwner.delete(drop.owner);
 			}
-			inventories.remove(id), this.areas.delete(drop);
+			inventories.remove(id), this.areas.delete(drop.id);
 		}
 	}
 	start(source) {
@@ -17526,7 +17686,7 @@ const ammoOf = (stack) => typeof stack.metadata.ammo == "number" ? stack.metadat
 function registerUsable(name, handler) {
 	handlers.set(name.toLowerCase(), handler);
 }
-const pending = new PendingActions();
+const using = new PlayerMap();
 function finish(source, stack, def) {
 	let inventory = inventories.playerOf(source);
 	if (!inventory) return;
@@ -17540,24 +17700,19 @@ function finish(source, stack, def) {
 }
 function useSlot(source, slot, hash) {
 	let inventory = inventories.playerOf(source), stack = inventory?.stacks.get(slot), def = stack ? content.items.get(stack.name) : void 0;
-	if (!inventory || !stack || !def) return fail("INV_ERR_GONE");
-	if (def.type === "weapon") return weapons.toggle(source, stack), { ok: !0 };
-	if (def.type === "component") return hash ? weapons.attach(source, stack, hash) : fail("INV_ERR_NOT_FIT");
-	if (def.type === "ammo") return weapons.reload(source, 250);
-	if (!def.usable && !handlers.has(def.name)) return fail("INV_ERR_NOT_USABLE");
-	if (pending.peek(source)) return fail("INV_ERR_BUSY");
-	if (def.use.time <= 0) return finish(source, stack, def), { ok: !0 };
-	let use = {
-		token: pending.start(source, {
-			slot,
-			name: def.name,
-			serial: stack.metadata.serial
-		}, def.use.time),
-		name: def.name,
-		anim: def.use.anim,
-		time: def.use.time
-	};
-	return emitNet(EVENTS.startUse, source, use), { ok: !0 };
+	return !inventory || !stack || !def ? fail("INV_ERR_GONE") : def.type === "weapon" ? (weapons.toggle(source, stack), { ok: !0 }) : def.type === "component" ? hash ? weapons.attach(source, stack, hash) : fail("INV_ERR_NOT_FIT") : def.type === "ammo" ? weapons.reload(source, 250) : !def.usable && !handlers.has(def.name) ? fail("INV_ERR_NOT_USABLE") : using.has(source) ? fail("INV_ERR_BUSY") : def.use.time <= 0 ? (finish(source, stack, def), { ok: !0 }) : (playUse(source, slot, stack.metadata.serial, def), { ok: !0 });
+}
+async function playUse(source, slot, serial, def) {
+	using.set(source, !0);
+	let done = await progressFor(source, {
+		label: Locale("UI_USING", def.label),
+		duration: def.use.time,
+		anim: USE_ANIMS[def.use.anim]
+	});
+	if (using.delete(source), !done) return;
+	let stack = inventories.playerOf(source)?.stacks.get(slot);
+	if (!stack || stack.name !== def.name || stack.metadata.serial !== serial) return notify(source, Locale("INV_ERR_GONE"), "error");
+	finish(source, stack, def);
 }
 onClientCallback(EVENTS.use, {
 	args: ([slot, hash]) => {
@@ -17565,15 +17720,7 @@ onClientCallback(EVENTS.use, {
 		return s === null ? null : [s, typeof hash == "string" && /^[A-Z0-9_]{2,64}$/.test(hash) ? hash : void 0];
 	},
 	lock: !0
-}, (source, slot, hash) => useSlot(source, slot, hash)), onClientCallback(EVENTS.finishUse, {
-	args: oneArg(readId),
-	lock: !0
-}, (source, token) => {
-	let running = pending.peek(source) !== null, use = pending.take(source, token);
-	if (!use) return fail(running && pending.peek(source) === null ? "INV_ERR_TOO_FAST" : "INV_ERR_GONE");
-	let stack = inventories.playerOf(source)?.stacks.get(use.slot), def = content.items.get(use.name);
-	return !stack || !def || stack.name !== use.name || stack.metadata.serial !== use.serial ? fail("INV_ERR_GONE") : (finish(source, stack, def), { ok: !0 });
-}), onClientEvent(EVENTS.cancelUse, (source) => pending.cancel(source)), onClientCallback(EVENTS.reload, {
+}, (source, slot, hash) => useSlot(source, slot, hash)), onClientCallback(EVENTS.reload, {
 	args: oneArg((v) => readInt(v, 1, 1e3)),
 	lock: !0
 }, (source, want) => weapons.reload(source, want)), onClientCallback(EVENTS.detach, {
@@ -17587,7 +17734,7 @@ onClientCallback(EVENTS.use, {
 	return s !== null && a !== null ? [s, a] : null;
 } }, (source, slot, ammo) => weapons.reportAmmo(source, slot, ammo));
 function dropPlayer(source) {
-	pending.cancel(source), weapons.drop(source);
+	weapons.drop(source);
 }
 // resource/server/session.ts
 const current = new PlayerMap();
@@ -17765,17 +17912,33 @@ function definitionView(name) {
 	} : null;
 }
 // resource/server/open.ts
-const FAR = fail("INV_ERR_FAR"), DENIED = fail("INV_ERR_DENIED"), GONE = fail("INV_ERR_GONE"), plateOf = (vehicle) => GetVehicleNumberPlateText(vehicle).trim().toUpperCase(), owned = new EntityState(VEHICLE_BAGS.owned, stateBoolean), isOwned = (vehicle) => owned.get(vehicle) === !0, temporary = new Map();
-function vehicleInventory(vehicle, kind) {
+const FAR = fail("INV_ERR_FAR"), DENIED = fail("INV_ERR_DENIED"), GONE = fail("INV_ERR_GONE"), plateOf = (vehicle) => GetVehicleNumberPlateText(vehicle).trim().toUpperCase(), owned = new EntityState(VEHICLE_BAGS.owned, stateBoolean), isOwned = (vehicle) => owned.get(vehicle) === !0, vehicleIds = new EntityState(VEHICLE_BAGS.id, stateNumber), temporary = new Map(), adopted = new Set();
+async function adoptPlateRow(kind, vehicleId, id) {
+	if (adopted.has(id) || inventories.get(id)) return;
+	adopted.add(id);
+	let registered = optionalExport("ai-vehicles")?.GetVehicle(vehicleId)?.plate;
+	typeof registered == "string" && registered.trim() !== "" && await renameInventory(`${kind}:${registered.trim().toUpperCase()}`, id);
+}
+async function vehicleInventory(vehicle, kind) {
 	let plate = plateOf(vehicle), shape = {
 		kind,
 		label: plate,
 		...content.settings[kind]
 	};
-	if (isOwned(vehicle)) return inventories.load(`${kind}:${plate}`, {
-		...shape,
-		persistent: !0
-	});
+	if (isOwned(vehicle)) {
+		let vehicleId = vehicleIds.get(vehicle);
+		if (vehicleId === void 0) return inventories.load(`${kind}:${plate}`, {
+			...shape,
+			persistent: !0
+		});
+		let id = `${kind}:v${vehicleId}`;
+		await adoptPlateRow(kind, vehicleId, id);
+		let inventory = await inventories.load(id, {
+			...shape,
+			persistent: !0
+		});
+		return inventory.label = plate, inventories.alias(`${kind}:${plate}`, id), inventory;
+	}
 	let id = `${kind}:tmp:${vehicle}`, ids = temporary.get(vehicle) ?? [];
 	return ids.includes(id) || temporary.set(vehicle, [...ids, id]), inventories.load(id, {
 		...shape,

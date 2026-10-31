@@ -1,8 +1,8 @@
-import { Cooldowns, every, isNear } from "@aicore-fivem/lib/server";
+import { AreaStream, Cooldowns, every, isNear } from "@aicore-fivem/lib/server";
+import { EVENTS } from "common/events";
 import type { DropPoint } from "common/nui";
 import { charIdOf, setReach } from "./access";
 import { content } from "./content";
-import { cellOf, DropAreas, keyOf, type AreaDrop } from "./dropAreas";
 import type { Inventory } from "./inventory";
 import { inventories } from "./registry";
 
@@ -15,15 +15,12 @@ const MAX_PER_CELL = 50;
 /** One new drop per player per this time (adding to an existing one is free). */
 const NEW_DROP_MS = 1000;
 
-class Drop implements AreaDrop {
-  readonly known = new Set<number>();
-
+class Drop {
   constructor(
     readonly id: string,
     readonly x: number,
     readonly y: number,
     readonly z: number,
-    readonly cell: number,
     /** The character that made it (per-player cap), null for scripts and crafting. */
     readonly owner: number | null,
     readonly inventory: Inventory,
@@ -36,12 +33,18 @@ class Drop implements AreaDrop {
 
 /**
  * Items on the ground: temporary inventories with a point, never stored. Clients know only the drops around them
- * (`DropAreas`). New drops are limited per player (rate, the panel's live cap) and per cell. Empty drops go at once,
+ * (lib `AreaStream`: 64 m cells, the 7x7 around the player, at least 192 m while bags show at 40 m; the server reads
+ * the players' positions). New drops are limited per player (rate, the panel's live cap) and per cell. Empty drops go at once,
  * others after the panel's despawn time without changes.
  */
 class Drops {
   private readonly byId = new Map<string, Drop>();
-  private readonly areas = new DropAreas<Drop>();
+  private readonly areas = new AreaStream<Drop, DropPoint>({
+    event: EVENTS.drops,
+    view: (drop) => drop.point(),
+    range: 3,
+    chunk: 100,
+  });
   /** Live drops per character (the panel's per-player cap). */
   private readonly perOwner = new Map<number, number>();
   private readonly newDrop = new Cooldowns();
@@ -71,8 +74,7 @@ class Drops {
       (this.perOwner.get(charId) ?? 0) >= content.settings.drop.maxPerPlayer
     )
       return "INV_ERR_DROP_LIMIT";
-    if ((this.areas.at(keyOf(cellOf(x), cellOf(y)))?.size ?? 0) >= MAX_PER_CELL)
-      return "INV_ERR_DROP_LIMIT";
+    if (this.areas.countAt(x, y) >= MAX_PER_CELL) return "INV_ERR_DROP_LIMIT";
     return this.newDrop.take(source, NEW_DROP_MS) ? null : "INV_ERR_TOO_FAST";
   }
 
@@ -85,12 +87,11 @@ class Drops {
       { kind: "drop", label: "", rows, maxWeight, persistent: false },
       [],
     );
-    const cell = keyOf(cellOf(x), cellOf(y));
-    const drop = new Drop(id, x, y, z - 0.95, cell, owner, inventory);
+    const drop = new Drop(id, x, y, z - 0.95, owner, inventory);
     this.byId.set(id, drop);
     if (owner !== null)
       this.perOwner.set(owner, (this.perOwner.get(owner) ?? 0) + 1);
-    this.areas.add(drop);
+    this.areas.set(drop);
     return drop;
   }
 
@@ -116,7 +117,7 @@ class Drops {
       else this.perOwner.delete(drop.owner);
     }
     inventories.remove(id);
-    this.areas.delete(drop);
+    this.areas.delete(drop.id);
   }
 
   /** A character entered the world: his client gets the drops around him. */

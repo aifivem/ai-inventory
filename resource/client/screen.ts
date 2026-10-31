@@ -3,8 +3,8 @@ import {
   cache,
   callAction,
   getPlayerData,
-  hud,
   loadLocaleTexts,
+  NuiScreen,
 } from "@aicore-fivem/lib/client";
 import { EVENTS } from "common/events";
 import {
@@ -18,7 +18,11 @@ import { benchView, content, itemViews, shopView } from "./content";
 import { state, toView } from "./state";
 import { worldPed } from "./worldPed";
 
-export const send = (message: NuiMessage): void => SendNUIMessage(message);
+/** The page: focus, HUDs and the close message; closing it (the page's button too) runs `screen.closed`. */
+const page = new NuiScreen<NuiMessage>("inventory", {
+  onClose: () => screen.closed(),
+});
+export const send = (message: NuiMessage): void => page.send(message);
 
 /** The character's name and the clothes column (worn pieces) for the screen. */
 export function sendProfile(): void {
@@ -37,7 +41,10 @@ class Screen {
   /** The open key's current binding (set by `open.ts`, which owns the keybind). */
   openKey: () => string = () => "";
 
-  isOpen = false;
+  get isOpen(): boolean {
+    return page.isOpen;
+  }
+
   /** A shop or bench shows next to the player inventory. */
   private panel = false;
   private setupSent = false;
@@ -67,7 +74,7 @@ class Screen {
     state.otherId = other?.id ?? null;
     this.panel = panel !== null;
     send({ action: "player", data: state.player });
-    send({
+    page.open({
       action: "open",
       data: {
         other,
@@ -77,21 +84,16 @@ class Screen {
       },
     });
     sendProfile();
-    if (!this.isOpen) {
-      SetNuiFocus(true, true);
-      hud.hide("inventory");
-    }
-    this.isOpen = true;
   }
 
   close(): void {
-    if (!this.isOpen) return;
-    this.isOpen = false;
+    page.close();
+  }
+
+  /** The page closed: the second inventory and the character copy go, the server stops sending its deltas. */
+  closed(): void {
     state.otherId = null;
-    SetNuiFocus(false, false);
-    hud.show("inventory");
     worldPed.hide();
-    send({ action: "close", data: null });
     emitNet(EVENTS.close);
   }
 

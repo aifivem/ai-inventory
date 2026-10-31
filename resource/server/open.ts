@@ -7,7 +7,9 @@ import {
   isNear,
   onClientCallback,
   onClientEvent,
+  optionalExport,
   stateBoolean,
+  stateNumber,
   vehicleFromNet,
 } from "@aicore-fivem/lib/server";
 import { nearPlace } from "common/content";
@@ -19,6 +21,7 @@ import { content } from "./content";
 import { drops } from "./drops";
 import type { Inventory } from "./inventory";
 import { inventories } from "./registry";
+import { renameInventory } from "./repo";
 
 const FAR = fail("INV_ERR_FAR");
 const DENIED = fail("INV_ERR_DENIED");
@@ -30,22 +33,55 @@ const plateOf = (vehicle: number): string =>
 /** Trunks of vehicles a vehicles resource marks as owned (`ai:owned` state bag) are stored; others are temporary. */
 const owned = new EntityState(VEHICLE_BAGS.owned, stateBoolean);
 const isOwned = (vehicle: number): boolean => owned.get(vehicle) === true;
+/** The owned vehicle's id in ai-vehicles (`ai:vid`): its trunk follows the vehicle, not the plate on it. */
+const vehicleIds = new EntityState(VEHICLE_BAGS.id, stateNumber);
 
 /** Entity -> ids of the temporary trunk / glovebox of an unowned vehicle (they go with the entity). */
 const temporary = new Map<number, string[]>();
+/** Vehicle inventory ids whose plate-keyed row was already moved over this session. */
+const adopted = new Set<string>();
 
 /**
- * An owned vehicle's trunk or glovebox is stored under its plate (plates of owned vehicles are unique); any other
+ * Trunks used to be stored under the plate: the first open of `<kind>:v<id>` moves the row stored under the
+ * vehicle's registered plate (a fake plate on it changes nothing).
+ */
+async function adoptPlateRow(kind: string, vehicleId: number, id: string) {
+  if (adopted.has(id) || inventories.get(id)) return;
+  adopted.add(id);
+  const registered: unknown =
+    optionalExport("ai-vehicles")?.GetVehicle(vehicleId)?.plate;
+  if (typeof registered === "string" && registered.trim() !== "")
+    await renameInventory(`${kind}:${registered.trim().toUpperCase()}`, id);
+}
+
+/**
+ * An owned vehicle's trunk or glovebox is stored under its vehicle id (`trunk:v12`), so a fake or changed plate
+ * keeps the same items; an owned vehicle without an id (another vehicles resource) uses its plate. Any other
  * vehicle gets a temporary one tied to the entity, so it never takes or shadows a stored one with the same plate.
  */
-function vehicleInventory(
+async function vehicleInventory(
   vehicle: number,
   kind: "trunk" | "glovebox",
 ): Promise<Inventory> {
   const plate = plateOf(vehicle);
   const shape = { kind, label: plate, ...content.settings[kind] };
-  if (isOwned(vehicle))
-    return inventories.load(`${kind}:${plate}`, { ...shape, persistent: true });
+  if (isOwned(vehicle)) {
+    const vehicleId = vehicleIds.get(vehicle);
+    if (vehicleId === undefined)
+      return inventories.load(`${kind}:${plate}`, {
+        ...shape,
+        persistent: true,
+      });
+    const id = `${kind}:v${vehicleId}`;
+    await adoptPlateRow(kind, vehicleId, id);
+    const inventory = await inventories.load(id, {
+      ...shape,
+      persistent: true,
+    });
+    inventory.label = plate;
+    inventories.alias(`${kind}:${plate}`, id);
+    return inventory;
+  }
   const id = `${kind}:tmp:${vehicle}`;
   const ids = temporary.get(vehicle) ?? [];
   if (!ids.includes(id)) temporary.set(vehicle, [...ids, id]);

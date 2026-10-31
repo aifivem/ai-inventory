@@ -15,6 +15,8 @@ g.IsDuplicityVersion = () => true;
 g.GetConvar = (_: string, fallback: string) => fallback;
 g.on = noop;
 g.onNet = noop;
+g.setTick = () => 1;
+g.clearTick = noop;
 g.emit = noop;
 let sent = 0;
 let dropBytes = 0;
@@ -23,7 +25,7 @@ let measureBytes = true;
 g.emitNet = (name: string, _target: unknown, ...args: unknown[]) => {
   sent++;
   if (name !== "ai-inventory:client:drops") return;
-  const [put, remove] = args as [unknown[], unknown[]];
+  const [, put, remove] = args as [boolean, unknown[], unknown[]];
   dropItems += put.length + remove.length;
   if (measureBytes) dropBytes += JSON.stringify(args).length;
 };

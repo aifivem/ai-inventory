@@ -1,12 +1,15 @@
-import { fail, oneArg, readId, readInt } from "@aicore-fivem/lib/shared";
+import { fail, oneArg, readInt } from "@aicore-fivem/lib/shared";
 import {
+  notify,
   onClientCallback,
   onClientEvent,
-  PendingActions,
+  PlayerMap,
+  progressFor,
 } from "@aicore-fivem/lib/server";
+import { Locale } from "common";
 import { EVENTS, type ActionResult } from "common/events";
-import type { ItemDef } from "common/items";
-import type { PendingUse, Stack } from "common/nui";
+import { USE_ANIMS, type ItemDef } from "common/items";
+import type { Stack } from "common/nui";
 import { content } from "./content";
 import { inventories } from "./registry";
 import { weapons } from "./weapons";
@@ -30,12 +33,8 @@ export function registerUsable(name: string, handler: UseHandler): void {
   handlers.set(name.toLowerCase(), handler);
 }
 
-/** The use the player's animation is running for: checked when it reports done (before 80 % of its time = refused). */
-const pending = new PendingActions<{
-  slot: number;
-  name: string;
-  serial: unknown;
-}>();
+/** Players whose use animation runs (one at a time). */
+const using = new PlayerMap<true>();
 
 /** Consumes the item and tells scripts (after the animation, or at once when the item has none). */
 function finish(source: number, stack: Stack, def: ItemDef): void {
@@ -82,24 +81,34 @@ export function useSlot(
     return hash ? weapons.attach(source, stack, hash) : fail("INV_ERR_NOT_FIT");
   if (def.type === "ammo") return weapons.reload(source, 250);
   if (!def.usable && !handlers.has(def.name)) return fail("INV_ERR_NOT_USABLE");
-  if (pending.peek(source)) return fail("INV_ERR_BUSY");
+  if (using.has(source)) return fail("INV_ERR_BUSY");
   if (def.use.time <= 0) {
     finish(source, stack, def);
     return { ok: true };
   }
-  const token = pending.start(
-    source,
-    { slot, name: def.name, serial: stack.metadata.serial },
-    def.use.time,
-  );
-  const use: PendingUse = {
-    token,
-    name: def.name,
-    anim: def.use.anim,
-    time: def.use.time,
-  };
-  emitNet(EVENTS.startUse, source, use);
+  void playUse(source, slot, stack.metadata.serial, def);
   return { ok: true };
+}
+
+/** Runs the use animation (server-timed progress bar), then consumes the stack if it is still the same item. */
+async function playUse(
+  source: number,
+  slot: number,
+  serial: unknown,
+  def: ItemDef,
+): Promise<void> {
+  using.set(source, true);
+  const done = await progressFor(source, {
+    label: Locale("UI_USING", def.label),
+    duration: def.use.time,
+    anim: USE_ANIMS[def.use.anim],
+  });
+  using.delete(source);
+  if (!done) return;
+  const stack = inventories.playerOf(source)?.stacks.get(slot);
+  if (!stack || stack.name !== def.name || stack.metadata.serial !== serial)
+    return notify(source, Locale("INV_ERR_GONE"), "error");
+  finish(source, stack, def);
 }
 
 onClientCallback(
@@ -119,36 +128,6 @@ onClientCallback(
   },
   (source, slot, hash) => useSlot(source, slot, hash),
 );
-
-onClientCallback(
-  EVENTS.finishUse,
-  { args: oneArg(readId), lock: true },
-  (source, token): ActionResult => {
-    const running = pending.peek(source) !== null;
-    const use = pending.take(source, token);
-    // A matching token ends the use even when too early; a wrong one leaves it running.
-    if (!use)
-      return fail(
-        running && pending.peek(source) === null
-          ? "INV_ERR_TOO_FAST"
-          : "INV_ERR_GONE",
-      );
-    const stack = inventories.playerOf(source)?.stacks.get(use.slot);
-    const def = content.items.get(use.name);
-    if (
-      !stack ||
-      !def ||
-      stack.name !== use.name ||
-      stack.metadata.serial !== use.serial
-    )
-      return fail("INV_ERR_GONE");
-    finish(source, stack, def);
-    return { ok: true };
-  },
-);
-
-/** The client cancelled the use animation (moved, got in a car). */
-onClientEvent(EVENTS.cancelUse, (source) => pending.cancel(source));
 
 onClientCallback(
   EVENTS.reload,
@@ -181,6 +160,5 @@ onClientEvent(
 );
 
 export function dropPlayer(source: number): void {
-  pending.cancel(source);
   weapons.drop(source);
 }

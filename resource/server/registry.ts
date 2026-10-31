@@ -31,9 +31,16 @@ class Inventories {
   private readonly holders = new Map<string, number>();
   /** source -> id of the second inventory the player has open. */
   private readonly open = new Map<number, string>();
+  /** Other names of an inventory: `trunk:<plate>` of an owned vehicle stored under its vehicle id. */
+  private readonly aliases = new Map<string, string>();
 
   get(id: string): Inventory | undefined {
-    return this.byId.get(id);
+    return this.byId.get(id) ?? this.byId.get(this.aliases.get(id) ?? "");
+  }
+
+  /** Lets scripts find inventory `id` under `name` too (until another inventory takes the name). */
+  alias(name: string, id: string): void {
+    if (name !== id) this.aliases.set(name, id);
   }
 
   playerOf(source: number): Inventory | undefined {

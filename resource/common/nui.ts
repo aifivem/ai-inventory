@@ -67,13 +67,6 @@ export interface EquippedWeapon {
   components: string[];
 }
 
-export interface PendingUse {
-  token: number;
-  name: string;
-  anim: string;
-  time: number;
-}
-
 /** Item fields the screen needs (from the panel's item list). */
 export interface ItemView {
   name: string;

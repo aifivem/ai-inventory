@@ -97,3 +97,12 @@ export async function saveInventories(
     );
   }
 }
+
+/** Moves a stored inventory to a new id; nothing happens when `from` is missing or `to` already exists. */
+export async function renameInventory(from: string, to: string): Promise<void> {
+  await prepareDatabase();
+  await mysql.query(
+    "UPDATE IGNORE ai_inventory_inventories SET id = ? WHERE id = ?",
+    [to, from],
+  );
+}

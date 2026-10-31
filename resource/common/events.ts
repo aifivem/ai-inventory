@@ -12,22 +12,15 @@ export const EVENTS = {
   ground: "ai-inventory:client:ground",
   /** Server -> client: () the second inventory went away (drop emptied, too far). */
   forceClose: "ai-inventory:client:forceClose",
-  /**
-   * Server -> players near drops: (put: DropPoint[], remove: string[], reset) the ground bags around the player (cells
-   * of 64 m); `reset` = the first list after a character load (replaces what the client had).
-   */
+  /** Server -> players near drops: (reset, put: DropPoint[], remove: string[]) the ground bags around the player (lib `AreaStream`). */
   drops: "ai-inventory:client:drops",
   /** Server -> owner: (weapon: EquippedWeapon | null) equip or holster. */
   weapon: "ai-inventory:client:weapon",
-  /** Server -> owner: (use: PendingUse) play the use animation, then call `finishUse`. */
-  startUse: "ai-inventory:client:startUse",
   /** Server -> owner: (hashes: string[]) the held weapon's attachments changed. */
   components: "ai-inventory:client:components",
 
   /** Client -> server: () the player closed the screen; stop sending the second inventory. */
   close: "ai-inventory:close",
-  /** Client -> server: () the use animation was cancelled. */
-  cancelUse: "ai-inventory:cancelUse",
   /** Client -> server: (slot, ammo) ammo left in the held weapon (only lower values are taken). */
   ammo: "ai-inventory:ammo",
 
@@ -37,8 +30,6 @@ export const EVENTS = {
   move: "ai-inventory:move",
   /** Callback: (slot) -> ActionResult; use a stack of the player inventory. */
   use: "ai-inventory:use",
-  /** Callback: (token) -> ActionResult; the use animation finished. */
-  finishUse: "ai-inventory:finishUse",
   /** Callback: (slot, count, targetServerId) -> ActionResult. */
   give: "ai-inventory:give",
   /** Callback: (from, slot, count) -> ActionResult; put a stack on the ground. */

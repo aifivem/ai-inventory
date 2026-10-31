@@ -113,7 +113,7 @@ export const drops = new Drops();
 onServerEvent(
   EVENTS.drops,
   {
-    args: ([put, remove, reset]) =>
+    args: ([reset, put, remove]) =>
       Array.isArray(put) && Array.isArray(remove)
         ? [
             put.map(toPoint).filter((p): p is DropPoint => p !== null),

@@ -17,7 +17,11 @@ const names: DataSpec = {
 };
 const gridSpec = (extra: Record<string, DataSpec> = {}): DataSpec => ({
   type: "object",
-  fields: { rows: spec.int(1, 50), maxWeight: spec.int(0, 10_000_000), ...extra },
+  fields: {
+    rows: spec.int(1, 50),
+    maxWeight: spec.int(0, 10_000_000),
+    ...extra,
+  },
 });
 const KEY = "^[a-z0-9_-]{2,48}$";
 
@@ -118,7 +122,10 @@ export const inventorySchema: PanelSchema = {
         label: text(48),
         description: text(240, true),
         weight: spec.int(0, 1_000_000),
-        size: { type: "object", fields: { w: spec.int(1, 8), h: spec.int(1, 8) } },
+        size: {
+          type: "object",
+          fields: { w: spec.int(1, 8), h: spec.int(1, 8) },
+        },
         stack: spec.int(1, 100_000),
         type: { type: "enum", values: ["item", "weapon", "ammo", "component"] },
         usable: { type: "bool" },
