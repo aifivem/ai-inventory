@@ -4,10 +4,12 @@ import {
   coordsOf,
   isNear,
   onClientCallback,
+  online,
+  vehicleOf,
 } from "@aicore-fivem/lib/server";
 import { EVENTS, type ActionResult } from "common/events";
 import { toMoveInput } from "common/nui";
-import { charIdOf, reachable } from "./access";
+import { reachable } from "./access";
 import { content } from "./content";
 import { drops } from "./drops";
 import { moveStack } from "./move";
@@ -62,14 +64,13 @@ onClientCallback(
       return fail("INV_ERR_GONE");
     const def = content.items.get(stack.name);
     if (!def) return fail("INV_ERR_GONE");
-    if (GetVehiclePedIsIn(GetPlayerPed(String(source)), false))
-      return fail("INV_ERR_IN_VEHICLE");
+    if (vehicleOf(source)) return fail("INV_ERR_IN_VEHICLE");
     const p = coordsOf(source);
     let drop = drops.near(p.x, p.y, p.z);
     if (!drop) {
       const refused = drops.refusal(source, p.x, p.y);
       if (refused) return fail(refused);
-      drop = drops.create(p.x, p.y, p.z, charIdOf(source));
+      drop = drops.create(p.x, p.y, p.z, online.charId(source) ?? null);
     }
     if (!drop.inventory.add(def, count, stack.metadata)) {
       drops.check(drop.inventory);

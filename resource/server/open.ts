@@ -13,11 +13,12 @@ import {
   stateBoolean,
   stateNumber,
   vehicleFromNet,
+  vehicleOf,
 } from "@aicore-fivem/lib/server";
 import { nearPlace } from "common/content";
 import { EVENTS } from "common/events";
 import { toOpenTarget, type OpenResult, type OpenTarget } from "common/nui";
-import { charIdOf, setReach } from "./access";
+import { setReach } from "./access";
 import { scriptStashes } from "./api";
 import { content } from "./content";
 import { drops } from "./drops";
@@ -130,8 +131,8 @@ async function open(source: number, target: OpenTarget): Promise<OpenResult> {
       if (!stash || stash.scriptOnly || !nearPlace(stash, p.x, p.y, p.z))
         return FAR;
       if (!online.allows(source, stash.access)) return DENIED;
-      const charId = charIdOf(source);
-      if (charId === null) return DENIED;
+      const charId = online.charId(source);
+      if (charId === undefined) return DENIED;
       const id = stash.personal
         ? `stash:${stash.id}:${charId}`
         : `stash:${stash.id}`;
@@ -165,15 +166,11 @@ async function open(source: number, target: OpenTarget): Promise<OpenResult> {
       return { ok: true, other: inventory.view(), panel: null };
     }
     case "glovebox": {
-      const vehicle = GetVehiclePedIsIn(GetPlayerPed(String(source)), false);
+      const vehicle = vehicleOf(source);
       if (!vehicle) return FAR;
       const inventory = await vehicleInventory(vehicle, "glovebox");
       inventories.watch(source, inventory);
-      setReach(
-        source,
-        () =>
-          GetVehiclePedIsIn(GetPlayerPed(String(source)), false) === vehicle,
-      );
+      setReach(source, () => vehicleOf(source) === vehicle);
       return { ok: true, other: inventory.view(), panel: null };
     }
     case "shop":

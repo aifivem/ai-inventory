@@ -1,11 +1,10 @@
-import { every } from "@aicore-fivem/lib/server";
+import { every, onStop } from "@aicore-fivem/lib/server";
 import type { InventoryKind, Stack } from "common/nui";
 import { EVENTS } from "common/events";
 import { content } from "./content";
 import { Inventory } from "./inventory";
 import { log } from "./log";
 import { loadInventories, saveInventories } from "./repo";
-import { ResourceName } from "common";
 
 export interface InventoryShape {
   kind: InventoryKind;
@@ -249,6 +248,4 @@ every(
   { name: "flush" },
 );
 on("txAdmin:events:serverShuttingDown", () => saveNow("shutdown"));
-on("onResourceStop", (resource: string) => {
-  if (resource === ResourceName) saveNow("resource stop");
-});
+onStop(() => saveNow("resource stop"));

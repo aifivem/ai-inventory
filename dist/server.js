@@ -448,6 +448,8 @@ const CORE = {
 	vehicleTypeCallback: "ai-core:vehicleType",
 	interactionStateKey: "ai:interaction",
 	pvpStateKey: "ai:pvp",
+	medicalStateKey: "ai:medical",
+	clientDeadEvent: "ai-core:client:dead",
 	charactersCallback: "ai-core:characters",
 	createCharacterCallback: "ai-core:createCharacter",
 	deleteCharacterCallback: "ai-core:deleteCharacter",
@@ -532,6 +534,10 @@ function entityCoords(entity) {
 	};
 }
 const coordsOf = (source) => entityCoords(GetPlayerPed(String(source)));
+function vehicleOf(source, options = {}) {
+	let ped = GetPlayerPed(String(source)), vehicle = GetVehiclePedIsIn(ped, !1);
+	return !vehicle || !options.driver || GetPedInVehicleSeat(vehicle, -1) === ped ? vehicle : 0;
+}
 function isNear(source, point, metres) {
 	let [x = 0, y = 0, z = 0] = GetEntityCoords(GetPlayerPed(String(source))), dx = x - point.x, dy = y - point.y, dz = z - point.z;
 	return dx * dx + dy * dy + dz * dz <= metres * metres;
@@ -1192,6 +1198,9 @@ var OnlinePlayers = class {
 	character(source) {
 		return this.start(), this.players.get(source)?.character ?? null;
 	}
+	charId(source) {
+		return this.start(), this.players.get(source)?.character.id;
+	}
 	name(source, options = {}) {
 		let c = this.character(source);
 		return c ? `${c.firstname} ${c.lastname}` : options.fallback === !1 ? "" : GetPlayerName(String(source));
@@ -1257,9 +1266,9 @@ const vehicleFromNet = (netId) => entityFromNet(netId, 2);
 resourceExport(CORE.resource);
 // ../../../packages/lib/src/server/players.ts
 const log$5 = createLogger(GetCurrentResourceName()), dropped = new Set();
-let listening = !1;
+let listening$1 = !1;
 function onDropped(fn) {
-	listening || (listening = !0, on("playerDropped", () => {
+	listening$1 || (listening$1 = !0, on("playerDropped", () => {
 		let source = Number(globalThis.source);
 		for (let handler of dropped) handler(source);
 	})), dropped.add(fn);
@@ -1301,19 +1310,19 @@ function onCharacter(handlers) {
 		} catch (error) {
 			log$5.error(`character loaded handler failed for ${source}`, error);
 		}
-	}, end = (source, charId) => {
+	}, end = (source, charId, reason) => {
 		if (live.delete(source)) try {
-			handlers.unloaded?.(source, charId);
+			handlers.unloaded?.(source, charId, reason);
 		} catch (error) {
 			log$5.error(`character unloaded handler failed for ${source}`, error);
 		}
 	};
 	on(CORE.playerLoadedEvent, (source, character) => {
 		let previous = live.get(source);
-		previous !== void 0 && end(source, previous), deliver(source, character);
-	}), on(CORE.playerUnloadedEvent, (source, charId) => end(source, charId)), onDropped((source) => setImmediate(() => {
+		previous !== void 0 && end(source, previous, "switch"), deliver(source, character);
+	}), on(CORE.playerUnloadedEvent, (source, charId, reason) => end(source, charId, reason === "dropped" ? "dropped" : "switch")), onDropped((source) => setImmediate(() => {
 		let charId = live.get(source);
-		charId !== void 0 && end(source, charId);
+		charId !== void 0 && end(source, charId, "dropped");
 	})), setImmediate(() => {
 		for (let source of online.sources()) {
 			if (live.has(source)) continue;
@@ -15883,6 +15892,22 @@ async function createDatabaseTables(resource, file) {
 	}
 }
 // ../../../packages/lib/src/fivem/byResource.ts
+const stopHandlers = [];
+let listening = !1;
+function onAnyStop(handler) {
+	if (stopHandlers.push(handler), listening) return;
+	listening = !0;
+	let event = IsDuplicityVersion() ? "onResourceStop" : "onClientResourceStop";
+	on(event, (resource) => {
+		for (let stop of stopHandlers) stop(resource);
+	});
+}
+function onStop(fn) {
+	let self = GetCurrentResourceName();
+	onAnyStop((resource) => {
+		resource === self && fn();
+	});
+}
 const plateOf = (vehicle) => GetVehicleNumberPlateText(vehicle).trim().toUpperCase();
 let log$1 = null;
 var ScheduledJob = class {
@@ -17587,11 +17612,9 @@ const inventories = new class {
 };
 every(3e4, () => {
 	saveNow("interval"), inventories.sweep().catch((error) => log.error("unloading idle inventories failed", error));
-}, { name: "flush" }), on("txAdmin:events:serverShuttingDown", () => saveNow("shutdown")), on("onResourceStop", (resource) => {
-	resource === ResourceName && saveNow("resource stop");
-});
+}, { name: "flush" }), on("txAdmin:events:serverShuttingDown", () => saveNow("shutdown")), onStop(() => saveNow("resource stop"));
 // resource/server/access.ts
-const charIdOf = (source) => online.character(source)?.id ?? null, reach = new PlayerMap();
+const reach = new PlayerMap();
 function setReach(source, check) {
 	reach.set(source, check);
 }
@@ -17641,8 +17664,8 @@ const drops = new class {
 		for (let drop of this.areas.around(x, y)) if (Math.hypot(drop.x - x, drop.y - y, drop.z - z) <= 1.5) return drop;
 	}
 	refusal(source, x, y) {
-		let charId = charIdOf(source);
-		return charId !== null && (this.perOwner.get(charId) ?? 0) >= content.settings.drop.maxPerPlayer || this.areas.countAt(x, y) >= 50 ? "INV_ERR_DROP_LIMIT" : this.newDrop.take(source, 1e3) ? null : "INV_ERR_TOO_FAST";
+		let charId = online.charId(source);
+		return charId !== void 0 && (this.perOwner.get(charId) ?? 0) >= content.settings.drop.maxPerPlayer || this.areas.countAt(x, y) >= 50 ? "INV_ERR_DROP_LIMIT" : this.newDrop.take(source, 1e3) ? null : "INV_ERR_TOO_FAST";
 	}
 	create(x, y, z, owner) {
 		let id = `drop:${++this.next}`, { rows, maxWeight } = content.settings.drop, inventory = inventories.create(id, {
@@ -18128,8 +18151,8 @@ async function open(source, target) {
 			let stash = content.stashes.get(target.id) ?? scriptStashes.get(target.id), p = coordsOf(source);
 			if (!stash || stash.scriptOnly || !nearPlace(stash, p.x, p.y, p.z)) return FAR;
 			if (!online.allows(source, stash.access)) return DENIED;
-			let charId = charIdOf(source);
-			if (charId === null) return DENIED;
+			let charId = online.charId(source);
+			if (charId === void 0) return DENIED;
 			let id = stash.personal ? `stash:${stash.id}:${charId}` : `stash:${stash.id}`, inventory = await inventories.load(id, {
 				kind: "stash",
 				label: stash.label,
@@ -18158,10 +18181,10 @@ async function open(source, target) {
 			};
 		}
 		case "glovebox": {
-			let vehicle = GetVehiclePedIsIn(GetPlayerPed(String(source)), !1);
+			let vehicle = vehicleOf(source);
 			if (!vehicle) return FAR;
 			let inventory = await vehicleInventory(vehicle, "glovebox");
-			return inventories.watch(source, inventory), setReach(source, () => GetVehiclePedIsIn(GetPlayerPed(String(source)), !1) === vehicle), {
+			return inventories.watch(source, inventory), setReach(source, () => vehicleOf(source) === vehicle), {
 				ok: !0,
 				other: inventory.view(),
 				panel: null
@@ -18273,12 +18296,12 @@ onClientCallback(EVENTS.move, {
 	if (!inventory || !stack || count > stack.count || inventory.kind === "drop") return fail("INV_ERR_GONE");
 	let def = content.items.get(stack.name);
 	if (!def) return fail("INV_ERR_GONE");
-	if (GetVehiclePedIsIn(GetPlayerPed(String(source)), !1)) return fail("INV_ERR_IN_VEHICLE");
+	if (vehicleOf(source)) return fail("INV_ERR_IN_VEHICLE");
 	let p = coordsOf(source), drop = drops.near(p.x, p.y, p.z);
 	if (!drop) {
 		let refused = drops.refusal(source, p.x, p.y);
 		if (refused) return fail(refused);
-		drop = drops.create(p.x, p.y, p.z, charIdOf(source));
+		drop = drops.create(p.x, p.y, p.z, online.charId(source) ?? null);
 	}
 	return drop.inventory.add(def, count, stack.metadata) ? (inventory.setCount(slot, stack.count - count), weapons.check(source), inventories.openOf(source) || (drops.watch(source, drop), emitNet(EVENTS.ground, source, drop.inventory.view())), aiLog("drops", `dropped ${count}x ${def.name}`, {
 		source,

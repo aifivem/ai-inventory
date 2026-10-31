@@ -4,6 +4,7 @@ import {
   callAction,
   getPlayerData,
   loadLocaleTexts,
+  medical,
   NuiScreen,
 } from "@aicore-fivem/lib/client";
 import { EVENTS } from "common/events";
@@ -19,7 +20,7 @@ import { state, toView } from "./state";
 import { worldPed } from "./worldPed";
 
 /** The page: focus, HUDs and the close message; closing it (the page's button too) runs `screen.closed`. */
-const page = new NuiScreen<NuiMessage>("inventory", {
+export const page = new NuiScreen<NuiMessage>("inventory", {
   onClose: () => screen.closed(),
 });
 export const send = (message: NuiMessage): void => page.send(message);
@@ -60,7 +61,7 @@ class Screen {
 
   /** Asks the server for the second inventory (or a shop / bench) and opens the screen with it. */
   async open(target: OpenTarget): Promise<void> {
-    if (!state.player || IsPauseMenuActive() || IsEntityDead(cache.ped)) return;
+    if (!state.player || IsPauseMenuActive() || medical.isDead()) return;
     const reply = await callAction(EVENTS.open, [target], {
       fallback: "INV_ERR_GONE",
     });

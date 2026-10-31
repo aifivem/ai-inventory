@@ -142,16 +142,16 @@ function readPlace(id: string, v: Record<string, unknown>): Place {
 
 /** One shop record (`records("shops", readShop)`). */
 export const readShop: RecordReader<Shop> = (id, v) => ({
-    ...readPlace(id, v),
-    ped: readPlacePed(v.ped),
-    blip: bool(v.blip, true),
-    blipStyle: readBlipStyle(v.blipStyle, SHOP_BLIP),
-    accounts: names(v.accounts).length ? names(v.accounts) : ["cash", "bank"],
-    items: (Array.isArray(v.items) ? v.items : []).flatMap((row) => {
-      const r = record(row);
-      const name = str(r.name, "").toLowerCase();
-      return name ? [{ name, price: int(r.price, 0, 0, 100_000_000) }] : [];
-    }),
+  ...readPlace(id, v),
+  ped: readPlacePed(v.ped),
+  blip: bool(v.blip, true),
+  blipStyle: readBlipStyle(v.blipStyle, SHOP_BLIP),
+  accounts: names(v.accounts).length ? names(v.accounts) : ["cash", "bank"],
+  items: (Array.isArray(v.items) ? v.items : []).flatMap((row) => {
+    const r = record(row);
+    const name = str(r.name, "").toLowerCase();
+    return name ? [{ name, price: int(r.price, 0, 0, 100_000_000) }] : [];
+  }),
 });
 
 /** One stash record. */
@@ -163,20 +163,20 @@ export const readStash: RecordReader<Stash> = (id, v) => ({
 
 /** One crafting bench record. */
 export const readBench: RecordReader<Bench> = (id, v) => ({
-    ...readPlace(id, v),
-    recipes: (Array.isArray(v.recipes) ? v.recipes : []).flatMap((row) => {
-      const r = record(row);
-      const result = str(r.result, "").toLowerCase();
-      if (!result) return [];
-      return [
-        {
-          result,
-          count: int(r.count, 1, 1, 1000),
-          time: num(r.time, 5, 0, 600),
-          ingredients: parseIngredients(str(r.ingredients, "", 400)),
-        },
-      ];
-    }),
+  ...readPlace(id, v),
+  recipes: (Array.isArray(v.recipes) ? v.recipes : []).flatMap((row) => {
+    const r = record(row);
+    const result = str(r.result, "").toLowerCase();
+    if (!result) return [];
+    return [
+      {
+        result,
+        count: int(r.count, 1, 1, 1000),
+        time: num(r.time, 5, 0, 600),
+        ingredients: parseIngredients(str(r.ingredients, "", 400)),
+      },
+    ];
+  }),
 });
 
 /** Where the content comes from: the server's AdminPanel or a client's AdminWorld. */

@@ -1,7 +1,13 @@
-import { AreaStream, Cooldowns, every, isNear } from "@aicore-fivem/lib/server";
+import {
+  AreaStream,
+  Cooldowns,
+  every,
+  isNear,
+  online,
+} from "@aicore-fivem/lib/server";
 import { EVENTS } from "common/events";
 import type { DropPoint } from "common/nui";
-import { charIdOf, setReach } from "./access";
+import { setReach } from "./access";
 import { content } from "./content";
 import type { Inventory } from "./inventory";
 import { inventories } from "./registry";
@@ -68,9 +74,9 @@ class Drops {
 
   /** Why the player may not make a new drop at a point now (a lang key), or null: own cap, full cell, rate. */
   refusal(source: number, x: number, y: number): string | null {
-    const charId = charIdOf(source);
+    const charId = online.charId(source);
     if (
-      charId !== null &&
+      charId !== undefined &&
       (this.perOwner.get(charId) ?? 0) >= content.settings.drop.maxPerPlayer
     )
       return "INV_ERR_DROP_LIMIT";
