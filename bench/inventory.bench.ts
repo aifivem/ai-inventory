@@ -8,9 +8,10 @@ const root = join(import.meta.dirname, "..", "..");
 const g = globalThis as Record<string, unknown>;
 const noop = () => undefined;
 g.GetCurrentResourceName = () => "ai-inventory";
-g.LoadResourceFile = (_: string, path: string) =>
-  readFileSync(join(root, path), "utf8");
-g.GetResourcePath = () => root;
+g.LoadResourceFile = (resource: string, path: string) =>
+  readFileSync(join(root, "..", resource, path), "utf8");
+// Writes (panel schemas, data files) land in the git-ignored bench/.out, never in the real data folder.
+g.GetResourcePath = () => import.meta.dirname;
 g.IsDuplicityVersion = () => true;
 g.GetConvar = (_: string, fallback: string) => fallback;
 g.on = noop;
