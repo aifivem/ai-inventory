@@ -8,5 +8,6 @@ import "./places";
 import "./open";
 import "./use";
 import "./exports";
+import "./itemCounts";
 import "./characterExit";
 import "./wheel";
