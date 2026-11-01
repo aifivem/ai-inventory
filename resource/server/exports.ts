@@ -4,6 +4,7 @@ import { forceOpen } from "./api/forceOpen";
 import {
   addItem,
   canCarry,
+  canCarryAll,
   countItem,
   removeItem,
   setMaxWeight,
@@ -46,6 +47,9 @@ registerExport(
   "CanCarryItem",
   (inv: unknown, item: unknown, count: unknown, metadata?: unknown) =>
     canCarry(inv, item, count, metadata),
+);
+registerExport("CanCarryItems", (inv: unknown, items: unknown) =>
+  canCarryAll(inv, items),
 );
 registerExport("GetWeight", (inv: unknown) => {
   const found = resolve(inv);

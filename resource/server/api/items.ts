@@ -2,6 +2,7 @@ import { isRecord } from "@aicore-fivem/lib/shared";
 import type { Stack } from "common/nui";
 import { content } from "../content";
 import { drops } from "../drops";
+import { fitsAll, type AddEntry } from "../inventory/addPlan";
 import type { Inventory } from "../inventory/inventory";
 import { weapons } from "../weapons";
 import { resolve } from "./resolve";
@@ -78,6 +79,21 @@ export function canCarry(
     n !== null &&
     inventory.planAdd(def, n, metaOf(metadata)),
   );
+}
+
+/** Whether all the items (`{ name, count, metadata? }[]`) fit together; false for an unknown item. */
+export function canCarryAll(inv: unknown, items: unknown): boolean {
+  const inventory = resolve(inv);
+  if (!inventory || !Array.isArray(items)) return false;
+  const entries: AddEntry[] = [];
+  for (const raw of items) {
+    if (!isRecord(raw)) return false;
+    const def = content.items.get(raw.name);
+    const n = countOf(raw.count ?? raw.amount);
+    if (!def || n === null) return false;
+    entries.push({ def, count: n, metadata: metaOf(raw.metadata ?? raw.info) });
+  }
+  return fitsAll(inventory, entries);
 }
 
 /** Stacks of one item (any spelling), lowest slot first. */

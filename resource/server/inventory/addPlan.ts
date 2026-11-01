@@ -12,6 +12,13 @@ interface PlanSource {
   weightAllows(def: ItemDef, count: number): boolean;
 }
 
+/** One item of a combined add (`fitsAll`). */
+export interface AddEntry {
+  def: ItemDef;
+  count: number;
+  metadata: Metadata;
+}
+
 /** One step of an add: top up the stack at `slot` (`fresh` false) or start a new one there. */
 export interface AddStep {
   slot: number;
@@ -81,4 +88,44 @@ export function planAdd(
     left -= add;
   }
   return steps;
+}
+
+/**
+ * Whether several items fit together (one trade, one reward): their summed weight, the room of equal stacks (what an
+ * earlier entry took is gone for the next) and new stacks on one scratch copy of the grid. Nothing is changed.
+ */
+export function fitsAll(
+  inv: PlanSource & { readonly weight: number; readonly maxWeight: number },
+  entries: readonly AddEntry[],
+): boolean {
+  let total = 0;
+  for (const e of entries) total += e.def.weight * e.count;
+  if (inv.maxWeight > 0 && inv.weight + total > inv.maxWeight) return false;
+  const topped = new Map<number, number>();
+  const scratch = new Occupancy(inv.columns, inv.rows);
+  scratch.cells.set(inv.grid.cells);
+  for (const { def, count, metadata } of entries) {
+    let left = count;
+    const key = metaKey(metadata);
+    if (def.stack > 1) {
+      for (const stack of inv.stacks.values()) {
+        if (left === 0) break;
+        if (stack.name !== def.name || metaKey(stack.metadata) !== key)
+          continue;
+        const room = def.stack - stack.count - (topped.get(stack.slot) ?? 0);
+        if (room <= 0) continue;
+        const add = Math.min(left, room);
+        topped.set(stack.slot, (topped.get(stack.slot) ?? 0) + add);
+        left -= add;
+      }
+    }
+    while (left > 0) {
+      const place = scratch.findPlace(def.size);
+      if (!place) return false;
+      const { w, h } = footprint(def.size, place.rotated);
+      scratch.mark(place.slot, w, h, place.slot);
+      left -= Math.min(left, def.stack);
+    }
+  }
+  return true;
 }
