@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0](https://github.com/aifivem/ai-inventory/compare/v0.3.0...v0.4.0) (2026-11-01)
+
+
+### New Features
+
+* **inventory:** CanCarryItems export, several items checked together ([b5a13b0](https://github.com/aifivem/ai-inventory/commit/b5a13b0c5f0ab6bca36a7ec40ba1c43ec3ebf13c))
+* **inventory:** report the player's item total changes as ox_inventory:itemCount ([fba45be](https://github.com/aifivem/ai-inventory/commit/fba45be7ac2b3b5e6c49195abac248e66cbbff13))
+
 ## [0.3.0](https://github.com/aifivem/ai-inventory/compare/v0.2.1...v0.3.0) (2026-11-01)
 
 

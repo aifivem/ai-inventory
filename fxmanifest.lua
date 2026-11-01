@@ -1,6 +1,6 @@
 name 'ai-inventory'
 author 'TGIANN'
-version '0.3.0' -- x-release-please-version
+version '0.4.0' -- x-release-please-version
 license 'GPL-3.0-only'
 description 'Grid inventory: drops, stashes, trunks, shops, crafting, weapons; ox_inventory and qb-inventory compatible'
 repository 'https://github.com/aifivem/ai-inventory'
