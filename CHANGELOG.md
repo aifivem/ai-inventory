@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/aifivem/ai-inventory/compare/v0.2.1...v0.3.0) (2026-11-01)
+
+
+### New Features
+
+* **inventory:** SetMetadata and SetMaxWeight exports; open screens follow a new weight limit ([4eefd74](https://github.com/aifivem/ai-inventory/commit/4eefd7457079afd5ad5d8d6e254712902f1135fc))
+
+
+### Code Refactoring
+
+* feature folders, side entries that only import, panel schema per tab ([d38c744](https://github.com/aifivem/ai-inventory/commit/d38c744e4f721c9e8faff2f9a9fc6becf939742f))
+
 ## [0.2.1](https://github.com/aifivem/ai-inventory/compare/v0.2.0...v0.2.1) (2026-10-31)
 
 
