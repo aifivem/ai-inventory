@@ -154,6 +154,19 @@ export function setMetadata(
   return true;
 }
 
+/** Sets a loaded inventory's weight limit (grams) until it loads again or the panel re-lays it; viewers see it at once. */
+export function setMaxWeight(inv: unknown, grams: unknown): boolean {
+  const inventory = resolve(inv);
+  if (!inventory || typeof grams !== "number" || !Number.isFinite(grams))
+    return false;
+  inventory.relayout(
+    inventory.columns,
+    inventory.rows,
+    Math.max(0, Math.floor(grams)),
+  );
+  return true;
+}
+
 export interface StashAccess {
   /** Job -> lowest grade (0 = any grade). Empty: everyone may open it. */
   groups?: Record<string, number>;

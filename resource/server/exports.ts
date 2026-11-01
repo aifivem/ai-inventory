@@ -10,6 +10,8 @@ import {
   registerStash,
   removeItem,
   resolve,
+  setMaxWeight,
+  setMetadata,
 } from "./api";
 import { content } from "./content";
 import { scriptShops } from "./scriptShops";
@@ -50,6 +52,14 @@ registerExport("GetWeight", (inv: unknown) => {
   const found = resolve(inv);
   return found ? { weight: found.weight, maxWeight: found.maxWeight } : null;
 });
+registerExport(
+  "SetMetadata",
+  (inv: unknown, slot: unknown, metadata: unknown) =>
+    setMetadata(inv, slot, metadata),
+);
+registerExport("SetMaxWeight", (inv: unknown, grams: unknown) =>
+  setMaxWeight(inv, grams),
+);
 registerExport("GetItems", (inv: unknown) =>
   [...(resolve(inv)?.stacks.values() ?? [])].map(itemView),
 );

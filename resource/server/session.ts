@@ -43,4 +43,6 @@ onCharacter({
 // The grid is laid out from item sizes and the column count: re-lay it when either changes in the panel.
 content.subscribe((file) => {
   if (file === "items" || file === "settings") inventories.rebuildAll();
+  // ai-core mirrors item definitions on every client: it reads them again and sends what changed.
+  if (file === "items") emit("ai-inventory:itemsChanged");
 });

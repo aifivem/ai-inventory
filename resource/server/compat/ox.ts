@@ -11,6 +11,7 @@ import {
   registerStash,
   removeItem,
   resolve,
+  setMaxWeight,
   setMetadata,
   stacksOf,
 } from "../api";
@@ -157,10 +158,7 @@ const exportsMap: Record<string, (...args: unknown[]) => unknown> = {
       ? setMetadata(inv, slot, { ...stack.metadata, durability })
       : false;
   },
-  SetMaxWeight: (inv, weight) => {
-    const inventory = resolve(inv);
-    if (inventory && typeof weight === "number") inventory.maxWeight = weight;
-  },
+  SetMaxWeight: (inv, weight) => void setMaxWeight(inv, weight),
   RegisterStash: (name, label, slots, maxWeight, owner, groups, coords) => {
     // An object or a Lua vector3 (arrives as an array).
     const c = readVec3(coords) ?? undefined;
