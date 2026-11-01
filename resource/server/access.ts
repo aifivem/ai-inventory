@@ -1,6 +1,6 @@
 import { PlayerMap } from "@aicore-fivem/lib/server";
-import { inventories } from "./registry";
-import type { Inventory } from "./inventory";
+import { inventories } from "./registry/registry";
+import type { Inventory } from "./inventory/inventory";
 
 /** Per player: how to re-check that the open second inventory is still in reach (distance to its point or vehicle). */
 const reach = new PlayerMap<() => boolean>();

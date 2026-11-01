@@ -2,7 +2,8 @@ import { onCharacter, PlayerMap } from "@aicore-fivem/lib/server";
 import { content } from "./content";
 import { drops } from "./drops";
 import { log } from "./log";
-import { inventories } from "./registry";
+import { inventories } from "./registry/registry";
+import { relayoutAll } from "./registry/relayout";
 import { cancelCraft } from "./shop";
 import { dropPlayer } from "./use";
 
@@ -42,7 +43,7 @@ onCharacter({
 
 // The grid is laid out from item sizes and the column count: re-lay it when either changes in the panel.
 content.subscribe((file) => {
-  if (file === "items" || file === "settings") inventories.rebuildAll();
+  if (file === "items" || file === "settings") relayoutAll(inventories.all());
   // ai-core mirrors item definitions on every client: it reads them again and sends what changed.
   if (file === "items") emit("ai-inventory:itemsChanged");
 });

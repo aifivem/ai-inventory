@@ -37,10 +37,10 @@ g.GetGameTimer = () => Math.floor(performance.now());
 g.exports = new Proxy(noop, { get: () => new Proxy({}, { get: () => noop }) });
 
 const { content } = await import("../resource/server/content");
-const { inventories } = await import("../resource/server/registry");
+const { inventories } = await import("../resource/server/registry/registry");
 const { moveStack } = await import("../resource/server/move");
 const { drops } = await import("../resource/server/drops");
-const { metaKey } = await import("../resource/server/stacks");
+const { metaKey } = await import("../resource/server/inventory/stacks");
 
 const defs = [...content.items.byName.values()];
 const pick = (i: number) => defs[i % defs.length]!;

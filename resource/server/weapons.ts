@@ -2,7 +2,7 @@ import { fail } from "@aicore-fivem/lib/shared";
 import { EVENTS, type ActionResult } from "common/events";
 import type { EquippedWeapon, Stack } from "common/nui";
 import { content } from "./content";
-import { inventories } from "./registry";
+import { inventories } from "./registry/registry";
 
 const ammoOf = (stack: Stack): number =>
   typeof stack.metadata.ammo === "number" ? stack.metadata.ammo : 0;

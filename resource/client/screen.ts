@@ -7,24 +7,28 @@ import {
   medical,
   NuiScreen,
 } from "@aicore-fivem/lib/client";
+import { NUI_LAYER } from "@aicore-fivem/shared";
 import { EVENTS } from "common/events";
 import {
-  toPanel,
   type InventoryView,
   type NuiMessage,
   type OpenTarget,
   type Panel,
   type ShopView,
 } from "common/nui";
+import { toPanel } from "common/nuiParsers";
 import { benchView, content, itemViews, shopView } from "./content";
 import { state, toView } from "./state";
-import { worldPed } from "./worldPed";
+import { worldPed } from "./worldPed/worldPed";
 
 /** The page: focus, HUDs and the close message; closing it (the page's button too) runs `screen.closed`. */
 export const page = new NuiScreen<NuiMessage>("inventory", {
   onClose: () => screen.closed(),
 });
 export const send = (message: NuiMessage): void => page.send(message);
+
+// Stacking among NUI pages (`NUI_LAYER`): set at start, not left to load order.
+SetNuiZindex(NUI_LAYER.screen);
 
 /** The character's name and the clothes column (worn pieces) for the screen. */
 export function sendProfile(): void {

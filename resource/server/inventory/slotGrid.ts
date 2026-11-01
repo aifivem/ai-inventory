@@ -1,51 +1,29 @@
 import { footprint, isHotbarSlot, Occupancy } from "common/grid";
-import type { ItemDef } from "common/items";
-import type { InventoryKind, InventoryView, Metadata, Stack } from "common/nui";
-import { EVENTS } from "common/events";
-import { planAdd, type AddStep } from "./addPlan";
-import { content } from "./content";
-import { SlotDeltas } from "./deltas";
-import { ensureSerial, metaKey, sizeOf } from "./stacks";
+import type { Metadata, Stack } from "common/nui";
+import { content } from "../content";
+import { metaKey, sizeOf } from "./stacks";
 
 /**
- * One inventory in server memory: stacks by anchor slot, the cell occupancy, the weight and who sees it. Every change
- * marks its slots; one delta per tick goes to the viewers (the push lives here, callers never send).
+ * The stacks of one inventory by anchor slot, their cell occupancy and weight, and the stack changes that keep the
+ * three in step. `Inventory` adds who sees it and how it is stored; every change reports its slot through `touch`.
  */
-export class Inventory {
+export abstract class SlotGrid {
   readonly stacks = new Map<number, Stack>();
-  readonly viewers = new Set<number>();
   grid: Occupancy;
   weight = 0;
-  dirty = false;
-  /** Kept in memory while idle (stashes a script registered: its exports must find them). */
-  pinned = false;
-  lastUsed = Date.now();
-  private readonly deltas: SlotDeltas = new SlotDeltas(this);
 
   constructor(
-    readonly id: string,
-    readonly kind: InventoryKind,
-    public label: string,
     public columns: number,
     public rows: number,
-    public maxWeight: number,
-    /** Written to the database (player, stash, owned trunk); drops and temporary stashes are not. */
-    readonly persistent: boolean,
-    stacks: Stack[],
   ) {
-    for (const stack of stacks) this.stacks.set(stack.slot, stack);
     this.grid = new Occupancy(columns, rows);
-    this.rebuild();
-  }
-
-  get slots(): number {
-    return this.columns * this.rows;
   }
 
   /** Only player inventories have quick slots. */
-  get hasHotbar(): boolean {
-    return this.kind === "player";
-  }
+  abstract get hasHotbar(): boolean;
+
+  /** A slot changed (its stack, count or metadata). */
+  protected abstract touch(slot: number): void;
 
   /** Anchor slots of the stacks `w x h` at `slot` would cover (a quick slot covers only its own stack). */
   coveredAt(slot: number, w: number, h: number): Set<number> {
@@ -115,25 +93,6 @@ export class Inventory {
     this.grid = grid;
   }
 
-  /** Takes a new column count, rows and weight limit from the panel; viewers get the new layout (only when it changed). */
-  relayout(columns: number, rows: number, maxWeight: number): void {
-    const before = `${this.columns}:${this.rows}:${this.maxWeight}`;
-    this.columns = columns;
-    this.rows = rows;
-    this.maxWeight = maxWeight;
-    this.rebuild();
-    if (`${this.columns}:${this.rows}:${this.maxWeight}` === before) return;
-    for (const viewer of this.viewers)
-      emitNet(
-        EVENTS.layout,
-        viewer,
-        this.id,
-        this.columns,
-        this.rows,
-        this.maxWeight,
-      );
-  }
-
   /** Cells a stack of `name` covers at `rotated`. */
   shape(name: string, rotated: boolean): { w: number; h: number } {
     return footprint(sizeOf(content.items.get(name)), rotated);
@@ -195,98 +154,7 @@ export class Inventory {
     return total;
   }
 
-  /** Whether `count` more of an item stays inside the weight limit. */
-  weightAllows(def: ItemDef, count: number): boolean {
-    return (
-      this.maxWeight <= 0 || this.weight + def.weight * count <= this.maxWeight
-    );
-  }
-
-  /**
-   * Plans adding `count` of an item: tops up equal stacks first, then new stacks at free places. Returns the steps or
-   * null when it does not all fit (nothing is changed).
-   */
-  planAdd(
-    def: ItemDef,
-    count: number,
-    metadata: Metadata,
-    slot?: number,
-  ): AddStep[] | null {
-    return planAdd(this, def, count, metadata, slot);
-  }
-
-  /** Adds an item all-or-nothing; false when it does not fit. */
-  add(
-    def: ItemDef,
-    count: number,
-    metadata: Metadata = {},
-    slot?: number,
-  ): boolean {
-    const plan = this.planAdd(def, count, metadata, slot);
-    if (!plan) return false;
-    for (const step of plan) {
-      const existing = this.stacks.get(step.slot);
-      if (existing && !step.fresh)
-        this.setCount(step.slot, existing.count + step.add);
-      else {
-        const meta = structuredClone(metadata);
-        ensureSerial(def, meta);
-        this.put({
-          slot: step.slot,
-          name: def.name,
-          count: step.add,
-          metadata: meta,
-          rotated: step.rotated,
-        });
-      }
-    }
-    return true;
-  }
-
-  /** Removes `count` of an item (from `slot` only when given) all-or-nothing; false when there is not enough. */
-  remove(
-    name: string,
-    count: number,
-    metadata?: Metadata,
-    slot?: number,
-  ): boolean {
-    const key = metadata ? metaKey(metadata) : null;
-    const from = [...this.stacks.values()].filter(
-      (stack) =>
-        stack.name === name &&
-        (slot === undefined || stack.slot === slot) &&
-        (key === null || metaKey(stack.metadata) === key),
-    );
-    if (from.reduce((sum, stack) => sum + stack.count, 0) < count) return false;
-    let left = count;
-    for (const stack of from.sort((a, b) => a.count - b.count)) {
-      const take = Math.min(left, stack.count);
-      this.setCount(stack.slot, stack.count - take);
-      left -= take;
-      if (left === 0) break;
-    }
-    return true;
-  }
-
   clear(): void {
     for (const slot of this.stacks.keys()) this.take(slot);
-  }
-
-  view(): InventoryView {
-    return {
-      id: this.id,
-      kind: this.kind,
-      label: this.label,
-      columns: this.columns,
-      rows: this.rows,
-      maxWeight: this.maxWeight,
-      stacks: [...this.stacks.values()],
-    };
-  }
-
-  private touch(slot: number): void {
-    this.dirty = true;
-    this.lastUsed = Date.now();
-    this.deltas.touch(slot);
   }
 }

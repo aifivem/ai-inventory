@@ -1,9 +1,5 @@
-import {
-  cache,
-  onStop,
-  ScriptCamera,
-  TickLoop,
-} from "@aicore-fivem/lib/client";
+import { cache, ScriptCamera, TickLoop } from "@aicore-fivem/lib/client";
+import { add, cross, mul, screenPoint, type Vec } from "./vectors";
 
 /** The screen area (0 - 1) the equipment column keeps for the character. */
 export interface PedArea {
@@ -11,8 +7,6 @@ export interface PedArea {
   top: number;
   bottom: number;
 }
-
-type Vec = [number, number, number];
 
 /** Metres of body the area shows: bigger = farther and smaller. */
 const PED_HEIGHT = 1.62;
@@ -25,25 +19,6 @@ const SCALE = 0.2;
 const SMOOTH_FRAMES = 5;
 /** Prop slots the clothes column changes (hat, glasses, ear, watch, bracelet). */
 const PROPS = [0, 1, 2, 6, 7];
-
-const add = (a: Vec, b: Vec): Vec => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
-const mul = (a: Vec, k: number): Vec => [a[0] * k, a[1] * k, a[2] * k];
-const cross = (a: Vec, b: Vec): Vec => [
-  a[1] * b[2] - a[2] * b[1],
-  a[2] * b[0] - a[0] * b[2],
-  a[0] * b[1] - a[1] * b[0],
-];
-const vec = (v: number[]): Vec => [v[0] ?? 0, v[1] ?? 0, v[2] ?? 0];
-
-/** The world point under a screen position, `depth` metres in front of the camera plane. */
-function screenPoint(sx: number, sy: number, depth: number): Vec {
-  const [, forward] = GetWorldCoordFromScreenCoord(0.5, 0.5);
-  const [origin, dir] = GetWorldCoordFromScreenCoord(sx, sy);
-  const f = vec(forward);
-  const d = vec(dir);
-  const along = Math.max(0.1, d[0] * f[0] + d[1] * f[1] + d[2] * f[2]);
-  return add(vec(origin), mul(d, depth / along));
-}
 
 /**
  * The equipment column's character (tgiann-inventory's grid layout): a local copy of the player stands in front of
@@ -219,5 +194,3 @@ class WorldPed {
 }
 
 export const worldPed = new WorldPed();
-
-onStop(() => worldPed.hide());

@@ -1,22 +1,13 @@
-import { every, onStop } from "@aicore-fivem/lib/server";
-import type { InventoryKind, Stack } from "common/nui";
+import type { Stack } from "common/nui";
 import { EVENTS } from "common/events";
-import { content } from "./content";
-import { Inventory } from "./inventory";
-import { log } from "./log";
+import { content } from "../content";
+import { Inventory } from "../inventory/inventory";
+import { InventoryAliases } from "./aliases";
 import { loadInventories, saveInventories } from "./repo";
-
-export interface InventoryShape {
-  kind: InventoryKind;
-  label: string;
-  rows: number;
-  maxWeight: number;
-  persistent: boolean;
-}
+import type { InventoryShape } from "./shape";
 
 /** Stashes and trunks nobody looked at for this long leave memory (saved first). */
 const IDLE_MS = 5 * 60_000;
-const FLUSH_MS = 30_000;
 
 /**
  * Every inventory in memory by id, the player inventory of each source, and which second inventory each player has
@@ -30,35 +21,21 @@ class Inventories {
   private readonly holders = new Map<string, number>();
   /** source -> id of the second inventory the player has open. */
   private readonly open = new Map<number, string>();
-  /** Other names of an inventory: `trunk:<plate>` of an owned vehicle stored under its vehicle id. */
-  private readonly aliases = new Map<string, string>();
-  /** Inventory id -> its alias (one each, gone when the inventory leaves memory). */
-  private readonly aliasOf = new Map<string, string>();
+  private readonly aliases = new InventoryAliases();
 
   get(id: string): Inventory | undefined {
-    return this.byId.get(id) ?? this.byId.get(this.aliases.get(id) ?? "");
+    return this.byId.get(id) ?? this.byId.get(this.aliases.idOf(id) ?? "");
   }
 
   /** Lets scripts find inventory `id` under `name` too (until another inventory takes the name or it unloads). */
   alias(name: string, id: string): void {
-    if (name === id) return;
-    const old = this.aliasOf.get(id);
-    if (old !== undefined && old !== name && this.aliases.get(old) === id)
-      this.aliases.delete(old);
-    const previous = this.aliases.get(name);
-    if (previous !== undefined && previous !== id)
-      this.aliasOf.delete(previous);
     this.aliases.set(name, id);
-    this.aliasOf.set(id, name);
   }
 
   /** Forgets an inventory and its alias. */
   private forget(id: string): void {
     this.byId.delete(id);
-    const name = this.aliasOf.get(id);
-    if (name === undefined) return;
-    this.aliasOf.delete(id);
-    if (this.aliases.get(name) === id) this.aliases.delete(name);
+    this.aliases.drop(id);
   }
 
   playerOf(source: number): Inventory | undefined {
@@ -68,6 +45,11 @@ class Inventories {
   openOf(source: number): Inventory | undefined {
     const id = this.open.get(source);
     return id ? this.byId.get(id) : undefined;
+  }
+
+  /** Every inventory in memory. */
+  all(): IterableIterator<Inventory> {
+    return this.byId.values();
   }
 
   get size(): number {
@@ -173,23 +155,6 @@ class Inventories {
     this.forget(id);
   }
 
-  /** Re-lays every inventory after the item list or the settings changed; open screens get the new layout at once. */
-  rebuildAll(): void {
-    const s = content.settings;
-    const shapes: Partial<
-      Record<InventoryKind, { rows: number; maxWeight: number }>
-    > = {
-      player: s.player,
-      drop: s.drop,
-      trunk: s.trunk,
-      glovebox: s.glovebox,
-    };
-    for (const inventory of this.byId.values()) {
-      const shape = shapes[inventory.kind] ?? inventory;
-      inventory.relayout(s.columns, shape.rows, shape.maxWeight);
-    }
-  }
-
   async save(list: Inventory[]): Promise<void> {
     const dirty = list.filter((inv) => inv.persistent && inv.dirty);
     for (const inv of dirty) inv.dirty = false;
@@ -226,26 +191,3 @@ class Inventories {
 }
 
 export const inventories = new Inventories();
-
-const saveNow = (why: string): void => {
-  inventories
-    .flush()
-    .catch((error: unknown) =>
-      log.error(`saving inventories failed (${why})`, error),
-    );
-};
-
-every(
-  FLUSH_MS,
-  () => {
-    saveNow("interval");
-    inventories
-      .sweep()
-      .catch((error: unknown) =>
-        log.error("unloading idle inventories failed", error),
-      );
-  },
-  { name: "flush" },
-);
-on("txAdmin:events:serverShuttingDown", () => saveNow("shutdown"));
-onStop(() => saveNow("resource stop"));

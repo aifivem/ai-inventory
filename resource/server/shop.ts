@@ -6,11 +6,11 @@ import {
   online,
   resourceExport,
 } from "@aicore-fivem/lib/server";
-import { nearPlace } from "common/content";
+import { nearPlace } from "common/places";
 import { EVENTS, type ActionResult } from "common/events";
 import { content } from "./content";
 import { drops } from "./drops";
-import { inventories } from "./registry";
+import { inventories } from "./registry/registry";
 import { SCRIPT_SHOP_ACCOUNTS, scriptShops } from "./scriptShops";
 
 const core = resourceExport("ai-core");

@@ -2,14 +2,15 @@ import { callAction, nearestPlayer, notify } from "@aicore-fivem/lib/client";
 import { fail, isRecord, readInt } from "@aicore-fivem/lib/shared";
 import { Locale } from "common";
 import { EVENTS, type ActionResult } from "common/events";
-import { NUI, toMoveInput, toPedArea } from "common/nui";
+import { NUI } from "common/nui";
+import { toMoveInput, toPedArea } from "common/nuiParsers";
 import { content } from "./content";
 import { isClothesId } from "common/clothes";
 import { wardrobe } from "./clothes";
 import { page, screen, sendProfile } from "./screen";
 import { state } from "./state";
 import { useItem } from "./use";
-import { worldPed } from "./worldPed";
+import { worldPed } from "./worldPed/worldPed";
 
 const GONE = fail("INV_ERR_GONE");
 const slotOf = (v: unknown): number | null => readInt(v, 1, 10_000);

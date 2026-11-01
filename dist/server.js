@@ -604,7 +604,7 @@ var ClientGate = class {
 	}
 };
 // ../../../packages/lib/src/server/callback.ts
-const log$6 = createLogger(GetCurrentResourceName()), resource$4 = GetCurrentResourceName(), REFUSED = Symbol("refused");
+const log$6 = createLogger(GetCurrentResourceName()), resource$5 = GetCurrentResourceName(), REFUSED = Symbol("refused");
 function onClientCallback(name, first, second) {
 	let [handler, options] = typeof first == "function" ? [first, second ?? {}] : [second, first], gate = new ClientGate(name, options, 20);
 	onNet(requestEvent(name), async (caller, id, ...raw) => {
@@ -622,7 +622,7 @@ function onClientCallback(name, first, second) {
 }
 const pending$1 = new Map();
 let nextId = 0;
-onNet(responseEvent(resource$4), (id, ok, result) => {
+onNet(responseEvent(resource$5), (id, ok, result) => {
 	let entry = typeof id == "number" ? pending$1.get(id) : void 0;
 	entry && entry.source === Number(globalThis.source) && (pending$1.delete(id), clearTimeout(entry.timer), ok === !0 ? entry.resolve(result) : entry.reject(Error("client callback failed")));
 });
@@ -637,7 +637,7 @@ function triggerClientCallback(name, source, args = [], timeoutMs = 3e4) {
 			resolve,
 			reject,
 			timer
-		}), emitNet(requestEvent(name), source, resource$4, id, ...args);
+		}), emitNet(requestEvent(name), source, resource$5, id, ...args);
 	});
 }
 // ../../../packages/lib/src/server/admin/patch.ts
@@ -682,7 +682,7 @@ function toPatch(value) {
 		default: return null;
 	}
 }
-const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(value)), core$26 = resourceExport(CORE.resource), ERR = {
+const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(value)), core$27 = resourceExport(CORE.resource), ERR = {
 	type: "ADMIN_ERR_TYPE",
 	range: "ADMIN_ERR_RANGE",
 	length: "ADMIN_ERR_LENGTH",
@@ -696,7 +696,7 @@ const clone = (value) => value === void 0 ? value : JSON.parse(JSON.stringify(va
 		if (cached && Date.now() - cached.at < 2e3) return cached.values.size > 0 ? cached.values : null;
 		let list = [];
 		try {
-			list = core$26.GetLookupValues(source);
+			list = core$27.GetLookupValues(source);
 		} catch {}
 		let values = new Set(Array.isArray(list) ? list.filter((v) => typeof v == "string") : []);
 		return this.lists.set(source, {
@@ -825,11 +825,7 @@ function applyEdit(data, patch, spec) {
 	}
 	return [spec.kind === "records" ? patch.key : void 0];
 }
-// ../../../packages/lib/src/server/admin/jsonSchema.ts
-const SCHEMA_KEY = {
-	type: "string",
-	description: "This file's JSON Schema (for editors)."
-};
+// ../../../packages/lib/src/server/admin/descriptions.ts
 function langFile(resource) {
 	try {
 		let raw = JSON.parse(LoadResourceFile(resource, "locales/en.json") ?? "{}");
@@ -856,6 +852,11 @@ function describe(schema, file, lang) {
 	for (let tab of schema.tabs) if (tab.file === file) for (let card of tab.cards) collect(card.fields, "", lang, out);
 	return out;
 }
+// ../../../packages/lib/src/server/admin/jsonSchema.ts
+const SCHEMA_KEY = {
+	type: "string",
+	description: "This file's JSON Schema (for editors)."
+};
 function toJson(spec, path, desc) {
 	let description = desc.get(path), base = description ? { description } : {};
 	switch (spec.type) {
@@ -960,27 +961,20 @@ function writeSchema(resource, name, text, log) {
 	let dir = `${GetResourcePath(resource)}/data/schemas`;
 	(0, node_fs_promises.mkdir)(dir, { recursive: !0 }).then(() => (0, node_fs_promises.writeFile)(`${dir}/${name}.schema.json`, text, "utf8")).catch((error) => log.error(`writing ${resource}/${path} failed`, error));
 }
-// ../../../packages/lib/src/server/admin/panel.ts
-const core$25 = resourceExport(CORE.resource);
-var AdminPanel = class {
+// ../../../packages/lib/src/server/admin/panelFiles.ts
+const core$26 = resourceExport(CORE.resource);
+var PanelFiles = class {
 	schema;
 	data = new Map();
 	dataFiles = new Map();
 	handlers = new Map();
-	rules = new Map();
-	actions = new Map();
 	views = new FileViews((file) => this.get(file));
 	worldChanges = new Map();
 	resource = GetCurrentResourceName();
 	log = createLogger(this.resource);
-	editor = 0;
 	constructor(schema) {
 		this.schema = schema;
 		for (let [name, spec] of Object.entries(schema.files)) this.load(name, spec);
-		registerExport("AdminPanelSnapshot", () => this.snapshot()), registerExport("AdminPanelData", () => this.dataSnapshot()), registerExport("AdminPanelSummary", () => this.summary()), registerExport("AdminPanelApply", (admin, patch) => this.apply(admin, patch)), onClientCallback(ADMIN.worldChangesCallback(this.resource), () => Object.fromEntries(this.worldChanges), { rate: {
-			count: 4,
-			windowMs: 1e4
-		} }), setImmediate(() => core$25.RegisterAdminPanel(this.resource));
 	}
 	get(file) {
 		return this.data.get(file) ?? {};
@@ -988,17 +982,68 @@ var AdminPanel = class {
 	onChange(file, handler) {
 		this.handlers.set(file, [...this.handlers.get(file) ?? [], handler]);
 	}
-	rule(file, rule) {
-		this.rules.set(file, rule);
-	}
-	onAction(id, handler) {
-		this.actions.set(id, handler);
-	}
 	view(file, read) {
 		return this.views.view(file, read);
 	}
 	records(file, readOne) {
 		return this.views.records(file, readOne);
+	}
+	commit(file, key, value) {
+		let data = this.data.get(file);
+		data && (key === void 0 ? isRecord(value) && this.data.set(file, clone(value)) : value === null ? delete data[key] : data[key] = clone(value), this.changed(file, key));
+	}
+	commitAfter(file, key, value) {
+		setImmediate(() => this.commit(file, key, value));
+	}
+	store(patch, spec) {
+		let data = this.data.get(patch.file) ?? {}, keys = applyEdit(data, patch, spec);
+		if (keys.length !== 0) {
+			this.data.set(patch.file, data);
+			for (let key of keys) this.changed(patch.file, key);
+		}
+	}
+	changed(file, key) {
+		let spec = this.schema.files[file], data = this.get(file), value = key === void 0 ? data : data[key] ?? null;
+		this.dataFiles.get(file)?.write(data), this.views.changed(file, key, value);
+		for (let handler of this.handlers.get(file) ?? []) handler(key, value);
+		if (core$26.AdminPanelChanged({
+			resource: this.resource,
+			file,
+			key,
+			value: clone(value)
+		}), spec?.sync !== "all") return;
+		let changes = this.worldChanges.get(file) ?? {};
+		changes[key ?? ""] = clone(value), this.worldChanges.set(file, changes), emitNet(ADMIN.worldEvent(this.resource), -1, file, key ?? null, value);
+	}
+	load(name, spec) {
+		if (spec.memory) {
+			this.data.set(name, {});
+			return;
+		}
+		let file = new DataFile(this.resource, name, this.log);
+		this.dataFiles.set(name, file), file.schemaRef = `./schemas/${name}.schema.json`, writeSchema(this.resource, name, fileSchema(this.resource, this.schema, name, spec), this.log);
+		let raw = file.read(), data = isRecord(raw) ? raw : {}, filled = !1;
+		if (spec.kind === "settings") for (let [section, value] of Object.entries(spec.defaults ?? {})) section in data || (data[section] = clone(value), filled = !0);
+		this.data.set(name, data), (filled || raw === null || !file.hasSchemaRef()) && file.write(data);
+	}
+};
+// ../../../packages/lib/src/server/admin/panel.ts
+const core$25 = resourceExport(CORE.resource);
+var AdminPanel = class extends PanelFiles {
+	rules = new Map();
+	actions = new Map();
+	editor = 0;
+	constructor(schema) {
+		super(schema), registerExport("AdminPanelSnapshot", () => this.snapshot()), registerExport("AdminPanelData", () => this.dataSnapshot()), registerExport("AdminPanelSummary", () => this.summary()), registerExport("AdminPanelApply", (admin, patch) => this.apply(admin, patch)), onClientCallback(ADMIN.worldChangesCallback(this.resource), () => Object.fromEntries(this.worldChanges), { rate: {
+			count: 4,
+			windowMs: 1e4
+		} }), setImmediate(() => core$25.RegisterAdminPanel(this.resource));
+	}
+	rule(file, rule) {
+		this.rules.set(file, rule);
+	}
+	onAction(id, handler) {
+		this.actions.set(id, handler);
 	}
 	snapshot() {
 		return {
@@ -1076,44 +1121,6 @@ var AdminPanel = class {
 			};
 		}
 	}
-	commit(file, key, value) {
-		let data = this.data.get(file);
-		data && (key === void 0 ? isRecord(value) && this.data.set(file, clone(value)) : value === null ? delete data[key] : data[key] = clone(value), this.changed(file, key));
-	}
-	commitAfter(file, key, value) {
-		setImmediate(() => this.commit(file, key, value));
-	}
-	store(patch, spec) {
-		let data = this.data.get(patch.file) ?? {}, keys = applyEdit(data, patch, spec);
-		if (keys.length !== 0) {
-			this.data.set(patch.file, data);
-			for (let key of keys) this.changed(patch.file, key);
-		}
-	}
-	changed(file, key) {
-		let spec = this.schema.files[file], data = this.get(file), value = key === void 0 ? data : data[key] ?? null;
-		this.dataFiles.get(file)?.write(data), this.views.changed(file, key, value);
-		for (let handler of this.handlers.get(file) ?? []) handler(key, value);
-		if (core$25.AdminPanelChanged({
-			resource: this.resource,
-			file,
-			key,
-			value: clone(value)
-		}), spec?.sync !== "all") return;
-		let changes = this.worldChanges.get(file) ?? {};
-		changes[key ?? ""] = clone(value), this.worldChanges.set(file, changes), emitNet(ADMIN.worldEvent(this.resource), -1, file, key ?? null, value);
-	}
-	load(name, spec) {
-		if (spec.memory) {
-			this.data.set(name, {});
-			return;
-		}
-		let file = new DataFile(this.resource, name, this.log);
-		this.dataFiles.set(name, file), file.schemaRef = `./schemas/${name}.schema.json`, writeSchema(this.resource, name, fileSchema(this.resource, this.schema, name, spec), this.log);
-		let raw = file.read(), data = isRecord(raw) ? raw : {}, filled = !1;
-		if (spec.kind === "settings") for (let [section, value] of Object.entries(spec.defaults ?? {})) section in data || (data[section] = clone(value), filled = !0);
-		this.data.set(name, data), (filled || raw === null || !file.hasSchemaRef()) && file.write(data);
-	}
 };
 function labelOf(record, path) {
 	if (!path) return null;
@@ -1142,7 +1149,7 @@ function notify(source, text, kind = "info", duration, title) {
 	emitNet(LIB_UI.notifyEvent, source, notification);
 }
 resourceExport(CORE.resource);
-// ../../../packages/lib/src/server/online.ts
+// ../../../packages/lib/src/server/online/mirror.ts
 const core$23 = resourceExport(CORE.resource);
 function reindex(index, source, before, after) {
 	for (let name of before) {
@@ -1154,7 +1161,7 @@ function reindex(index, source, before, after) {
 		set || index.set(name, set = new Set()), set.add(source);
 	}
 }
-var OnlinePlayers = class {
+var OnlineMirror = class {
 	players = new Map();
 	onDuty = new Map();
 	jobIndex = new Map();
@@ -1206,6 +1213,7 @@ var OnlinePlayers = class {
 		let set = this.onDuty.get(job);
 		set || this.onDuty.set(job, set = new Set()), set.add(source);
 	}
+}, OnlinePlayers = class extends OnlineMirror {
 	sources() {
 		return this.start(), this.players.keys();
 	}
@@ -1273,7 +1281,7 @@ var OnlinePlayers = class {
 };
 const EMPTY = new Set(), online = new OnlinePlayers();
 resourceExport(CORE.resource), resourceExport(CORE.resource);
-// ../../../packages/lib/src/server/vehicle.ts
+// ../../../packages/lib/src/server/netEntity.ts
 function entityFromNet(netId, type) {
 	if (readId(netId) === null) return 0;
 	let entity = NetworkGetEntityFromNetworkId(netId);
@@ -1348,22 +1356,13 @@ function onCharacter(handlers) {
 		}
 	});
 }
-// ../../../packages/lib/src/server/areaStream.ts
-var AreaStream = class {
-	options;
+// ../../../packages/lib/src/server/areaStream/grid.ts
+var AreaGrid = class {
 	items = new Map();
 	cells = new Map();
-	followers = new PlayerMap({ onDrop: (source, f) => this.leave(source, f) });
-	inCell = new Map();
-	alsoOf = new PlayerMap({ onDrop: (_source, entries) => {
-		for (let entry of entries) entry.also = void 0;
-	} });
 	size_;
-	range;
-	chunk;
-	stale = !1;
-	constructor(options) {
-		this.options = options, this.size_ = options.cellSize ?? 64, this.range = options.range ?? 1, this.chunk = options.chunk ?? 50;
+	constructor(cellSize) {
+		this.size_ = cellSize;
 	}
 	get size() {
 		return this.items.size;
@@ -1385,49 +1384,25 @@ var AreaStream = class {
 		let { cx, cy } = this.cellOf(x, y);
 		for (let dx = -cells; dx <= cells; dx++) for (let dy = -cells; dy <= cells; dy++) for (let entry of this.cells.get(cellKey(cx + dx, cy + dy)) ?? []) yield entry.item;
 	}
-	set(item, resend = !0) {
-		this.stale && this.followAll();
-		let { cx, cy } = this.cellOf(item.x, item.y), also = this.options.alsoTo?.(item), entry = this.items.get(item.id);
-		if (!entry) {
-			let fresh = {
-				item,
-				cx,
-				cy,
-				also: void 0
-			};
-			this.items.set(item.id, fresh), this.file(fresh), this.setAlso(fresh, also);
-			let put = [this.options.view(item)];
-			for (let source of this.who(cx, cy, also)) this.send(source, put, []);
-			return;
-		}
-		let before = this.who(entry.cx, entry.cy, entry.also);
-		(entry.cx !== cx || entry.cy !== cy) && (this.unfile(entry), entry.cx = cx, entry.cy = cy, this.file(entry)), entry.item = item, this.setAlso(entry, also);
-		let after = this.who(cx, cy, also), gone = [item.id];
-		for (let source of before) after.has(source) || this.send(source, [], gone);
-		let put = [this.options.view(item)];
-		for (let source of after) (resend || !before.has(source)) && this.send(source, put, []);
+	file(entry) {
+		let key = cellKey(entry.cx, entry.cy), set = this.cells.get(key);
+		set || this.cells.set(key, set = new Set()), set.add(entry);
 	}
-	delete(id) {
-		let entry = this.items.get(id);
-		if (!entry) return;
-		this.items.delete(id), this.unfile(entry);
-		let gone = [id];
-		for (let source of this.who(entry.cx, entry.cy, entry.also)) this.send(source, [], gone);
-		this.setAlso(entry, void 0);
+	unfile(entry) {
+		let key = cellKey(entry.cx, entry.cy), set = this.cells.get(key);
+		set?.delete(entry), set?.size === 0 && this.cells.delete(key);
 	}
-	load(items) {
-		for (let item of items) {
-			let old = this.items.get(item.id);
-			old && (this.unfile(old), this.setAlso(old, void 0));
-			let { cx, cy } = this.cellOf(item.x, item.y), entry = {
-				item,
-				cx,
-				cy,
-				also: void 0
-			};
-			this.items.set(item.id, entry), this.file(entry), this.setAlso(entry, this.options.alsoTo?.(item));
-		}
-		for (let [source, f] of this.followers) this.snapshot(source, f);
+}, AreaFollowers = class extends AreaGrid {
+	options;
+	followers = new PlayerMap({ onDrop: (source, f) => this.leave(source, f) });
+	inCell = new Map();
+	alsoOf = new PlayerMap({ onDrop: (_source, entries) => {
+		for (let entry of entries) entry.also = void 0;
+	} });
+	range;
+	chunk;
+	constructor(options) {
+		super(options.cellSize ?? 64), this.options = options, this.range = options.range ?? 1, this.chunk = options.chunk ?? 50;
 	}
 	recipients(id) {
 		let entry = this.items.get(id);
@@ -1439,44 +1414,6 @@ var AreaStream = class {
 		if (entry.also === source) return !0;
 		let f = this.followers.get(source);
 		return f !== void 0 && Math.abs(f.cx - entry.cx) <= this.range && Math.abs(f.cy - entry.cy) <= this.range;
-	}
-	start(source, at = coordsOf(source)) {
-		let { cx, cy } = this.cellOf(at.x, at.y), old = this.followers.get(source);
-		old && this.leave(source, old);
-		let f = {
-			cx,
-			cy
-		};
-		this.followers.set(source, f), this.enter(source, f), this.snapshot(source, f);
-	}
-	follow(source, cx, cy) {
-		let f = this.followers.get(source);
-		if (!f) {
-			let fresh = {
-				cx,
-				cy
-			};
-			return this.followers.set(source, fresh), this.enter(source, fresh), this.snapshot(source, fresh);
-		}
-		this.move(source, f, cx, cy);
-	}
-	followReported(source, cx, cy) {
-		let p = coordsOf(source), real = this.cellOf(p.x, p.y);
-		return Math.abs(real.cx - cx) > 1 || Math.abs(real.cy - cy) > 1 ? !1 : (this.follow(source, cx, cy), !0);
-	}
-	followAll() {
-		if (this.items.size === 0) this.stale = !0;
-		else {
-			this.stale = !1;
-			for (let [source, f] of this.followers) {
-				let p = coordsOf(source), { cx, cy } = this.cellOf(p.x, p.y);
-				this.move(source, f, cx, cy);
-			}
-		}
-	}
-	stop(source, tell = !1) {
-		let f = this.followers.get(source);
-		f && (this.followers.delete(source), this.leave(source, f), tell && this.emit(source, !0, [], []));
 	}
 	following(source) {
 		return this.followers.has(source);
@@ -1521,14 +1458,6 @@ var AreaStream = class {
 		let set = this.alsoOf.get(also);
 		set || this.alsoOf.set(also, set = new Set()), set.add(entry);
 	}
-	file(entry) {
-		let key = cellKey(entry.cx, entry.cy), set = this.cells.get(key);
-		set || this.cells.set(key, set = new Set()), set.add(entry);
-	}
-	unfile(entry) {
-		let key = cellKey(entry.cx, entry.cy), set = this.cells.get(key);
-		set?.delete(entry), set?.size === 0 && this.cells.delete(key);
-	}
 	enter(source, f) {
 		let key = cellKey(f.cx, f.cy), set = this.inCell.get(key);
 		set || this.inCell.set(key, set = new Set()), set.add(source);
@@ -1536,6 +1465,90 @@ var AreaStream = class {
 	leave(source, f) {
 		let key = cellKey(f.cx, f.cy), set = this.inCell.get(key);
 		set?.delete(source), set?.size === 0 && this.inCell.delete(key);
+	}
+}, AreaStream = class extends AreaFollowers {
+	stale = !1;
+	set(item, resend = !0) {
+		this.stale && this.followAll();
+		let { cx, cy } = this.cellOf(item.x, item.y), also = this.options.alsoTo?.(item), entry = this.items.get(item.id);
+		if (!entry) {
+			let fresh = {
+				item,
+				cx,
+				cy,
+				also: void 0
+			};
+			this.items.set(item.id, fresh), this.file(fresh), this.setAlso(fresh, also);
+			let put = [this.options.view(item)];
+			for (let source of this.who(cx, cy, also)) this.send(source, put, []);
+			return;
+		}
+		let before = this.who(entry.cx, entry.cy, entry.also);
+		(entry.cx !== cx || entry.cy !== cy) && (this.unfile(entry), entry.cx = cx, entry.cy = cy, this.file(entry)), entry.item = item, this.setAlso(entry, also);
+		let after = this.who(cx, cy, also), gone = [item.id];
+		for (let source of before) after.has(source) || this.send(source, [], gone);
+		let put = [this.options.view(item)];
+		for (let source of after) (resend || !before.has(source)) && this.send(source, put, []);
+	}
+	delete(id) {
+		let entry = this.items.get(id);
+		if (!entry) return;
+		this.items.delete(id), this.unfile(entry);
+		let gone = [id];
+		for (let source of this.who(entry.cx, entry.cy, entry.also)) this.send(source, [], gone);
+		this.setAlso(entry, void 0);
+	}
+	load(items) {
+		for (let item of items) {
+			let old = this.items.get(item.id);
+			old && (this.unfile(old), this.setAlso(old, void 0));
+			let { cx, cy } = this.cellOf(item.x, item.y), entry = {
+				item,
+				cx,
+				cy,
+				also: void 0
+			};
+			this.items.set(item.id, entry), this.file(entry), this.setAlso(entry, this.options.alsoTo?.(item));
+		}
+		for (let [source, f] of this.followers) this.snapshot(source, f);
+	}
+	start(source, at = coordsOf(source)) {
+		let { cx, cy } = this.cellOf(at.x, at.y), old = this.followers.get(source);
+		old && this.leave(source, old);
+		let f = {
+			cx,
+			cy
+		};
+		this.followers.set(source, f), this.enter(source, f), this.snapshot(source, f);
+	}
+	follow(source, cx, cy) {
+		let f = this.followers.get(source);
+		if (!f) {
+			let fresh = {
+				cx,
+				cy
+			};
+			return this.followers.set(source, fresh), this.enter(source, fresh), this.snapshot(source, fresh);
+		}
+		this.move(source, f, cx, cy);
+	}
+	followReported(source, cx, cy) {
+		let p = coordsOf(source), real = this.cellOf(p.x, p.y);
+		return Math.abs(real.cx - cx) > 1 || Math.abs(real.cy - cy) > 1 ? !1 : (this.follow(source, cx, cy), !0);
+	}
+	followAll() {
+		if (this.items.size === 0) this.stale = !0;
+		else {
+			this.stale = !1;
+			for (let [source, f] of this.followers) {
+				let p = coordsOf(source), { cx, cy } = this.cellOf(p.x, p.y);
+				this.move(source, f, cx, cy);
+			}
+		}
+	}
+	stop(source, tell = !1) {
+		let f = this.followers.get(source);
+		f && (this.followers.delete(source), this.leave(source, f), tell && this.emit(source, !0, [], []));
 	}
 };
 // ../../../packages/lib/src/server/progressFor.ts
@@ -1585,10 +1598,10 @@ new class {
 		let def = this.gangs.get(name);
 		return def === void 0 && this.gangs.set(name, def = core$19.GetGangDefinition(name) ?? null), def;
 	}
-}();
-// ../../../packages/lib/src/server/command.ts
+}(), createLogger(GetCurrentResourceName());
+// ../../../packages/lib/src/server/command/commandSet.ts
 const resource$3 = GetCurrentResourceName();
-createLogger(resource$3), new class {
+new class {
 	list = [];
 	sent = new Map();
 	announced = 0;
@@ -15938,47 +15951,8 @@ function onStop(fn) {
 	});
 }
 const plateOf = (vehicle) => GetVehicleNumberPlateText(vehicle).trim().toUpperCase();
-let log$1 = null;
-var ScheduledJob = class {
-	interval;
-	fn;
-	name;
-	gen = 0;
-	active = !1;
-	stopped = !1;
-	quietUntil = 0;
-	skipped = 0;
-	constructor(interval, fn, name) {
-		this.interval = interval, this.fn = fn, this.name = name;
-	}
-	get running() {
-		return this.active;
-	}
-	set(active) {
-		active === this.active || active && this.stopped || (this.active = active, active ? scheduler.activate(this) : scheduler.deactivate(this));
-	}
-	stop() {
-		this.set(!1), this.stopped = !0;
-	}
-	call() {
-		try {
-			let result = this.fn();
-			result instanceof Promise && result.catch((error) => this.fail(error));
-		} catch (error) {
-			this.fail(error);
-		}
-	}
-	fail(error) {
-		let now = GetGameTimer();
-		if (now < this.quietUntil) {
-			this.skipped++;
-			return;
-		}
-		this.quietUntil = now + 1e4;
-		let more = this.skipped ? ` (+${this.skipped} more)` : "";
-		this.skipped = 0, log$1 ??= createLogger(GetCurrentResourceName()), log$1.error(`job "${this.name}" failed${more}`, error instanceof Error ? error.stack ?? error.message : error);
-	}
-}, Group = class {
+// ../../../packages/lib/src/fivem/scheduler/group.ts
+var Group = class {
 	interval;
 	jobs = Array(8);
 	gens = Array(8).fill(0);
@@ -16064,12 +16038,53 @@ const scheduler = new class {
 		groups.length = kept, this.nextDue = soonest;
 	};
 }();
+let log$1 = null;
+var ScheduledJob = class {
+	interval;
+	fn;
+	name;
+	gen = 0;
+	active = !1;
+	stopped = !1;
+	quietUntil = 0;
+	skipped = 0;
+	constructor(interval, fn, name) {
+		this.interval = interval, this.fn = fn, this.name = name;
+	}
+	get running() {
+		return this.active;
+	}
+	set(active) {
+		active === this.active || active && this.stopped || (this.active = active, active ? scheduler.activate(this) : scheduler.deactivate(this));
+	}
+	stop() {
+		this.set(!1), this.stopped = !0;
+	}
+	call() {
+		try {
+			let result = this.fn();
+			result instanceof Promise && result.catch((error) => this.fail(error));
+		} catch (error) {
+			this.fail(error);
+		}
+	}
+	fail(error) {
+		let now = GetGameTimer();
+		if (now < this.quietUntil) {
+			this.skipped++;
+			return;
+		}
+		this.quietUntil = now + 1e4;
+		let more = this.skipped ? ` (+${this.skipped} more)` : "";
+		this.skipped = 0, log$1 ??= createLogger(GetCurrentResourceName()), log$1.error(`job "${this.name}" failed${more}`, error instanceof Error ? error.stack ?? error.message : error);
+	}
+};
 function every(ms, fn, options = {}) {
 	let job = new ScheduledJob(Math.max(0, Math.floor(ms)), fn, options.name ?? (fn.name || "anonymous"));
 	return options.active !== !1 && job.set(!0), job;
 }
-// ../../../packages/lib/src/fivem/state.ts
-const stateNumber = (v) => typeof v == "number" && Number.isFinite(v) ? v : void 0, stateBoolean = (v) => typeof v == "boolean" ? v : void 0, isServer = IsDuplicityVersion();
+// ../../../packages/lib/src/fivem/state/mirror.ts
+const stateNumber = (v) => typeof v == "number" && Number.isFinite(v) ? v : void 0, stateBoolean = (v) => typeof v == "boolean" ? v : void 0;
 var Mirror = class {
 	key;
 	parse;
@@ -16088,14 +16103,17 @@ var Mirror = class {
 		let old = this.values.get(id);
 		if (this.values.set(id, value), old !== value) for (let listener of this.listeners) listener(id, value, old);
 	}
-}, EntityState$1 = class extends Mirror {
+};
+// ../../../packages/lib/src/fivem/state/entityState.ts
+const isServer$1 = IsDuplicityVersion();
+var EntityState$1 = class extends Mirror {
 	handles = new Map();
 	constructor(key, parse) {
 		super(key, parse), AddStateBagChangeHandler(key, "", (bag, _key, value) => {
 			if (!bag.startsWith("entity:")) return;
 			let netId = Number(bag.slice(7));
 			this.handles.set(netId, GetEntityFromStateBagName(bag)), this.store(netId, value);
-		}), isServer ? on("entityRemoved", (entity) => this.forget(NetworkGetNetworkIdFromEntity(entity))) : every(3e4, () => this.prune(), { name: `state ${key}` });
+		}), isServer$1 ? on("entityRemoved", (entity) => this.forget(NetworkGetNetworkIdFromEntity(entity))) : every(3e4, () => this.prune(), { name: `state ${key}` });
 	}
 	get(entity) {
 		if (!entity) return;
@@ -16122,73 +16140,15 @@ var Mirror = class {
 	prune() {
 		for (let netId of this.values.keys()) DoesEntityExist(NetworkGetEntityFromNetworkId(netId)) || this.forget(netId);
 	}
-}, EntityState = class extends EntityState$1 {
+};
+IsDuplicityVersion();
+// ../../../packages/lib/src/server/state.ts
+var EntityState = class extends EntityState$1 {
 	set(entity, value) {
 		DoesEntityExist(entity) && (Entity(entity).state.set(this.key, value ?? null, !0), this.put(entity, value));
 	}
 };
 resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource), resourceExport(CORE.resource);
-// resource/common/locale.ts
-const Locale = createLocale(), ResourceName = GetCurrentResourceName();
-IsDuplicityVersion();
-// resource/server/log.ts
-const log = createLogger(ResourceName);
-// resource/server/repo.ts
-let setup = null;
-const prepareDatabase = () => setup ??= createDatabaseTables(ResourceName, "sql/main.sql");
-function decode(id, text) {
-	try {
-		let parsed = JSON.parse(text);
-		if (typeof parsed != "object" || !parsed || !("s" in parsed) || !Array.isArray(parsed.s)) return [];
-		let stacks = [];
-		for (let row of parsed.s) {
-			if (!Array.isArray(row)) continue;
-			let [slot, name, count, metadata, rotated] = row;
-			if (typeof slot != "number" || typeof name != "string" || typeof count != "number" || count <= 0) continue;
-			let meta = typeof metadata == "object" && metadata && !Array.isArray(metadata) ? metadata : {};
-			stacks.push({
-				slot,
-				name,
-				count,
-				metadata: meta,
-				rotated: rotated === !0
-			});
-		}
-		return stacks;
-	} catch (error) {
-		return log.error(`inventory ${id} has broken stored data`, error), [];
-	}
-}
-const encode = (stacks) => JSON.stringify({
-	v: 1,
-	s: [...stacks].map((s) => [
-		s.slot,
-		s.name,
-		s.count,
-		s.metadata,
-		s.rotated
-	])
-});
-async function loadInventories(ids) {
-	let found = new Map();
-	if (ids.length === 0) return found;
-	await prepareDatabase();
-	let rows = await mysql.query("SELECT id, items FROM ai_inventory_inventories WHERE id IN (?)", [ids]);
-	for (let row of rows) found.set(row.id, decode(row.id, row.items));
-	return found;
-}
-async function saveInventories(list) {
-	if (list.length !== 0) {
-		await prepareDatabase();
-		for (let i = 0; i < list.length; i += 200) {
-			let chunk = list.slice(i, i + 200), values = chunk.flatMap((inv) => [inv.id, encode(inv.stacks)]);
-			await mysql.query(`INSERT INTO ai_inventory_inventories (id, items) VALUES ${chunk.map(() => "(?, ?)").join(", ")} ON DUPLICATE KEY UPDATE items = VALUES(items)`, values);
-		}
-	}
-}
-async function renameInventory(from, to) {
-	await prepareDatabase(), await mysql.query("UPDATE IGNORE ai_inventory_inventories SET id = ? WHERE id = ?", [to, from]);
-}
 // resource/common/items.ts
 const USE_ANIMS = {
 	none: void 0,
@@ -16276,12 +16236,8 @@ var ItemList = class {
 		return this.byName.get(key) ?? this.byName.get(this.alias.get(key) ?? "");
 	}
 };
-// resource/common/content.ts
-const SHOP_BLIP = {
-	sprite: 52,
-	color: 0,
-	scale: .6
-}, names$1 = (v) => Array.isArray(v) ? v.filter((x) => typeof x == "string" && x !== "") : [], grid = (v, rows, weight) => {
+// resource/common/settings.ts
+const grid = (v, rows, weight) => {
 	let g = record(v);
 	return {
 		rows: int(g.rows, rows, 1, 50),
@@ -16303,6 +16259,12 @@ function readSettings(raw) {
 		noWeaponWheel: s.noWeaponWheel !== !1
 	};
 }
+// resource/common/places.ts
+const SHOP_BLIP = {
+	sprite: 52,
+	color: 0,
+	scale: .6
+}, names$1 = (v) => Array.isArray(v) ? v.filter((x) => typeof x == "string" && x !== "") : [];
 function parseIngredients(text) {
 	return text.split(",").map((part) => part.trim()).filter(Boolean).map((part) => {
 		let [name = "", count = "1"] = part.split(":").map((x) => x.trim());
@@ -16352,7 +16314,8 @@ const readShop = (id, v) => ({
 			ingredients: parseIngredients(str(r.ingredients, "", 400))
 		}] : [];
 	})
-});
+}), nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - place.y, z - place.z) <= place.radius + slack;
+// resource/common/content.ts
 function readRarities(raw) {
 	let out = new Map();
 	if (typeof raw != "object" || !raw) return out;
@@ -16388,7 +16351,8 @@ var InventoryContent = class {
 		for (let listener of this.listeners) listener(file);
 	}
 };
-const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - place.y, z - place.z) <= place.radius + slack, text = (max, optional = !1) => ({
+// resource/server/schema/dataSpecs.ts
+const text = (max, optional = !1) => ({
 	type: "text",
 	min: 0,
 	max,
@@ -16398,14 +16362,7 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 	max: 30,
 	itemMax: 48,
 	pattern: "^[a-z0-9_-]{2,48}$"
-}, gridSpec = (extra = {}) => ({
-	type: "object",
-	fields: {
-		rows: spec.int(1, 50),
-		maxWeight: spec.int(0, 1e7),
-		...extra
-	}
-}), KEY = "^[a-z0-9_-]{2,48}$", place = (labelKey) => [
+}, KEY = "^[a-z0-9_-]{2,48}$", place = (labelKey) => [
 	{
 		widget: "text",
 		path: "label",
@@ -16430,7 +16387,492 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 		unit: "m"
 	},
 	...accessFields()
-], gridFields = (path) => [{
+], placeSections = {
+	label: text(48),
+	coords: { type: "vec3" },
+	radius: spec.num(.5, 30),
+	...ACCESS_FIELDS
+}, benchesFile = {
+	kind: "records",
+	sync: "all",
+	labelPath: "label",
+	newRecord: {
+		label: "",
+		coords: {
+			x: 0,
+			y: 0,
+			z: 0
+		},
+		radius: 1.5,
+		jobs: [],
+		recipes: [{
+			result: "lockpick",
+			count: 1,
+			time: 5,
+			ingredients: "scrapmetal:3"
+		}]
+	},
+	sections: {
+		...placeSections,
+		recipes: {
+			type: "list",
+			max: 50,
+			of: {
+				type: "object",
+				fields: {
+					result: {
+						type: "text",
+						min: 2,
+						max: 48,
+						pattern: KEY
+					},
+					count: spec.int(1, 1e3),
+					time: spec.num(0, 600),
+					ingredients: text(400)
+				}
+			}
+		}
+	}
+}, benchesTab = {
+	id: "benches",
+	file: "benches",
+	icon: "hammer",
+	label: "ADMIN_TAB_BENCHES",
+	desc: "ADMIN_TAB_BENCHES_DESC",
+	createLabel: "ADMIN_NEW_BENCH",
+	deleteLabel: "ADMIN_DELETE_BENCH",
+	cards: [{
+		icon: "hammer",
+		title: "ADMIN_C_BENCH",
+		desc: "ADMIN_C_BENCH_DESC",
+		fields: place("ADMIN_F_BENCH_LABEL")
+	}, {
+		icon: "flask",
+		title: "ADMIN_C_RECIPES",
+		desc: "ADMIN_C_RECIPES_DESC",
+		fields: [{
+			widget: "list",
+			path: "recipes",
+			label: "ADMIN_F_RECIPES",
+			addLabel: "ADMIN_ADD_RECIPE",
+			max: 50,
+			newRow: {
+				result: "lockpick",
+				count: 1,
+				time: 5,
+				ingredients: "scrapmetal:3"
+			},
+			rows: [
+				{
+					widget: "text",
+					path: "result",
+					label: "ADMIN_F_RESULT",
+					placeholder: "ADMIN_P_ITEM"
+				},
+				{
+					widget: "number",
+					path: "count",
+					label: "ADMIN_F_COUNT",
+					min: 1,
+					max: 1e3
+				},
+				{
+					widget: "number",
+					path: "time",
+					label: "ADMIN_F_TIME",
+					min: 0,
+					max: 600,
+					unit: "s"
+				},
+				{
+					widget: "text",
+					path: "ingredients",
+					label: "ADMIN_F_INGREDIENTS",
+					placeholder: "ADMIN_P_INGREDIENTS"
+				}
+			]
+		}]
+	}]
+}, itemCard = {
+	icon: "tag",
+	title: "ADMIN_C_ITEM",
+	desc: "ADMIN_C_ITEM_DESC",
+	fields: [
+		{
+			widget: "text",
+			path: "label",
+			label: "ADMIN_F_LABEL",
+			placeholder: "ADMIN_P_ITEM_LABEL"
+		},
+		{
+			widget: "text",
+			path: "description",
+			label: "ADMIN_F_DESCRIPTION",
+			placeholder: "ADMIN_P_DESCRIPTION"
+		},
+		{
+			widget: "select",
+			path: "type",
+			label: "ADMIN_F_TYPE",
+			hint: "ADMIN_H_TYPE",
+			options: [
+				{
+					value: "item",
+					label: "ADMIN_O_ITEM"
+				},
+				{
+					value: "weapon",
+					label: "ADMIN_O_WEAPON"
+				},
+				{
+					value: "ammo",
+					label: "ADMIN_O_AMMO"
+				},
+				{
+					value: "component",
+					label: "ADMIN_O_COMPONENT"
+				}
+			]
+		},
+		{
+			widget: "text",
+			path: "rarity",
+			records: "rarities",
+			label: "ADMIN_F_RARITY",
+			hint: "ADMIN_H_RARITY",
+			placeholder: "ADMIN_P_RARITY"
+		},
+		{
+			widget: "text",
+			path: "image",
+			label: "ADMIN_F_IMAGE",
+			hint: "ADMIN_H_IMAGE",
+			placeholder: "ADMIN_P_IMAGE"
+		},
+		{
+			widget: "tags",
+			path: "aliases",
+			label: "ADMIN_F_ALIASES",
+			hint: "ADMIN_H_ALIASES",
+			placeholder: "ADMIN_P_ALIASES"
+		}
+	]
+}, sizeCard = {
+	icon: "table-cells",
+	title: "ADMIN_C_SIZE",
+	desc: "ADMIN_C_SIZE_DESC",
+	fields: [
+		{
+			widget: "number",
+			path: "size.w",
+			label: "ADMIN_F_WIDTH",
+			hint: "ADMIN_H_WIDTH",
+			min: 1,
+			max: 8,
+			unit: "ADMIN_U_CELLS"
+		},
+		{
+			widget: "number",
+			path: "size.h",
+			label: "ADMIN_F_HEIGHT",
+			min: 1,
+			max: 8,
+			unit: "ADMIN_U_CELLS"
+		},
+		{
+			widget: "number",
+			path: "weight",
+			label: "ADMIN_F_WEIGHT",
+			hint: "ADMIN_H_WEIGHT",
+			min: 0,
+			max: 1e6,
+			step: 10,
+			unit: "g"
+		},
+		{
+			widget: "number",
+			path: "stack",
+			label: "ADMIN_F_STACK",
+			hint: "ADMIN_H_STACK",
+			min: 1,
+			max: 1e5
+		}
+	]
+}, useCard = {
+	icon: "hand-pointer",
+	title: "ADMIN_C_USE",
+	desc: "ADMIN_C_USE_DESC",
+	fields: [
+		{
+			widget: "switch",
+			path: "usable",
+			label: "ADMIN_F_USABLE",
+			hint: "ADMIN_H_USABLE"
+		},
+		{
+			widget: "number",
+			path: "consume",
+			label: "ADMIN_F_CONSUME",
+			hint: "ADMIN_H_CONSUME",
+			min: 0,
+			max: 1e3
+		},
+		{
+			widget: "switch",
+			path: "close",
+			label: "ADMIN_F_CLOSE",
+			hint: "ADMIN_H_CLOSE"
+		},
+		{
+			widget: "select",
+			path: "use.anim",
+			label: "ADMIN_F_ANIM",
+			options: [
+				{
+					value: "none",
+					label: "ADMIN_O_ANIM_NONE"
+				},
+				{
+					value: "eat",
+					label: "ADMIN_O_ANIM_EAT"
+				},
+				{
+					value: "drink",
+					label: "ADMIN_O_ANIM_DRINK"
+				},
+				{
+					value: "bandage",
+					label: "ADMIN_O_ANIM_BANDAGE"
+				},
+				{
+					value: "armour",
+					label: "ADMIN_O_ANIM_ARMOUR"
+				}
+			]
+		},
+		{
+			widget: "number",
+			path: "use.time",
+			label: "ADMIN_F_USE_TIME",
+			hint: "ADMIN_H_USE_TIME",
+			min: 0,
+			max: 6e4,
+			step: 250,
+			unit: "ms"
+		},
+		{
+			widget: "number",
+			path: "use.status.hunger",
+			label: "ADMIN_F_HUNGER",
+			hint: "ADMIN_H_STATUS",
+			min: -100,
+			max: 100
+		},
+		{
+			widget: "number",
+			path: "use.status.thirst",
+			label: "ADMIN_F_THIRST",
+			min: -100,
+			max: 100
+		},
+		{
+			widget: "number",
+			path: "use.status.stress",
+			label: "ADMIN_F_STRESS",
+			min: -100,
+			max: 100
+		}
+	]
+}, weaponCard = {
+	icon: "gun",
+	title: "ADMIN_C_WEAPON",
+	desc: "ADMIN_C_WEAPON_DESC",
+	fields: [
+		{
+			widget: "text",
+			path: "weapon.ammo",
+			label: "ADMIN_F_AMMO",
+			hint: "ADMIN_H_AMMO",
+			placeholder: "ADMIN_P_AMMO"
+		},
+		{
+			widget: "switch",
+			path: "weapon.throwable",
+			label: "ADMIN_F_THROWABLE",
+			hint: "ADMIN_H_THROWABLE"
+		},
+		{
+			widget: "tags",
+			path: "component.hashes",
+			label: "ADMIN_F_COMPONENTS",
+			hint: "ADMIN_H_COMPONENTS",
+			placeholder: "ADMIN_P_COMPONENTS"
+		}
+	]
+}, itemsFile = {
+	kind: "records",
+	sync: "all",
+	keyPattern: KEY,
+	labelPath: "label",
+	newRecord: {
+		label: "",
+		description: "",
+		weight: 100,
+		size: {
+			w: 1,
+			h: 1
+		},
+		stack: 10,
+		type: "item",
+		usable: !1,
+		consume: 0,
+		close: !1,
+		image: "",
+		aliases: []
+	},
+	sections: {
+		label: text(48),
+		description: text(240, !0),
+		weight: spec.int(0, 1e6),
+		size: {
+			type: "object",
+			fields: {
+				w: spec.int(1, 8),
+				h: spec.int(1, 8)
+			}
+		},
+		stack: spec.int(1, 1e5),
+		type: {
+			type: "enum",
+			values: [
+				"item",
+				"weapon",
+				"ammo",
+				"component"
+			]
+		},
+		usable: { type: "bool" },
+		consume: spec.int(0, 1e3),
+		close: { type: "bool" },
+		image: text(200),
+		aliases: names,
+		rarity: {
+			type: "text",
+			min: 0,
+			max: 48,
+			records: "rarities",
+			optional: !0
+		},
+		use: {
+			type: "object",
+			optional: !0,
+			fields: {
+				anim: {
+					type: "enum",
+					values: [
+						"none",
+						"eat",
+						"drink",
+						"bandage",
+						"armour"
+					],
+					optional: !0
+				},
+				time: spec.int(0, 6e4, !0),
+				status: {
+					type: "object",
+					optional: !0,
+					fields: {
+						hunger: spec.num(-100, 100, !0),
+						thirst: spec.num(-100, 100, !0),
+						stress: spec.num(-100, 100, !0)
+					}
+				}
+			}
+		},
+		weapon: {
+			type: "object",
+			optional: !0,
+			fields: {
+				ammo: text(48, !0),
+				throwable: {
+					type: "bool",
+					optional: !0
+				}
+			}
+		},
+		component: {
+			type: "object",
+			optional: !0,
+			fields: { hashes: {
+				type: "names",
+				max: 20,
+				itemMax: 64,
+				pattern: "^[A-Za-z0-9_]{2,64}$",
+				optional: !0
+			} }
+		}
+	}
+}, itemsTab = {
+	id: "items",
+	file: "items",
+	icon: "box",
+	label: "ADMIN_TAB_ITEMS",
+	desc: "ADMIN_TAB_ITEMS_DESC",
+	listSub: "type",
+	createLabel: "ADMIN_NEW_ITEM",
+	deleteLabel: "ADMIN_DELETE_ITEM",
+	deleteDesc: "ADMIN_DELETE_ITEM_DESC",
+	cards: [
+		itemCard,
+		sizeCard,
+		useCard,
+		weaponCard
+	]
+}, raritiesFile = {
+	kind: "records",
+	sync: "all",
+	keyPattern: KEY,
+	labelPath: "label",
+	newRecord: {
+		label: "",
+		color: "#9e9e9e"
+	},
+	sections: {
+		label: text(32),
+		color: {
+			type: "text",
+			min: 7,
+			max: 7,
+			pattern: "^#[0-9a-fA-F]{6}$"
+		}
+	}
+}, raritiesTab = {
+	id: "rarities",
+	file: "rarities",
+	icon: "gem",
+	label: "ADMIN_TAB_RARITIES",
+	desc: "ADMIN_TAB_RARITIES_DESC",
+	createLabel: "ADMIN_NEW_RARITY",
+	deleteLabel: "ADMIN_DELETE_RARITY",
+	deleteDesc: "ADMIN_DELETE_RARITY_DESC",
+	cards: [{
+		icon: "gem",
+		title: "ADMIN_C_RARITY",
+		desc: "ADMIN_C_RARITY_DESC",
+		fields: [{
+			widget: "text",
+			path: "label",
+			label: "ADMIN_F_LABEL",
+			placeholder: "ADMIN_P_RARITY_LABEL"
+		}, {
+			widget: "color",
+			path: "color",
+			label: "ADMIN_F_RARITY_COLOR",
+			hint: "ADMIN_H_RARITY_COLOR"
+		}]
+	}]
+}, gridFields = (path) => [{
 	widget: "number",
 	path: `${path}rows`,
 	label: "ADMIN_F_ROWS",
@@ -16446,776 +16888,298 @@ const nearPlace = (place, x, y, z, slack = 1) => Math.hypot(x - place.x, y - pla
 	max: 1e7,
 	step: 1e3,
 	unit: "g"
-}], placeSections = {
-	label: text(48),
-	coords: { type: "vec3" },
-	radius: spec.num(.5, 30),
-	...ACCESS_FIELDS
+}], gridSpec = (extra = {}) => ({
+	type: "object",
+	fields: {
+		rows: spec.int(1, 50),
+		maxWeight: spec.int(0, 1e7),
+		...extra
+	}
+}), settingsFile = {
+	kind: "settings",
+	sync: "all",
+	sections: {
+		columns: spec.int(6, 14),
+		player: gridSpec(),
+		drop: gridSpec({
+			despawnMinutes: spec.int(1, 240),
+			maxPerPlayer: spec.int(1, 100, !0)
+		}),
+		trunk: gridSpec(),
+		glovebox: gridSpec(),
+		noWeaponWheel: { type: "bool" }
+	},
+	defaults: {
+		noWeaponWheel: !0,
+		columns: 8
+	}
+}, settingsTab = {
+	id: "settings",
+	file: "settings",
+	icon: "sliders",
+	label: "ADMIN_TAB_SETTINGS",
+	desc: "ADMIN_TAB_SETTINGS_DESC",
+	cards: [
+		{
+			icon: "table-cells",
+			title: "ADMIN_C_GRID",
+			desc: "ADMIN_C_GRID_DESC",
+			fields: [{
+				widget: "number",
+				path: "columns",
+				label: "ADMIN_F_COLUMNS",
+				hint: "ADMIN_H_COLUMNS",
+				min: 6,
+				max: 14
+			}, {
+				widget: "switch",
+				path: "noWeaponWheel",
+				label: "ADMIN_F_NO_WHEEL",
+				hint: "ADMIN_H_NO_WHEEL"
+			}]
+		},
+		{
+			icon: "user",
+			title: "ADMIN_C_PLAYER",
+			desc: "ADMIN_C_PLAYER_DESC",
+			fields: gridFields("player.")
+		},
+		{
+			icon: "box-open",
+			title: "ADMIN_C_DROP",
+			desc: "ADMIN_C_DROP_DESC",
+			fields: [
+				...gridFields("drop."),
+				{
+					widget: "number",
+					path: "drop.despawnMinutes",
+					label: "ADMIN_F_DESPAWN",
+					hint: "ADMIN_H_DESPAWN",
+					min: 1,
+					max: 240,
+					unit: "min"
+				},
+				{
+					widget: "number",
+					path: "drop.maxPerPlayer",
+					label: "ADMIN_F_DROP_LIMIT",
+					hint: "ADMIN_H_DROP_LIMIT",
+					min: 1,
+					max: 100
+				}
+			]
+		},
+		{
+			icon: "car",
+			title: "ADMIN_C_TRUNK",
+			desc: "ADMIN_C_TRUNK_DESC",
+			fields: gridFields("trunk.")
+		},
+		{
+			icon: "car-side",
+			title: "ADMIN_C_GLOVEBOX",
+			desc: "ADMIN_C_GLOVEBOX_DESC",
+			fields: gridFields("glovebox.")
+		}
+	]
+}, shopsFile = {
+	kind: "records",
+	sync: "all",
+	labelPath: "label",
+	newRecord: {
+		label: "",
+		coords: {
+			x: 0,
+			y: 0,
+			z: 0
+		},
+		radius: 2,
+		jobs: [],
+		blip: !0,
+		blipStyle: SHOP_BLIP,
+		accounts: ["cash", "bank"],
+		items: [{
+			name: "water",
+			price: 5
+		}]
+	},
+	sections: {
+		ped: PLACE_PED_SPEC,
+		...placeSections,
+		blip: { type: "bool" },
+		blipStyle: {
+			type: "object",
+			fields: BLIP_STYLE_FIELDS
+		},
+		accounts: {
+			type: "names",
+			lookup: "account",
+			max: 5,
+			itemMax: 32,
+			pattern: "^[a-z0-9_]{2,32}$"
+		},
+		items: {
+			type: "list",
+			max: 100,
+			of: {
+				type: "object",
+				fields: {
+					name: {
+						type: "text",
+						lookup: "item",
+						min: 2,
+						max: 48,
+						pattern: KEY
+					},
+					price: spec.int(0, 1e8)
+				}
+			}
+		}
+	}
+}, shopsTab = {
+	id: "shops",
+	file: "shops",
+	icon: "store",
+	label: "ADMIN_TAB_SHOPS",
+	desc: "ADMIN_TAB_SHOPS_DESC",
+	createLabel: "ADMIN_NEW_SHOP",
+	deleteLabel: "ADMIN_DELETE_SHOP",
+	cards: [
+		{
+			icon: "store",
+			title: "ADMIN_C_SHOP",
+			desc: "ADMIN_C_SHOP_DESC",
+			fields: [
+				...place("ADMIN_F_SHOP_LABEL"),
+				{
+					widget: "switch",
+					path: "blip",
+					label: "ADMIN_F_BLIP",
+					hint: "ADMIN_H_BLIP"
+				},
+				{
+					widget: "blip",
+					path: "blipStyle",
+					label: "ADMIN_F_BLIP_STYLE",
+					hint: "ADMIN_H_BLIP_STYLE",
+					showIf: {
+						path: "blip",
+						values: [!0]
+					}
+				},
+				{
+					widget: "tags",
+					lookup: "account",
+					path: "accounts",
+					label: "ADMIN_F_ACCOUNTS",
+					hint: "ADMIN_H_ACCOUNTS",
+					placeholder: "ADMIN_P_ACCOUNTS"
+				}
+			]
+		},
+		{
+			icon: "list",
+			title: "ADMIN_C_PRODUCTS",
+			desc: "ADMIN_C_PRODUCTS_DESC",
+			fields: [{
+				widget: "list",
+				path: "items",
+				label: "ADMIN_F_PRODUCTS",
+				addLabel: "ADMIN_ADD_PRODUCT",
+				max: 100,
+				newRow: {
+					name: "water",
+					price: 5
+				},
+				rows: [{
+					widget: "text",
+					lookup: "item",
+					path: "name",
+					label: "ADMIN_F_ITEM",
+					placeholder: "ADMIN_P_ITEM"
+				}, {
+					widget: "number",
+					path: "price",
+					label: "ADMIN_F_PRICE",
+					min: 0,
+					max: 1e8,
+					unit: "$"
+				}]
+			}]
+		},
+		{
+			icon: "user",
+			title: "ADMIN_C_PED",
+			desc: "ADMIN_C_PED_DESC",
+			fields: placePedFields()
+		}
+	]
+}, stashesFile = {
+	kind: "records",
+	sync: "all",
+	labelPath: "label",
+	newRecord: {
+		label: "",
+		coords: {
+			x: 0,
+			y: 0,
+			z: 0
+		},
+		radius: 1.5,
+		jobs: [],
+		gangs: [],
+		personal: !1,
+		rows: 6,
+		maxWeight: 1e5
+	},
+	sections: {
+		...placeSections,
+		personal: { type: "bool" },
+		rows: spec.int(1, 50),
+		maxWeight: spec.int(0, 1e7)
+	}
+}, stashesTab = {
+	id: "stashes",
+	file: "stashes",
+	icon: "warehouse",
+	label: "ADMIN_TAB_STASHES",
+	desc: "ADMIN_TAB_STASHES_DESC",
+	createLabel: "ADMIN_NEW_STASH",
+	deleteLabel: "ADMIN_DELETE_STASH",
+	deleteDesc: "ADMIN_DELETE_STASH_DESC",
+	cards: [{
+		icon: "warehouse",
+		title: "ADMIN_C_STASH",
+		desc: "ADMIN_C_STASH_DESC",
+		fields: [
+			...place("ADMIN_F_STASH_LABEL"),
+			{
+				widget: "switch",
+				path: "personal",
+				label: "ADMIN_F_PERSONAL",
+				hint: "ADMIN_H_PERSONAL"
+			},
+			...gridFields("")
+		]
+	}]
 }, content = new InventoryContent(new AdminPanel({
 	title: "ADMIN_TITLE",
 	icon: "box-open",
 	files: {
-		rarities: {
-			kind: "records",
-			sync: "all",
-			keyPattern: KEY,
-			labelPath: "label",
-			newRecord: {
-				label: "",
-				color: "#9e9e9e"
-			},
-			sections: {
-				label: text(32),
-				color: {
-					type: "text",
-					min: 7,
-					max: 7,
-					pattern: "^#[0-9a-fA-F]{6}$"
-				}
-			}
-		},
-		items: {
-			kind: "records",
-			sync: "all",
-			keyPattern: KEY,
-			labelPath: "label",
-			newRecord: {
-				label: "",
-				description: "",
-				weight: 100,
-				size: {
-					w: 1,
-					h: 1
-				},
-				stack: 10,
-				type: "item",
-				usable: !1,
-				consume: 0,
-				close: !1,
-				image: "",
-				aliases: []
-			},
-			sections: {
-				label: text(48),
-				description: text(240, !0),
-				weight: spec.int(0, 1e6),
-				size: {
-					type: "object",
-					fields: {
-						w: spec.int(1, 8),
-						h: spec.int(1, 8)
-					}
-				},
-				stack: spec.int(1, 1e5),
-				type: {
-					type: "enum",
-					values: [
-						"item",
-						"weapon",
-						"ammo",
-						"component"
-					]
-				},
-				usable: { type: "bool" },
-				consume: spec.int(0, 1e3),
-				close: { type: "bool" },
-				image: text(200),
-				aliases: names,
-				rarity: {
-					type: "text",
-					min: 0,
-					max: 48,
-					records: "rarities",
-					optional: !0
-				},
-				use: {
-					type: "object",
-					optional: !0,
-					fields: {
-						anim: {
-							type: "enum",
-							values: [
-								"none",
-								"eat",
-								"drink",
-								"bandage",
-								"armour"
-							],
-							optional: !0
-						},
-						time: spec.int(0, 6e4, !0),
-						status: {
-							type: "object",
-							optional: !0,
-							fields: {
-								hunger: spec.num(-100, 100, !0),
-								thirst: spec.num(-100, 100, !0),
-								stress: spec.num(-100, 100, !0)
-							}
-						}
-					}
-				},
-				weapon: {
-					type: "object",
-					optional: !0,
-					fields: {
-						ammo: text(48, !0),
-						throwable: {
-							type: "bool",
-							optional: !0
-						}
-					}
-				},
-				component: {
-					type: "object",
-					optional: !0,
-					fields: { hashes: {
-						type: "names",
-						max: 20,
-						itemMax: 64,
-						pattern: "^[A-Za-z0-9_]{2,64}$",
-						optional: !0
-					} }
-				}
-			}
-		},
-		shops: {
-			kind: "records",
-			sync: "all",
-			labelPath: "label",
-			newRecord: {
-				label: "",
-				coords: {
-					x: 0,
-					y: 0,
-					z: 0
-				},
-				radius: 2,
-				jobs: [],
-				blip: !0,
-				blipStyle: SHOP_BLIP,
-				accounts: ["cash", "bank"],
-				items: [{
-					name: "water",
-					price: 5
-				}]
-			},
-			sections: {
-				ped: PLACE_PED_SPEC,
-				...placeSections,
-				blip: { type: "bool" },
-				blipStyle: {
-					type: "object",
-					fields: BLIP_STYLE_FIELDS
-				},
-				accounts: {
-					type: "names",
-					lookup: "account",
-					max: 5,
-					itemMax: 32,
-					pattern: "^[a-z0-9_]{2,32}$"
-				},
-				items: {
-					type: "list",
-					max: 100,
-					of: {
-						type: "object",
-						fields: {
-							name: {
-								type: "text",
-								lookup: "item",
-								min: 2,
-								max: 48,
-								pattern: KEY
-							},
-							price: spec.int(0, 1e8)
-						}
-					}
-				}
-			}
-		},
-		stashes: {
-			kind: "records",
-			sync: "all",
-			labelPath: "label",
-			newRecord: {
-				label: "",
-				coords: {
-					x: 0,
-					y: 0,
-					z: 0
-				},
-				radius: 1.5,
-				jobs: [],
-				gangs: [],
-				personal: !1,
-				rows: 6,
-				maxWeight: 1e5
-			},
-			sections: {
-				...placeSections,
-				personal: { type: "bool" },
-				rows: spec.int(1, 50),
-				maxWeight: spec.int(0, 1e7)
-			}
-		},
-		benches: {
-			kind: "records",
-			sync: "all",
-			labelPath: "label",
-			newRecord: {
-				label: "",
-				coords: {
-					x: 0,
-					y: 0,
-					z: 0
-				},
-				radius: 1.5,
-				jobs: [],
-				recipes: [{
-					result: "lockpick",
-					count: 1,
-					time: 5,
-					ingredients: "scrapmetal:3"
-				}]
-			},
-			sections: {
-				...placeSections,
-				recipes: {
-					type: "list",
-					max: 50,
-					of: {
-						type: "object",
-						fields: {
-							result: {
-								type: "text",
-								min: 2,
-								max: 48,
-								pattern: KEY
-							},
-							count: spec.int(1, 1e3),
-							time: spec.num(0, 600),
-							ingredients: text(400)
-						}
-					}
-				}
-			}
-		},
-		settings: {
-			kind: "settings",
-			sync: "all",
-			sections: {
-				columns: spec.int(6, 14),
-				player: gridSpec(),
-				drop: gridSpec({
-					despawnMinutes: spec.int(1, 240),
-					maxPerPlayer: spec.int(1, 100, !0)
-				}),
-				trunk: gridSpec(),
-				glovebox: gridSpec(),
-				noWeaponWheel: { type: "bool" }
-			},
-			defaults: {
-				noWeaponWheel: !0,
-				columns: 8
-			}
-		}
+		rarities: raritiesFile,
+		items: itemsFile,
+		shops: shopsFile,
+		stashes: stashesFile,
+		benches: benchesFile,
+		settings: settingsFile
 	},
 	tabs: [
-		{
-			id: "items",
-			file: "items",
-			icon: "box",
-			label: "ADMIN_TAB_ITEMS",
-			desc: "ADMIN_TAB_ITEMS_DESC",
-			listSub: "type",
-			createLabel: "ADMIN_NEW_ITEM",
-			deleteLabel: "ADMIN_DELETE_ITEM",
-			deleteDesc: "ADMIN_DELETE_ITEM_DESC",
-			cards: [
-				{
-					icon: "tag",
-					title: "ADMIN_C_ITEM",
-					desc: "ADMIN_C_ITEM_DESC",
-					fields: [
-						{
-							widget: "text",
-							path: "label",
-							label: "ADMIN_F_LABEL",
-							placeholder: "ADMIN_P_ITEM_LABEL"
-						},
-						{
-							widget: "text",
-							path: "description",
-							label: "ADMIN_F_DESCRIPTION",
-							placeholder: "ADMIN_P_DESCRIPTION"
-						},
-						{
-							widget: "select",
-							path: "type",
-							label: "ADMIN_F_TYPE",
-							hint: "ADMIN_H_TYPE",
-							options: [
-								{
-									value: "item",
-									label: "ADMIN_O_ITEM"
-								},
-								{
-									value: "weapon",
-									label: "ADMIN_O_WEAPON"
-								},
-								{
-									value: "ammo",
-									label: "ADMIN_O_AMMO"
-								},
-								{
-									value: "component",
-									label: "ADMIN_O_COMPONENT"
-								}
-							]
-						},
-						{
-							widget: "text",
-							path: "rarity",
-							records: "rarities",
-							label: "ADMIN_F_RARITY",
-							hint: "ADMIN_H_RARITY",
-							placeholder: "ADMIN_P_RARITY"
-						},
-						{
-							widget: "text",
-							path: "image",
-							label: "ADMIN_F_IMAGE",
-							hint: "ADMIN_H_IMAGE",
-							placeholder: "ADMIN_P_IMAGE"
-						},
-						{
-							widget: "tags",
-							path: "aliases",
-							label: "ADMIN_F_ALIASES",
-							hint: "ADMIN_H_ALIASES",
-							placeholder: "ADMIN_P_ALIASES"
-						}
-					]
-				},
-				{
-					icon: "table-cells",
-					title: "ADMIN_C_SIZE",
-					desc: "ADMIN_C_SIZE_DESC",
-					fields: [
-						{
-							widget: "number",
-							path: "size.w",
-							label: "ADMIN_F_WIDTH",
-							hint: "ADMIN_H_WIDTH",
-							min: 1,
-							max: 8,
-							unit: "ADMIN_U_CELLS"
-						},
-						{
-							widget: "number",
-							path: "size.h",
-							label: "ADMIN_F_HEIGHT",
-							min: 1,
-							max: 8,
-							unit: "ADMIN_U_CELLS"
-						},
-						{
-							widget: "number",
-							path: "weight",
-							label: "ADMIN_F_WEIGHT",
-							hint: "ADMIN_H_WEIGHT",
-							min: 0,
-							max: 1e6,
-							step: 10,
-							unit: "g"
-						},
-						{
-							widget: "number",
-							path: "stack",
-							label: "ADMIN_F_STACK",
-							hint: "ADMIN_H_STACK",
-							min: 1,
-							max: 1e5
-						}
-					]
-				},
-				{
-					icon: "hand-pointer",
-					title: "ADMIN_C_USE",
-					desc: "ADMIN_C_USE_DESC",
-					fields: [
-						{
-							widget: "switch",
-							path: "usable",
-							label: "ADMIN_F_USABLE",
-							hint: "ADMIN_H_USABLE"
-						},
-						{
-							widget: "number",
-							path: "consume",
-							label: "ADMIN_F_CONSUME",
-							hint: "ADMIN_H_CONSUME",
-							min: 0,
-							max: 1e3
-						},
-						{
-							widget: "switch",
-							path: "close",
-							label: "ADMIN_F_CLOSE",
-							hint: "ADMIN_H_CLOSE"
-						},
-						{
-							widget: "select",
-							path: "use.anim",
-							label: "ADMIN_F_ANIM",
-							options: [
-								{
-									value: "none",
-									label: "ADMIN_O_ANIM_NONE"
-								},
-								{
-									value: "eat",
-									label: "ADMIN_O_ANIM_EAT"
-								},
-								{
-									value: "drink",
-									label: "ADMIN_O_ANIM_DRINK"
-								},
-								{
-									value: "bandage",
-									label: "ADMIN_O_ANIM_BANDAGE"
-								},
-								{
-									value: "armour",
-									label: "ADMIN_O_ANIM_ARMOUR"
-								}
-							]
-						},
-						{
-							widget: "number",
-							path: "use.time",
-							label: "ADMIN_F_USE_TIME",
-							hint: "ADMIN_H_USE_TIME",
-							min: 0,
-							max: 6e4,
-							step: 250,
-							unit: "ms"
-						},
-						{
-							widget: "number",
-							path: "use.status.hunger",
-							label: "ADMIN_F_HUNGER",
-							hint: "ADMIN_H_STATUS",
-							min: -100,
-							max: 100
-						},
-						{
-							widget: "number",
-							path: "use.status.thirst",
-							label: "ADMIN_F_THIRST",
-							min: -100,
-							max: 100
-						},
-						{
-							widget: "number",
-							path: "use.status.stress",
-							label: "ADMIN_F_STRESS",
-							min: -100,
-							max: 100
-						}
-					]
-				},
-				{
-					icon: "gun",
-					title: "ADMIN_C_WEAPON",
-					desc: "ADMIN_C_WEAPON_DESC",
-					fields: [
-						{
-							widget: "text",
-							path: "weapon.ammo",
-							label: "ADMIN_F_AMMO",
-							hint: "ADMIN_H_AMMO",
-							placeholder: "ADMIN_P_AMMO"
-						},
-						{
-							widget: "switch",
-							path: "weapon.throwable",
-							label: "ADMIN_F_THROWABLE",
-							hint: "ADMIN_H_THROWABLE"
-						},
-						{
-							widget: "tags",
-							path: "component.hashes",
-							label: "ADMIN_F_COMPONENTS",
-							hint: "ADMIN_H_COMPONENTS",
-							placeholder: "ADMIN_P_COMPONENTS"
-						}
-					]
-				}
-			]
-		},
-		{
-			id: "rarities",
-			file: "rarities",
-			icon: "gem",
-			label: "ADMIN_TAB_RARITIES",
-			desc: "ADMIN_TAB_RARITIES_DESC",
-			createLabel: "ADMIN_NEW_RARITY",
-			deleteLabel: "ADMIN_DELETE_RARITY",
-			deleteDesc: "ADMIN_DELETE_RARITY_DESC",
-			cards: [{
-				icon: "gem",
-				title: "ADMIN_C_RARITY",
-				desc: "ADMIN_C_RARITY_DESC",
-				fields: [{
-					widget: "text",
-					path: "label",
-					label: "ADMIN_F_LABEL",
-					placeholder: "ADMIN_P_RARITY_LABEL"
-				}, {
-					widget: "color",
-					path: "color",
-					label: "ADMIN_F_RARITY_COLOR",
-					hint: "ADMIN_H_RARITY_COLOR"
-				}]
-			}]
-		},
-		{
-			id: "shops",
-			file: "shops",
-			icon: "store",
-			label: "ADMIN_TAB_SHOPS",
-			desc: "ADMIN_TAB_SHOPS_DESC",
-			createLabel: "ADMIN_NEW_SHOP",
-			deleteLabel: "ADMIN_DELETE_SHOP",
-			cards: [
-				{
-					icon: "store",
-					title: "ADMIN_C_SHOP",
-					desc: "ADMIN_C_SHOP_DESC",
-					fields: [
-						...place("ADMIN_F_SHOP_LABEL"),
-						{
-							widget: "switch",
-							path: "blip",
-							label: "ADMIN_F_BLIP",
-							hint: "ADMIN_H_BLIP"
-						},
-						{
-							widget: "blip",
-							path: "blipStyle",
-							label: "ADMIN_F_BLIP_STYLE",
-							hint: "ADMIN_H_BLIP_STYLE",
-							showIf: {
-								path: "blip",
-								values: [!0]
-							}
-						},
-						{
-							widget: "tags",
-							lookup: "account",
-							path: "accounts",
-							label: "ADMIN_F_ACCOUNTS",
-							hint: "ADMIN_H_ACCOUNTS",
-							placeholder: "ADMIN_P_ACCOUNTS"
-						}
-					]
-				},
-				{
-					icon: "list",
-					title: "ADMIN_C_PRODUCTS",
-					desc: "ADMIN_C_PRODUCTS_DESC",
-					fields: [{
-						widget: "list",
-						path: "items",
-						label: "ADMIN_F_PRODUCTS",
-						addLabel: "ADMIN_ADD_PRODUCT",
-						max: 100,
-						newRow: {
-							name: "water",
-							price: 5
-						},
-						rows: [{
-							widget: "text",
-							lookup: "item",
-							path: "name",
-							label: "ADMIN_F_ITEM",
-							placeholder: "ADMIN_P_ITEM"
-						}, {
-							widget: "number",
-							path: "price",
-							label: "ADMIN_F_PRICE",
-							min: 0,
-							max: 1e8,
-							unit: "$"
-						}]
-					}]
-				},
-				{
-					icon: "user",
-					title: "ADMIN_C_PED",
-					desc: "ADMIN_C_PED_DESC",
-					fields: placePedFields()
-				}
-			]
-		},
-		{
-			id: "stashes",
-			file: "stashes",
-			icon: "warehouse",
-			label: "ADMIN_TAB_STASHES",
-			desc: "ADMIN_TAB_STASHES_DESC",
-			createLabel: "ADMIN_NEW_STASH",
-			deleteLabel: "ADMIN_DELETE_STASH",
-			deleteDesc: "ADMIN_DELETE_STASH_DESC",
-			cards: [{
-				icon: "warehouse",
-				title: "ADMIN_C_STASH",
-				desc: "ADMIN_C_STASH_DESC",
-				fields: [
-					...place("ADMIN_F_STASH_LABEL"),
-					{
-						widget: "switch",
-						path: "personal",
-						label: "ADMIN_F_PERSONAL",
-						hint: "ADMIN_H_PERSONAL"
-					},
-					...gridFields("")
-				]
-			}]
-		},
-		{
-			id: "benches",
-			file: "benches",
-			icon: "hammer",
-			label: "ADMIN_TAB_BENCHES",
-			desc: "ADMIN_TAB_BENCHES_DESC",
-			createLabel: "ADMIN_NEW_BENCH",
-			deleteLabel: "ADMIN_DELETE_BENCH",
-			cards: [{
-				icon: "hammer",
-				title: "ADMIN_C_BENCH",
-				desc: "ADMIN_C_BENCH_DESC",
-				fields: place("ADMIN_F_BENCH_LABEL")
-			}, {
-				icon: "flask",
-				title: "ADMIN_C_RECIPES",
-				desc: "ADMIN_C_RECIPES_DESC",
-				fields: [{
-					widget: "list",
-					path: "recipes",
-					label: "ADMIN_F_RECIPES",
-					addLabel: "ADMIN_ADD_RECIPE",
-					max: 50,
-					newRow: {
-						result: "lockpick",
-						count: 1,
-						time: 5,
-						ingredients: "scrapmetal:3"
-					},
-					rows: [
-						{
-							widget: "text",
-							path: "result",
-							label: "ADMIN_F_RESULT",
-							placeholder: "ADMIN_P_ITEM"
-						},
-						{
-							widget: "number",
-							path: "count",
-							label: "ADMIN_F_COUNT",
-							min: 1,
-							max: 1e3
-						},
-						{
-							widget: "number",
-							path: "time",
-							label: "ADMIN_F_TIME",
-							min: 0,
-							max: 600,
-							unit: "s"
-						},
-						{
-							widget: "text",
-							path: "ingredients",
-							label: "ADMIN_F_INGREDIENTS",
-							placeholder: "ADMIN_P_INGREDIENTS"
-						}
-					]
-				}]
-			}]
-		},
-		{
-			id: "settings",
-			file: "settings",
-			icon: "sliders",
-			label: "ADMIN_TAB_SETTINGS",
-			desc: "ADMIN_TAB_SETTINGS_DESC",
-			cards: [
-				{
-					icon: "table-cells",
-					title: "ADMIN_C_GRID",
-					desc: "ADMIN_C_GRID_DESC",
-					fields: [{
-						widget: "number",
-						path: "columns",
-						label: "ADMIN_F_COLUMNS",
-						hint: "ADMIN_H_COLUMNS",
-						min: 6,
-						max: 14
-					}, {
-						widget: "switch",
-						path: "noWeaponWheel",
-						label: "ADMIN_F_NO_WHEEL",
-						hint: "ADMIN_H_NO_WHEEL"
-					}]
-				},
-				{
-					icon: "user",
-					title: "ADMIN_C_PLAYER",
-					desc: "ADMIN_C_PLAYER_DESC",
-					fields: gridFields("player.")
-				},
-				{
-					icon: "box-open",
-					title: "ADMIN_C_DROP",
-					desc: "ADMIN_C_DROP_DESC",
-					fields: [
-						...gridFields("drop."),
-						{
-							widget: "number",
-							path: "drop.despawnMinutes",
-							label: "ADMIN_F_DESPAWN",
-							hint: "ADMIN_H_DESPAWN",
-							min: 1,
-							max: 240,
-							unit: "min"
-						},
-						{
-							widget: "number",
-							path: "drop.maxPerPlayer",
-							label: "ADMIN_F_DROP_LIMIT",
-							hint: "ADMIN_H_DROP_LIMIT",
-							min: 1,
-							max: 100
-						}
-					]
-				},
-				{
-					icon: "car",
-					title: "ADMIN_C_TRUNK",
-					desc: "ADMIN_C_TRUNK_DESC",
-					fields: gridFields("trunk.")
-				},
-				{
-					icon: "car-side",
-					title: "ADMIN_C_GLOVEBOX",
-					desc: "ADMIN_C_GLOVEBOX_DESC",
-					fields: gridFields("glovebox.")
-				}
-			]
-		}
+		itemsTab,
+		raritiesTab,
+		shopsTab,
+		stashesTab,
+		benchesTab,
+		settingsTab
 	]
 })), EVENTS = {
 	player: "ai-inventory:client:player",
@@ -17289,7 +17253,7 @@ var Occupancy = class Occupancy {
 		return null;
 	}
 };
-// resource/server/stacks.ts
+// resource/server/inventory/stacks.ts
 function canonical(value) {
 	if (Array.isArray(value)) return `[${value.map((v) => v === void 0 || typeof v == "function" ? "null" : canonical(v)).join(",")}]`;
 	if (typeof value == "object" && value) {
@@ -17313,7 +17277,7 @@ const sizeOf = (def) => def?.size ?? {
 	w: 1,
 	h: 1
 };
-// resource/server/addPlan.ts
+// resource/server/inventory/addPlan.ts
 function planAdd(inv, def, count, metadata, slot) {
 	if (!inv.weightAllows(def, count)) return null;
 	let steps = [], left = count, key = metaKey(metadata);
@@ -17348,7 +17312,7 @@ function planAdd(inv, def, count, metadata, slot) {
 	}
 	return steps;
 }
-// resource/server/deltas.ts
+// resource/server/inventory/deltas.ts
 var SlotDeltas = class {
 	inventory;
 	touched = new Set();
@@ -17370,32 +17334,14 @@ var SlotDeltas = class {
 		let { id, maxWeight } = this.inventory;
 		for (let viewer of this.inventory.viewers) emitNet(EVENTS.delta, viewer, id, put, remove, maxWeight);
 	}
-}, Inventory = class {
-	id;
-	kind;
-	label;
+}, SlotGrid = class {
 	columns;
 	rows;
-	maxWeight;
-	persistent;
 	stacks = new Map();
-	viewers = new Set();
 	grid;
 	weight = 0;
-	dirty = !1;
-	pinned = !1;
-	lastUsed = Date.now();
-	deltas = new SlotDeltas(this);
-	constructor(id, kind, label, columns, rows, maxWeight, persistent, stacks) {
-		this.id = id, this.kind = kind, this.label = label, this.columns = columns, this.rows = rows, this.maxWeight = maxWeight, this.persistent = persistent;
-		for (let stack of stacks) this.stacks.set(stack.slot, stack);
-		this.grid = new Occupancy(columns, rows), this.rebuild();
-	}
-	get slots() {
-		return this.columns * this.rows;
-	}
-	get hasHotbar() {
-		return this.kind === "player";
+	constructor(columns, rows) {
+		this.columns = columns, this.rows = rows, this.grid = new Occupancy(columns, rows);
 	}
 	coveredAt(slot, w, h) {
 		return isHotbarSlot(slot) ? new Set(this.hasHotbar && this.stacks.has(slot) ? [slot] : []) : this.grid.covered(slot, w, h);
@@ -17433,10 +17379,6 @@ var SlotDeltas = class {
 		let grid = new Occupancy(this.columns, this.rows);
 		grid.cells.set(this.grid.cells), this.grid = grid;
 	}
-	relayout(columns, rows, maxWeight) {
-		let before = `${this.columns}:${this.rows}:${this.maxWeight}`;
-		if (this.columns = columns, this.rows = rows, this.maxWeight = maxWeight, this.rebuild(), `${this.columns}:${this.rows}:${this.maxWeight}` !== before) for (let viewer of this.viewers) emitNet(EVENTS.layout, viewer, this.id, this.columns, this.rows, this.maxWeight);
-	}
 	shape(name, rotated) {
 		return footprint(sizeOf(content.items.get(name)), rotated);
 	}
@@ -17467,6 +17409,35 @@ var SlotDeltas = class {
 		let key = metadata ? metaKey(metadata) : null, total = 0;
 		for (let stack of this.stacks.values()) stack.name === name && (key === null || metaKey(stack.metadata) === key) && (total += stack.count);
 		return total;
+	}
+	clear() {
+		for (let slot of this.stacks.keys()) this.take(slot);
+	}
+}, Inventory = class extends SlotGrid {
+	id;
+	kind;
+	label;
+	maxWeight;
+	persistent;
+	viewers = new Set();
+	dirty = !1;
+	pinned = !1;
+	lastUsed = Date.now();
+	deltas = new SlotDeltas(this);
+	constructor(id, kind, label, columns, rows, maxWeight, persistent, stacks) {
+		super(columns, rows), this.id = id, this.kind = kind, this.label = label, this.maxWeight = maxWeight, this.persistent = persistent;
+		for (let stack of stacks) this.stacks.set(stack.slot, stack);
+		this.rebuild();
+	}
+	get slots() {
+		return this.columns * this.rows;
+	}
+	get hasHotbar() {
+		return this.kind === "player";
+	}
+	relayout(columns, rows, maxWeight) {
+		let before = `${this.columns}:${this.rows}:${this.maxWeight}`;
+		if (this.columns = columns, this.rows = rows, this.maxWeight = maxWeight, this.rebuild(), `${this.columns}:${this.rows}:${this.maxWeight}` !== before) for (let viewer of this.viewers) emitNet(EVENTS.layout, viewer, this.id, this.columns, this.rows, this.maxWeight);
 	}
 	weightAllows(def, count) {
 		return this.maxWeight <= 0 || this.weight + def.weight * count <= this.maxWeight;
@@ -17503,9 +17474,6 @@ var SlotDeltas = class {
 		}
 		return !0;
 	}
-	clear() {
-		for (let slot of this.stacks.keys()) this.take(slot);
-	}
 	view() {
 		return {
 			id: this.id,
@@ -17520,30 +17488,101 @@ var SlotDeltas = class {
 	touch(slot) {
 		this.dirty = !0, this.lastUsed = Date.now(), this.deltas.touch(slot);
 	}
-};
-// resource/server/registry.ts
-const inventories = new class {
-	byId = new Map();
-	loading = new Map();
-	players = new Map();
-	holders = new Map();
-	open = new Map();
+}, InventoryAliases = class {
 	aliases = new Map();
 	aliasOf = new Map();
-	get(id) {
-		return this.byId.get(id) ?? this.byId.get(this.aliases.get(id) ?? "");
+	idOf(name) {
+		return this.aliases.get(name);
 	}
-	alias(name, id) {
+	set(name, id) {
 		if (name === id) return;
 		let old = this.aliasOf.get(id);
 		old !== void 0 && old !== name && this.aliases.get(old) === id && this.aliases.delete(old);
 		let previous = this.aliases.get(name);
 		previous !== void 0 && previous !== id && this.aliasOf.delete(previous), this.aliases.set(name, id), this.aliasOf.set(id, name);
 	}
-	forget(id) {
-		this.byId.delete(id);
+	drop(id) {
 		let name = this.aliasOf.get(id);
 		name !== void 0 && (this.aliasOf.delete(id), this.aliases.get(name) === id && this.aliases.delete(name));
+	}
+};
+// resource/common/locale.ts
+const Locale = createLocale(), ResourceName = GetCurrentResourceName();
+IsDuplicityVersion();
+// resource/server/log.ts
+const log = createLogger(ResourceName);
+// resource/server/registry/repo.ts
+let setup = null;
+const prepareDatabase = () => setup ??= createDatabaseTables(ResourceName, "sql/main.sql");
+function decode(id, text) {
+	try {
+		let parsed = JSON.parse(text);
+		if (typeof parsed != "object" || !parsed || !("s" in parsed) || !Array.isArray(parsed.s)) return [];
+		let stacks = [];
+		for (let row of parsed.s) {
+			if (!Array.isArray(row)) continue;
+			let [slot, name, count, metadata, rotated] = row;
+			if (typeof slot != "number" || typeof name != "string" || typeof count != "number" || count <= 0) continue;
+			let meta = typeof metadata == "object" && metadata && !Array.isArray(metadata) ? metadata : {};
+			stacks.push({
+				slot,
+				name,
+				count,
+				metadata: meta,
+				rotated: rotated === !0
+			});
+		}
+		return stacks;
+	} catch (error) {
+		return log.error(`inventory ${id} has broken stored data`, error), [];
+	}
+}
+const encode = (stacks) => JSON.stringify({
+	v: 1,
+	s: [...stacks].map((s) => [
+		s.slot,
+		s.name,
+		s.count,
+		s.metadata,
+		s.rotated
+	])
+});
+async function loadInventories(ids) {
+	let found = new Map();
+	if (ids.length === 0) return found;
+	await prepareDatabase();
+	let rows = await mysql.query("SELECT id, items FROM ai_inventory_inventories WHERE id IN (?)", [ids]);
+	for (let row of rows) found.set(row.id, decode(row.id, row.items));
+	return found;
+}
+async function saveInventories(list) {
+	if (list.length !== 0) {
+		await prepareDatabase();
+		for (let i = 0; i < list.length; i += 200) {
+			let chunk = list.slice(i, i + 200), values = chunk.flatMap((inv) => [inv.id, encode(inv.stacks)]);
+			await mysql.query(`INSERT INTO ai_inventory_inventories (id, items) VALUES ${chunk.map(() => "(?, ?)").join(", ")} ON DUPLICATE KEY UPDATE items = VALUES(items)`, values);
+		}
+	}
+}
+async function renameInventory(from, to) {
+	await prepareDatabase(), await mysql.query("UPDATE IGNORE ai_inventory_inventories SET id = ? WHERE id = ?", [to, from]);
+}
+// resource/server/registry/registry.ts
+const inventories = new class {
+	byId = new Map();
+	loading = new Map();
+	players = new Map();
+	holders = new Map();
+	open = new Map();
+	aliases = new InventoryAliases();
+	get(id) {
+		return this.byId.get(id) ?? this.byId.get(this.aliases.idOf(id) ?? "");
+	}
+	alias(name, id) {
+		this.aliases.set(name, id);
+	}
+	forget(id) {
+		this.byId.delete(id), this.aliases.drop(id);
 	}
 	playerOf(source) {
 		return this.players.get(source);
@@ -17551,6 +17590,9 @@ const inventories = new class {
 	openOf(source) {
 		let id = this.open.get(source);
 		return id ? this.byId.get(id) : void 0;
+	}
+	all() {
+		return this.byId.values();
 	}
 	get size() {
 		return this.byId.size;
@@ -17602,18 +17644,6 @@ const inventories = new class {
 			this.forget(id);
 		}
 	}
-	rebuildAll() {
-		let s = content.settings, shapes = {
-			player: s.player,
-			drop: s.drop,
-			trunk: s.trunk,
-			glovebox: s.glovebox
-		};
-		for (let inventory of this.byId.values()) {
-			let shape = shapes[inventory.kind] ?? inventory;
-			inventory.relayout(s.columns, shape.rows, shape.maxWeight);
-		}
-	}
 	async save(list) {
 		let dirty = list.filter((inv) => inv.persistent && inv.dirty);
 		for (let inv of dirty) inv.dirty = !1;
@@ -17637,14 +17667,7 @@ const inventories = new class {
 			for (let inv of idle) inv.viewers.size === 0 && !inv.dirty && this.forget(inv.id);
 		}
 	}
-}(), saveNow = (why) => {
-	inventories.flush().catch((error) => log.error(`saving inventories failed (${why})`, error));
-};
-every(3e4, () => {
-	saveNow("interval"), inventories.sweep().catch((error) => log.error("unloading idle inventories failed", error));
-}, { name: "flush" }), on("txAdmin:events:serverShuttingDown", () => saveNow("shutdown")), onStop(() => saveNow("resource stop"));
-// resource/server/access.ts
-const reach = new PlayerMap();
+}(), reach = new PlayerMap();
 function setReach(source, check) {
 	reach.set(source, check);
 }
@@ -17740,6 +17763,19 @@ const drops = new class {
 every(6e4, () => drops.sweep(), { name: "dropSweep" }), every(2e3, () => {
 	drops.size > 0 && drops.followAll();
 }, { name: "dropFollow" });
+// resource/server/registry/relayout.ts
+function relayoutAll(list) {
+	let s = content.settings, shapes = {
+		player: s.player,
+		drop: s.drop,
+		trunk: s.trunk,
+		glovebox: s.glovebox
+	};
+	for (let inventory of list) {
+		let shape = shapes[inventory.kind] ?? inventory;
+		inventory.relayout(s.columns, shape.rows, shape.maxWeight);
+	}
+}
 // resource/server/scriptShops.ts
 const SCRIPT_SHOP_ACCOUNTS = ["cash", "bank"], scriptShops = new class {
 	shops = new Map();
@@ -17981,9 +18017,9 @@ onCharacter({
 		current.delete(source), drops.stop(source), dropPlayer(source), cancelCraft(source), inventories.unloadPlayer(source).catch((error) => log.error(`saving the inventory of ${source} failed`, error));
 	}
 }), content.subscribe((file) => {
-	(file === "items" || file === "settings") && inventories.rebuildAll(), file === "items" && emit("ai-inventory:itemsChanged");
+	(file === "items" || file === "settings") && relayoutAll(inventories.all()), file === "items" && emit("ai-inventory:itemsChanged");
 });
-// resource/common/nui.ts
+// resource/common/nuiParsers.ts
 const id = (v) => typeof v == "string" && v.length > 0 && v.length <= 96 ? v : null;
 function toMoveInput(v) {
 	if (!isRecord(v)) return null;
@@ -18022,10 +18058,7 @@ function toOpenTarget(v) {
 		default: return null;
 	}
 }
-// resource/server/api.ts
-const scriptStashes = new Map();
-let temp = 0;
-const rowsFor = (slots) => Number.isFinite(slots) ? Math.min(200, Math.max(1, Math.ceil(slots / content.settings.columns))) : 1, countOf = (v) => typeof v == "number" ? Number.isFinite(v) ? Math.max(1, Math.floor(v)) : null : 1;
+// resource/server/api/resolve.ts
 function resolve(inv) {
 	if (typeof inv == "number") return inventories.playerOf(inv);
 	if (isRecord(inv) && typeof inv.id == "string") {
@@ -18036,7 +18069,9 @@ function resolve(inv) {
 	let asSource = Number(inv);
 	return Number.isInteger(asSource) && asSource > 0 ? inventories.playerOf(asSource) : inventories.get(inv) ?? inventories.get(`stash:${inv}`) ?? inventories.get(`trunk:${normalizePlate(inv)}`) ?? inventories.get(`glovebox:${normalizePlate(inv)}`);
 }
-const metaOf = (v) => isRecord(v) ? { ...v } : {};
+// resource/server/api/scriptArgs.ts
+const countOf = (v) => typeof v == "number" ? Number.isFinite(v) ? Math.max(1, Math.floor(v)) : null : 1, metaOf = (v) => isRecord(v) ? { ...v } : {};
+// resource/server/api/items.ts
 function addItem(inv, name, count, metadata, slot) {
 	let inventory = resolve(inv), def = content.items.get(name), n = countOf(count);
 	return !inventory || !def || n === null ? !1 : inventory.add(def, n, metaOf(metadata), typeof slot == "number" ? slot : void 0);
@@ -18070,6 +18105,10 @@ function setMaxWeight(inv, grams) {
 	let inventory = resolve(inv);
 	return !inventory || typeof grams != "number" || !Number.isFinite(grams) ? !1 : (inventory.relayout(inventory.columns, inventory.rows, Math.max(0, Math.floor(grams))), !0);
 }
+// resource/server/api/stashes.ts
+const scriptStashes = new Map();
+let temp = 0;
+const rowsFor = (slots) => Number.isFinite(slots) ? Math.min(200, Math.max(1, Math.ceil(slots / content.settings.columns))) : 1;
 function registerStash(name, label, slots, maxWeight, access = {}) {
 	let { groups = {}, personal = !1, owner, coords } = access, stash = {
 		id: name,
@@ -18113,48 +18152,8 @@ function createTemporary(kind, label, slots, maxWeight, items) {
 	for (let item of items) addItem(id, item.name, item.count, item.metadata);
 	return inventory.dirty = !1, id;
 }
-function forceOpen(source, inv, panel = null) {
-	if (!inventories.playerOf(source)) return !1;
-	if (panel) return inventories.close(source), emitNet(EVENTS.forceOpen, source, null, panel), !0;
-	let inventory = resolve(inv);
-	return !inventory || inventory === inventories.playerOf(source) ? !1 : (inventories.watch(source, inventory), emitNet(EVENTS.forceOpen, source, inventory.view(), null), !0);
-}
-function itemView(stack) {
-	let def = content.items.get(stack.name);
-	return {
-		name: stack.name,
-		label: def?.label ?? stack.name,
-		weight: (def?.weight ?? 0) * stack.count,
-		slot: stack.slot,
-		count: stack.count,
-		amount: stack.count,
-		metadata: stack.metadata,
-		info: stack.metadata,
-		stack: (def?.stack ?? 1) > 1,
-		unique: (def?.stack ?? 1) === 1,
-		close: def?.close ?? !1,
-		description: def?.description ?? "",
-		type: def?.type ?? "item",
-		image: def?.image ?? ""
-	};
-}
-function definitionView(name) {
-	let def = content.items.get(name);
-	return def ? {
-		name: def.name,
-		label: def.label,
-		weight: def.weight,
-		stack: def.stack > 1,
-		unique: def.stack === 1,
-		close: def.close,
-		description: def.description,
-		type: def.type,
-		image: def.image,
-		useable: def.usable
-	} : null;
-}
-// resource/server/open.ts
-const FAR = fail("INV_ERR_FAR"), DENIED = fail("INV_ERR_DENIED"), GONE = fail("INV_ERR_GONE"), owned = new EntityState(VEHICLE_BAGS.owned, stateBoolean), isOwned = (vehicle) => owned.get(vehicle) === !0, vehicleIds = new EntityState(VEHICLE_BAGS.id, stateNumber), temporary = new Map(), adopting = new Map();
+// resource/server/open/vehicleInventory.ts
+const owned = new EntityState(VEHICLE_BAGS.owned, stateBoolean), isOwned = (vehicle) => owned.get(vehicle) === !0, vehicleIds = new EntityState(VEHICLE_BAGS.id, stateNumber), temporary = new Map(), adopting = new Map();
 function registeredPlate(vehicleId) {
 	let plate = optionalExport("ai-vehicles")?.GetVehicle(vehicleId)?.plate;
 	return typeof plate == "string" && plate.trim() !== "" ? normalizePlate(plate) : null;
@@ -18192,13 +18191,15 @@ async function vehicleInventory(vehicle, kind) {
 		persistent: !1
 	});
 }
-on("entityRemoved", (entity) => {
+function forgetVehicle(entity) {
 	let ids = temporary.get(entity);
 	if (ids) {
 		temporary.delete(entity);
 		for (let id of ids) inventories.remove(id);
 	}
-});
+}
+// resource/server/open/open.ts
+const FAR = fail("INV_ERR_FAR"), DENIED = fail("INV_ERR_DENIED"), GONE = fail("INV_ERR_GONE");
 async function open(source, target) {
 	switch (target.kind) {
 		case "self": return inventories.close(source), {
@@ -18272,7 +18273,7 @@ async function open(source, target) {
 		default: return target;
 	}
 }
-onClientCallback(EVENTS.open, {
+on("entityRemoved", (entity) => forgetVehicle(entity)), onClientCallback(EVENTS.open, {
 	args: ([raw]) => asArgs(toOpenTarget(raw)),
 	lock: !0
 }, (source, target) => inventories.playerOf(source) ? (scriptShops.close(source), open(source, target)) : fail("INV_ERR_BUSY")), onClientEvent(EVENTS.close, (source) => {
@@ -18404,7 +18405,50 @@ onClientCallback(EVENTS.move, {
 			count
 		}
 	}), { ok: !0 });
-}), registerExport("AddItem", (inv, item, count, metadata, slot) => addItem(inv, item, count, metadata, slot)), registerExport("RemoveItem", (inv, item, count, metadata, slot) => removeItem(inv, item, count, metadata, slot)), registerExport("GetItemCount", (inv, item, metadata) => countItem(inv, item, metadata)), registerExport("CanCarryItem", (inv, item, count, metadata) => canCarry(inv, item, count, metadata)), registerExport("GetWeight", (inv) => {
+});
+// resource/server/api/forceOpen.ts
+function forceOpen(source, inv, panel = null) {
+	if (!inventories.playerOf(source)) return !1;
+	if (panel) return inventories.close(source), emitNet(EVENTS.forceOpen, source, null, panel), !0;
+	let inventory = resolve(inv);
+	return !inventory || inventory === inventories.playerOf(source) ? !1 : (inventories.watch(source, inventory), emitNet(EVENTS.forceOpen, source, inventory.view(), null), !0);
+}
+// resource/server/api/views.ts
+function itemView(stack) {
+	let def = content.items.get(stack.name);
+	return {
+		name: stack.name,
+		label: def?.label ?? stack.name,
+		weight: (def?.weight ?? 0) * stack.count,
+		slot: stack.slot,
+		count: stack.count,
+		amount: stack.count,
+		metadata: stack.metadata,
+		info: stack.metadata,
+		stack: (def?.stack ?? 1) > 1,
+		unique: (def?.stack ?? 1) === 1,
+		close: def?.close ?? !1,
+		description: def?.description ?? "",
+		type: def?.type ?? "item",
+		image: def?.image ?? ""
+	};
+}
+function definitionView(name) {
+	let def = content.items.get(name);
+	return def ? {
+		name: def.name,
+		label: def.label,
+		weight: def.weight,
+		stack: def.stack > 1,
+		unique: def.stack === 1,
+		close: def.close,
+		description: def.description,
+		type: def.type,
+		image: def.image,
+		useable: def.usable
+	} : null;
+}
+registerExport("AddItem", (inv, item, count, metadata, slot) => addItem(inv, item, count, metadata, slot)), registerExport("RemoveItem", (inv, item, count, metadata, slot) => removeItem(inv, item, count, metadata, slot)), registerExport("GetItemCount", (inv, item, metadata) => countItem(inv, item, metadata)), registerExport("CanCarryItem", (inv, item, count, metadata) => canCarry(inv, item, count, metadata)), registerExport("GetWeight", (inv) => {
 	let found = resolve(inv);
 	return found ? {
 		weight: found.weight,
@@ -18429,6 +18473,7 @@ onClientCallback(EVENTS.move, {
 	}] : []);
 	scriptShops.register(name, typeof label == "string" && label !== "" ? label : name, products);
 }), registerExport("OpenShop", (source, name) => typeof source == "number" && typeof name == "string" && scriptShops.open(source, name)), registerExport("Items", (name) => typeof name == "string" ? definitionView(name) : Object.fromEntries([...content.items.byName.keys()].map((k) => [k, definitionView(k)])));
+// resource/server/compat/ox/inventories.ts
 function groupsOf(groups) {
 	return typeof groups == "string" ? { [groups]: 0 } : Array.isArray(groups) ? Object.fromEntries(groups.filter((g) => typeof g == "string").map((g) => [g, 0])) : isRecord(groups) ? Object.fromEntries(Object.entries(groups).map(([job, grade]) => [job, typeof grade == "number" ? grade : 0])) : {};
 }
@@ -18443,7 +18488,73 @@ const toList = (items) => Array.isArray(items) ? items.map((row) => Array.isArra
 } : {
 	name: null,
 	count: 0
-}) : [];
+}) : [], inventoryExports = {
+	RegisterStash: (name, label, slots, maxWeight, owner, groups, coords) => {
+		let c = readVec3(coords) ?? void 0, fixedOwner = typeof owner == "string" || typeof owner == "number" ? String(owner) : void 0;
+		registerStash(String(name), String(label ?? name), Number(slots) || 50, Number(maxWeight) || 1e5, {
+			groups: groupsOf(groups),
+			personal: owner === !0,
+			owner: fixedOwner,
+			coords: c
+		});
+	},
+	ClearInventory: (inv, keep) => {
+		let inventory = resolve(inv);
+		if (!inventory) return;
+		let keepList = (Array.isArray(keep) ? keep : keep ? [keep] : []).map((k) => content.items.get(k)?.name);
+		for (let stack of inventory.stacks.values()) keepList.includes(stack.name) || inventory.take(stack.slot);
+		drops.check(inventory);
+	},
+	Items: (name) => typeof name == "string" ? definitionView(name) : Object.fromEntries([...content.items.byName.keys()].map((k) => [k, definitionView(k)])),
+	ItemList: () => Object.fromEntries([...content.items.byName.keys()].map((k) => [k, definitionView(k)])),
+	forceOpenInventory: (source, type, data) => {
+		if (typeof source != "number") return;
+		if (type === "shop") return forceOpen(source, null, {
+			kind: "shop",
+			id: String(isRecord(data) ? data.type : data)
+		});
+		let id = isRecord(data) ? data : String(data);
+		return forceOpen(source, type === "player" ? Number(data) : id);
+	},
+	CreateTemporaryStash: (props) => {
+		let p = isRecord(props) ? props : {};
+		return createTemporary("temp", String(p.label ?? ""), Number(p.slots) || 50, Number(p.maxWeight) || 1e5, toList(p.items));
+	},
+	CustomDrop: (prefix, items, coords) => {
+		let c = isRecord(coords) ? coords : Array.isArray(coords) ? {
+			x: coords[0],
+			y: coords[1],
+			z: coords[2]
+		} : null, x = Number(c?.x), y = Number(c?.y), z = Number(c?.z) + .95;
+		if (![
+			x,
+			y,
+			z
+		].every(Number.isFinite)) return null;
+		let drop = drops.near(x, y, z) ?? drops.create(x, y, z, null);
+		for (let item of toList(items)) addItem(drop.id, item.name, item.count, item.metadata);
+		return drop.id;
+	},
+	RemoveInventory: (inv) => {
+		let inventory = resolve(inv);
+		inventory && inventory.kind !== "player" && (inventory.kind === "drop" ? drops.remove(inventory.id) : inventories.remove(inventory.id));
+	},
+	SwapSlots: (fromInv, toInv, fromSlot, toSlot) => {
+		let a = resolve(fromInv), b = resolve(toInv), stack = typeof fromSlot == "number" ? a?.stacks.get(fromSlot) : void 0;
+		return !a || !b || !stack || typeof toSlot != "number" ? !1 : moveStack(a, b, {
+			from: a.id,
+			to: b.id,
+			fromSlot: stack.slot,
+			toSlot,
+			count: stack.count,
+			rotated: stack.rotated
+		}).ok;
+	},
+	GetContainerFromSlot: () => null,
+	ConfiscateInventory: () => void 0,
+	ReturnInventory: () => void 0
+};
+// resource/server/compat/ox/items.ts
 function inventoryView(inv) {
 	let inventory = resolve(inv);
 	if (!inventory) return null;
@@ -18525,70 +18636,7 @@ const exportsMap$1 = {
 		}) : !1;
 	},
 	SetMaxWeight: (inv, weight) => void setMaxWeight(inv, weight),
-	RegisterStash: (name, label, slots, maxWeight, owner, groups, coords) => {
-		let c = readVec3(coords) ?? void 0, fixedOwner = typeof owner == "string" || typeof owner == "number" ? String(owner) : void 0;
-		registerStash(String(name), String(label ?? name), Number(slots) || 50, Number(maxWeight) || 1e5, {
-			groups: groupsOf(groups),
-			personal: owner === !0,
-			owner: fixedOwner,
-			coords: c
-		});
-	},
-	ClearInventory: (inv, keep) => {
-		let inventory = resolve(inv);
-		if (!inventory) return;
-		let keepList = (Array.isArray(keep) ? keep : keep ? [keep] : []).map((k) => content.items.get(k)?.name);
-		for (let stack of inventory.stacks.values()) keepList.includes(stack.name) || inventory.take(stack.slot);
-		drops.check(inventory);
-	},
-	Items: (name) => typeof name == "string" ? definitionView(name) : Object.fromEntries([...content.items.byName.keys()].map((k) => [k, definitionView(k)])),
-	ItemList: () => Object.fromEntries([...content.items.byName.keys()].map((k) => [k, definitionView(k)])),
-	forceOpenInventory: (source, type, data) => {
-		if (typeof source != "number") return;
-		if (type === "shop") return forceOpen(source, null, {
-			kind: "shop",
-			id: String(isRecord(data) ? data.type : data)
-		});
-		let id = isRecord(data) ? data : String(data);
-		return forceOpen(source, type === "player" ? Number(data) : id);
-	},
-	CreateTemporaryStash: (props) => {
-		let p = isRecord(props) ? props : {};
-		return createTemporary("temp", String(p.label ?? ""), Number(p.slots) || 50, Number(p.maxWeight) || 1e5, toList(p.items));
-	},
-	CustomDrop: (prefix, items, coords) => {
-		let c = isRecord(coords) ? coords : Array.isArray(coords) ? {
-			x: coords[0],
-			y: coords[1],
-			z: coords[2]
-		} : null, x = Number(c?.x), y = Number(c?.y), z = Number(c?.z) + .95;
-		if (![
-			x,
-			y,
-			z
-		].every(Number.isFinite)) return null;
-		let drop = drops.near(x, y, z) ?? drops.create(x, y, z, null);
-		for (let item of toList(items)) addItem(drop.id, item.name, item.count, item.metadata);
-		return drop.id;
-	},
-	RemoveInventory: (inv) => {
-		let inventory = resolve(inv);
-		inventory && inventory.kind !== "player" && (inventory.kind === "drop" ? drops.remove(inventory.id) : inventories.remove(inventory.id));
-	},
-	SwapSlots: (fromInv, toInv, fromSlot, toSlot) => {
-		let a = resolve(fromInv), b = resolve(toInv), stack = typeof fromSlot == "number" ? a?.stacks.get(fromSlot) : void 0;
-		return !a || !b || !stack || typeof toSlot != "number" ? !1 : moveStack(a, b, {
-			from: a.id,
-			to: b.id,
-			fromSlot: stack.slot,
-			toSlot,
-			count: stack.count,
-			rotated: stack.rotated
-		}).ok;
-	},
-	GetContainerFromSlot: () => null,
-	ConfiscateInventory: () => void 0,
-	ReturnInventory: () => void 0
+	...inventoryExports
 };
 for (let [name, fn] of Object.entries(exportsMap$1)) provideExport("ox_inventory", name, fn);
 function hasItem(source, items, amount) {
@@ -18660,10 +18708,18 @@ const exportsMap = {
 	}
 };
 for (let [name, fn] of Object.entries(exportsMap)) provideExport("qb-inventory", name, fn);
+// resource/server/logChannels.ts
 aiLogChannels({
 	moves: { active: !1 },
 	drops: {},
 	gives: {},
 	purchases: {},
 	crafting: {}
-}), prepareDatabase().catch((error) => log.error("database setup failed", error));
+});
+// resource/server/registry/index.ts
+const saveNow = (why) => {
+	inventories.flush().catch((error) => log.error(`saving inventories failed (${why})`, error));
+};
+every(3e4, () => {
+	saveNow("interval"), inventories.sweep().catch((error) => log.error("unloading idle inventories failed", error));
+}, { name: "flush" }), on("txAdmin:events:serverShuttingDown", () => saveNow("shutdown")), onStop(() => saveNow("resource stop")), prepareDatabase().catch((error) => log.error("database setup failed", error));

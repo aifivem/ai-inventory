@@ -3,7 +3,7 @@ import type { ShopProduct } from "@aicore-fivem/shared";
 import { EVENTS } from "common/events";
 import type { ShopView } from "common/nui";
 import { content } from "./content";
-import { inventories } from "./registry";
+import { inventories } from "./registry/registry";
 
 /** A shop another script registered (ai-core's inventory layer): products only, no place, opened by the server. */
 interface ScriptShop {

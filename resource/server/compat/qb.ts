@@ -1,20 +1,20 @@
 import { isRecord } from "@aicore-fivem/lib/shared";
 import { provideExport } from "@aicore-fivem/lib/server";
+import { forceOpen } from "../api/forceOpen";
 import {
   addItem,
   canCarry,
   countItem,
-  forceOpen,
-  itemView,
-  registerStash,
   removeItem,
-  resolve,
   setMetadata,
   stacksOf,
-} from "../api";
+} from "../api/items";
+import { resolve } from "../api/resolve";
+import { registerStash } from "../api/stashes";
+import { itemView } from "../api/views";
 import { content } from "../content";
 import { drops } from "../drops";
-import { inventories } from "../registry";
+import { inventories } from "../registry/registry";
 
 /**
  * qb-inventory's server exports (`provide 'qb-inventory'`), tested against qb-inventory 2.0. `info` is the

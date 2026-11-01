@@ -1,8 +1,16 @@
 import { footprint, Occupancy } from "common/grid";
 import type { ItemDef } from "common/items";
-import type { Metadata } from "common/nui";
-import type { Inventory } from "./inventory";
+import type { Metadata, Stack } from "common/nui";
 import { metaKey } from "./stacks";
+
+/** What planning reads of an inventory (`Inventory`). */
+interface PlanSource {
+  readonly stacks: ReadonlyMap<number, Stack>;
+  readonly columns: number;
+  readonly rows: number;
+  readonly grid: Occupancy;
+  weightAllows(def: ItemDef, count: number): boolean;
+}
 
 /** One step of an add: top up the stack at `slot` (`fresh` false) or start a new one there. */
 export interface AddStep {
@@ -17,7 +25,7 @@ export interface AddStep {
  * scratch copy of the grid). Returns the steps or null when it does not all fit (nothing is changed).
  */
 export function planAdd(
-  inv: Inventory,
+  inv: PlanSource,
   def: ItemDef,
   count: number,
   metadata: Metadata,

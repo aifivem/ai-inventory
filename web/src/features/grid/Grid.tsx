@@ -4,7 +4,8 @@ import type { InventoryView, ItemView } from "../../../../resource/common/nui";
 import { CELL_GAP_VH, CELL_VH } from "../../lib/cell";
 import { cn } from "../../lib/utils";
 import { useAppSelector } from "../../store";
-import { useDrag, type DragState } from "./drag";
+import { useDrag } from "./drag";
+import type { DragState } from "./dragState";
 import { ItemTile } from "./ItemTile";
 
 type Fit = "free" | "merge" | "swap" | "blocked";

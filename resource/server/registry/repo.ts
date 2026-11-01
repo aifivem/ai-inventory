@@ -2,7 +2,7 @@ import { createDatabaseTables } from "@aicore-fivem/lib/server";
 import { mysql } from "@aicore-fivem/mysql";
 import { ResourceName } from "common";
 import type { Metadata, Stack } from "common/nui";
-import { log } from "./log";
+import { log } from "../log";
 
 let setup: Promise<void> | null = null;
 

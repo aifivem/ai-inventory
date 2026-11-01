@@ -8,12 +8,12 @@ import {
   vehicleOf,
 } from "@aicore-fivem/lib/server";
 import { EVENTS, type ActionResult } from "common/events";
-import { toMoveInput } from "common/nui";
+import { toMoveInput } from "common/nuiParsers";
 import { reachable } from "./access";
 import { content } from "./content";
 import { drops } from "./drops";
 import { moveStack } from "./move";
-import { inventories } from "./registry";
+import { inventories } from "./registry/registry";
 import { weapons } from "./weapons";
 
 const GIVE_DISTANCE = 3;

@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowDown,
@@ -7,8 +6,6 @@ import {
   faScissors,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
-import { Button } from "../../components/ui/button";
-import { Dialog } from "../../components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,16 +13,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
-import { Input } from "../../components/ui/input";
 import { useLang } from "../../lib/lang";
 import { useAppSelector } from "../../store";
-import {
-  detachComponent,
-  dropItem,
-  giveItem,
-  itemUse,
-  splitItem,
-} from "../actions";
+import { detachComponent, dropItem, giveItem, itemUse } from "../actions";
 import { ui, useUi, type AmountAction } from "../ui";
 
 /** Right-click menu of a stack (right click opens it at the pointer; NUI gets no contextmenu event). */
@@ -135,81 +125,5 @@ export function ItemMenu() {
           ))}
       </DropdownMenuContent>
     </DropdownMenu>
-  );
-}
-
-const TITLE: Record<AmountAction, "UI_GIVE" | "UI_DROP" | "UI_SPLIT"> = {
-  give: "UI_GIVE",
-  drop: "UI_DROP",
-  split: "UI_SPLIT",
-};
-
-/** Asks how many to give, drop or split off; Enter confirms. */
-export function AmountDialog() {
-  const t = useLang();
-  const { amount } = useUi();
-  const [value, setValue] = useState("1");
-  useEffect(() => {
-    if (amount)
-      setValue(
-        amount.action === "split" ? String(Math.floor(amount.max / 2)) : "1",
-      );
-  }, [amount]);
-  const count = Math.floor(Number(value));
-  const valid =
-    amount !== null &&
-    Number.isFinite(count) &&
-    count >= 1 &&
-    count <= (amount.action === "split" ? amount.max - 1 : amount.max);
-
-  const confirm = () => {
-    if (!amount || !valid) return;
-    if (amount.action === "give") giveItem(amount.slot, count);
-    else if (amount.action === "drop") dropItem(amount.inv, amount.slot, count);
-    else splitItem(amount.inv, amount.slot, count);
-    ui.setAmount(null);
-  };
-
-  return (
-    <Dialog
-      open={amount !== null}
-      onOpenChange={(open) => !open && ui.setAmount(null)}
-      title={amount ? t(TITLE[amount.action]) : ""}
-    >
-      <form
-        className="flex flex-col gap-[1.2vh]"
-        onSubmit={(event) => {
-          event.preventDefault();
-          confirm();
-        }}
-      >
-        <div className="flex gap-[0.8vh]">
-          <Input
-            autoFocus
-            type="number"
-            min={1}
-            max={amount?.max}
-            value={value}
-            aria-label={t("UI_AMOUNT")}
-            aria-invalid={!valid}
-            onChange={(e) => setValue(e.target.value)}
-          />
-          {amount?.action !== "split" && (
-            <Button
-              variant="grey"
-              onClick={() => setValue(String(amount?.max ?? 1))}
-            >
-              {t("UI_ALL")}
-            </Button>
-          )}
-        </div>
-        <div className="flex justify-end gap-[0.8vh]">
-          <Button onClick={() => ui.setAmount(null)}>{t("UI_CANCEL")}</Button>
-          <Button type="submit" variant="primary" disabled={!valid}>
-            {t("UI_CONFIRM")}
-          </Button>
-        </div>
-      </form>
-    </Dialog>
   );
 }

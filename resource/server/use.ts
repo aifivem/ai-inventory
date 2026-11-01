@@ -11,7 +11,7 @@ import { EVENTS, type ActionResult } from "common/events";
 import { USE_ANIMS, type ItemDef } from "common/items";
 import type { Stack } from "common/nui";
 import { content } from "./content";
-import { inventories } from "./registry";
+import { inventories } from "./registry/registry";
 import { weapons } from "./weapons";
 
 /** Server local event every use fires: (source, name, slot, metadata, status) (ai-hud applies `status`). */

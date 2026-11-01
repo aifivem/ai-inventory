@@ -20,16 +20,15 @@ import {
 } from "./store/inventory";
 import { closeScreen } from "./features/actions";
 import { Ghost } from "./features/grid/Ghost";
-import { AmountDialog, ItemMenu } from "./features/menu/ItemMenu";
+import { AmountDialog } from "./features/menu/AmountDialog";
+import { ItemMenu } from "./features/menu/ItemMenu";
 import { Equipment } from "./features/panels/Equipment";
 import { Hotbar } from "./features/panels/Hotbar";
 import { Hints, TopBar } from "./features/panels/Header";
 import { InventoryPanel } from "./features/panels/InventoryPanel";
-import {
-  BenchPanel,
-  GroundPanel,
-  ShopPanel,
-} from "./features/panels/SidePanels";
+import { BenchPanel } from "./features/panels/BenchPanel";
+import { GroundPanel } from "./features/panels/GroundPanel";
+import { ShopPanel } from "./features/panels/ShopPanel";
 import { ui } from "./features/ui";
 
 type Data<A extends NuiMessage["action"]> = Extract<

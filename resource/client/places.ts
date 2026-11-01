@@ -5,7 +5,7 @@ import {
 } from "@aicore-fivem/lib/shared";
 import { allows, onMembershipChange, Points } from "@aicore-fivem/lib/client";
 import { Locale } from "common";
-import type { Place } from "common/content";
+import type { Place } from "common/places";
 import { content, world } from "./content";
 import { screen } from "./screen";
 

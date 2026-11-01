@@ -9,8 +9,8 @@ import { EVENTS } from "common/events";
 import type { DropPoint } from "common/nui";
 import { setReach } from "./access";
 import { content } from "./content";
-import type { Inventory } from "./inventory";
-import { inventories } from "./registry";
+import type { Inventory } from "./inventory/inventory";
+import { inventories } from "./registry/registry";
 
 /** A drop within this distance of the player takes new items instead of a second drop next to it. */
 const MERGE_DISTANCE = 1.5;

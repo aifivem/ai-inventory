@@ -1,18 +1,17 @@
 import { registerExport } from "@aicore-fivem/lib/server";
 import { isRecord } from "@aicore-fivem/lib/shared";
+import { forceOpen } from "./api/forceOpen";
 import {
   addItem,
   canCarry,
   countItem,
-  definitionView,
-  forceOpen,
-  itemView,
-  registerStash,
   removeItem,
-  resolve,
   setMaxWeight,
   setMetadata,
-} from "./api";
+} from "./api/items";
+import { resolve } from "./api/resolve";
+import { registerStash } from "./api/stashes";
+import { definitionView, itemView } from "./api/views";
 import { content } from "./content";
 import { scriptShops } from "./scriptShops";
 import { registerUsable, type UseHandler } from "./use";
