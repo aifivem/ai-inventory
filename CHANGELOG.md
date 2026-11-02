@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.2](https://github.com/aifivem/ai-inventory/compare/v0.4.1...v0.4.2) (2026-11-02)
+
+
+### Documentation
+
+* install from the release zip ([47e6482](https://github.com/aifivem/ai-inventory/commit/47e64826593a5b80eda7a572c773ef880379d712))
+
+
+### Miscellaneous Chores
+
+* build files are no longer in git, the release zip carries them ([947ad2a](https://github.com/aifivem/ai-inventory/commit/947ad2a52f0fe34cc84fd214e32ebadec38c7245))
+
 ## [0.4.1](https://github.com/aifivem/ai-inventory/compare/v0.4.0...v0.4.1) (2026-11-02)
 
 
