@@ -161,6 +161,12 @@
             "throwable": {
               "description": "Thrown: Grenades and the like: the stack count is the ammo.",
               "type": "boolean"
+            },
+            "uses": {
+              "description": "Shots / hits until broken: How many shots (firearm) or hits (melee weapon) take this weapon from 100% to broken. 0 uses the default in Settings > Weapon wear.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000
             }
           },
           "required": []

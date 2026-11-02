@@ -113,6 +113,53 @@
     "noWeaponWheel": {
       "description": "No GTA weapon wheel: GTA's weapon wheel and switching weapons with the mouse wheel stay off: weapons are taken from the quick slots (1-5).",
       "type": "boolean"
+    },
+    "durability": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Weapons wear out: Off: weapons never lose durability, broken ones can be used and the weapon repair kit does nothing.",
+          "type": "boolean"
+        },
+        "shots": {
+          "description": "Firearm shots: Shots that take a firearm from 100% to broken when its item sets none (Items > Weapon).",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "hits": {
+          "description": "Melee hits: Hits that take a melee weapon from 100% to broken when its item sets none (Items > Weapon).",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "repairPercent": {
+          "description": "Durability after a repair: A repair sets the weapon to this. Weapons at or above it are not listed.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "repairTime": {
+          "description": "Repair time: How long the repair's progress bar runs. 0 repairs at once.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 60000
+        },
+        "maxRepairs": {
+          "description": "Repairs per weapon: How many times one weapon can be repaired. 0 = no limit.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        }
+      },
+      "required": [
+        "enabled",
+        "shots",
+        "hits",
+        "repairPercent",
+        "repairTime",
+        "maxRepairs"
+      ]
     }
   },
   "required": [
