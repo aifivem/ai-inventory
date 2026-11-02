@@ -1,5 +1,6 @@
 import "./state";
 import "./weapons";
+import "./repair";
 import "./screen";
 import "./worldPed";
 import "./nuiActions";

@@ -1,7 +1,10 @@
+import { notify } from "@aifivem/lib/server";
 import { fail } from "@aifivem/lib/shared";
+import { Locale } from "common";
 import { EVENTS, type ActionResult } from "common/events";
-import type { EquippedWeapon, Stack } from "common/nui";
+import type { EquippedWeapon, Metadata, Stack } from "common/nui";
 import { content } from "./content";
+import { isBroken, wearKind, worn } from "./durability/wear";
 import { inventories } from "./registry/registry";
 
 const ammoOf = (stack: Stack): number =>
@@ -15,7 +18,7 @@ const componentsOf = (stack: Stack): string[] =>
 
 /**
  * The weapon each player holds: which stack (by serial), its ammo in metadata. The client reports ammo going down;
- * ammo only goes up through `reload` on the server.
+ * ammo only goes up through `reload` on the server. Spent ammo and melee hits wear the weapon (`durability`).
  */
 class Weapons {
   private readonly held = new Map<number, { name: string; serial: string }>();
@@ -48,10 +51,16 @@ class Weapons {
     emitNet(EVENTS.weapon, source, weapon);
   }
 
-  /** Using a weapon: hold it, or put it away when it is the one in hand. */
-  toggle(source: number, stack: Stack): void {
+  /** Using a weapon: hold it, or put it away when it is the one in hand; a worn-out one is refused. */
+  toggle(source: number, stack: Stack): ActionResult {
     const current = this.stackOf(source);
-    if (current?.slot === stack.slot) return this.holster(source);
+    if (current?.slot === stack.slot) {
+      this.holster(source);
+      return { ok: true };
+    }
+    const wear = content.settings.durability;
+    if (isBroken(content.items.get(stack.name), stack.metadata, wear))
+      return fail("INV_ERR_WEAPON_BROKEN");
     this.held.set(source, {
       name: stack.name,
       serial:
@@ -60,6 +69,7 @@ class Weapons {
           : stack.name,
     });
     this.send(source, stack);
+    return { ok: true };
   }
 
   holster(source: number): void {
@@ -67,23 +77,46 @@ class Weapons {
     this.send(source, undefined);
   }
 
-  /** After any change to the player's inventory: a held weapon that left it is put away. */
+  /** After any change to the player's inventory: a held weapon that left it or wore out is put away. */
   check(source: number): void {
-    if (this.held.has(source) && !this.stackOf(source)) this.holster(source);
+    if (!this.held.has(source)) return;
+    const stack = this.stackOf(source);
+    if (!stack) return this.holster(source);
+    const wear = content.settings.durability;
+    if (isBroken(content.items.get(stack.name), stack.metadata, wear))
+      this.broke(source);
   }
 
-  /** Ammo the client reports for its held weapon; only lower values count (a throwable's count is its stack). */
-  reportAmmo(source: number, slot: number, ammo: number): void {
+  private broke(source: number): void {
+    this.holster(source);
+    notify(source, Locale("INV_WEAPON_BROKE"), "error");
+  }
+
+  /**
+   * Ammo and melee hits the client reports for its held weapon; only lower ammo counts (a throwable's count is its
+   * stack). Spent ammo wears a firearm, hits wear a melee weapon.
+   */
+  reportAmmo(source: number, slot: number, ammo: number, hits: number): void {
     const stack = this.stackOf(source);
     const inventory = inventories.playerOf(source);
     if (!stack || !inventory || stack.slot !== slot) return;
-    if (content.items.get(stack.name)?.weapon?.throwable) {
+    const def = content.items.get(stack.name);
+    if (def?.weapon?.throwable) {
       if (ammo < stack.count) inventory.setCount(slot, ammo);
       if (ammo <= 0) this.holster(source);
       return;
     }
-    if (ammo < ammoOf(stack))
-      inventory.setMetadata(slot, { ...stack.metadata, ammo });
+    const wear = content.settings.durability;
+    const kind = wear.enabled ? wearKind(def) : null;
+    const spent = Math.max(0, ammoOf(stack) - ammo);
+    const used = kind === "melee" ? hits : kind === "firearm" ? spent : 0;
+    if (spent <= 0 && used <= 0) return;
+    const metadata: Metadata = { ...stack.metadata };
+    if (spent > 0) metadata.ammo = ammo;
+    if (def && used > 0)
+      metadata.durability = worn(def, stack.metadata, used, wear);
+    inventory.setMetadata(slot, metadata);
+    if (isBroken(def, metadata, wear)) this.broke(source);
   }
 
   /** Fills the held weapon up to `want` rounds from its ammo items. */

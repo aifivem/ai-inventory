@@ -1,5 +1,10 @@
 import type { DataSpec, FileSpec, TabSpec } from "@aifivem/shared";
 import { spec } from "@aifivem/lib/shared";
+import {
+  DURABILITY_DEFAULTS,
+  durabilityCards,
+  durabilitySpec,
+} from "./durability";
 import { gridFields } from "./gridFields";
 
 /** A grid size: rows and weight limit (plus `extra` fields). */
@@ -25,8 +30,13 @@ export const settingsFile: FileSpec = {
     trunk: gridSpec(),
     glovebox: gridSpec(),
     noWeaponWheel: { type: "bool" },
+    durability: durabilitySpec,
   },
-  defaults: { noWeaponWheel: true, columns: 8 },
+  defaults: {
+    noWeaponWheel: true,
+    columns: 8,
+    durability: DURABILITY_DEFAULTS,
+  },
 };
 
 export const settingsTab: TabSpec = {
@@ -100,5 +110,6 @@ export const settingsTab: TabSpec = {
       desc: "ADMIN_C_GLOVEBOX_DESC",
       fields: gridFields("glovebox."),
     },
+    ...durabilityCards,
   ],
 };

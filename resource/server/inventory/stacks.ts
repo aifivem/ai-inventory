@@ -23,18 +23,15 @@ export function metaKey(metadata: Metadata): string {
   return text === "{}" ? "" : text;
 }
 
-/** A serial ties the held weapon to its stack while it moves around the grid. */
+/** A new weapon gets a serial (it ties the held weapon to its stack while it moves) and full `durability`. */
 export function ensureSerial(
   def: ItemDef,
   metadata: Record<string, unknown>,
 ): void {
-  if (
-    def.type === "weapon" &&
-    !def.weapon?.throwable &&
-    typeof metadata.serial !== "string"
-  ) {
+  if (def.type !== "weapon" || def.weapon?.throwable) return;
+  if (typeof metadata.serial !== "string")
     metadata.serial = Math.random().toString(36).slice(2, 10).toUpperCase();
-  }
+  if (typeof metadata.durability !== "number") metadata.durability = 100;
 }
 
 /** An item's cells (1 x 1 for an unknown item). */

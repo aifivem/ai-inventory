@@ -20,10 +20,12 @@ export const EVENTS = {
   weapon: "ai-inventory:client:weapon",
   /** Server -> owner: (hashes: string[]) the held weapon's attachments changed. */
   components: "ai-inventory:client:components",
+  /** Server -> owner: (rows: RepairRow[]) the player used a weapon repair kit: the weapons it can repair. */
+  repairMenu: "ai-inventory:client:repairMenu",
 
   /** Client -> server: () the player closed the screen; stop sending the second inventory. */
   close: "ai-inventory:close",
-  /** Client -> server: (slot, ammo) ammo left in the held weapon (only lower values are taken). */
+  /** Client -> server: (slot, ammo, hits) ammo left in the held weapon (only lower values are taken) and melee hits since the last report. */
   ammo: "ai-inventory:ammo",
 
   /** Callback: (target: OpenTarget) -> OpenResult. */
@@ -44,6 +46,8 @@ export const EVENTS = {
   reload: "ai-inventory:reload",
   /** Callback: (slot, hash) -> ActionResult; take an attachment off a weapon. */
   detach: "ai-inventory:detach",
+  /** Callback: (slot) -> ActionResult; repair a weapon with a repair kit (the progress bar runs after the reply). */
+  repair: "ai-inventory:repair",
 } as const;
 
 export type { ActionResult } from "@aifivem/shared";

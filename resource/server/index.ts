@@ -2,6 +2,7 @@ import "./session";
 import "./open";
 import "./actions";
 import "./use";
+import "./durability";
 import "./shop";
 import "./exports";
 import "./compat/ox";

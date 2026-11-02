@@ -74,7 +74,12 @@ export const MOCK_PLAYER: InventoryView = {
       components: ["COMPONENT_AT_PI_FLSH"],
     }),
     s(14, "ammo-9", 48),
-    s(21, "weapon_carbinerifle", 1, false, { serial: "AB12CD", ammo: 30 }),
+    s(21, "weapon_carbinerifle", 1, false, {
+      serial: "AB12CD",
+      ammo: 30,
+      durability: 64,
+      repairs: 1,
+    }),
     s(27, "armour", 1),
     s(41, "lockpick", 4),
     s(42, "radio", 1),

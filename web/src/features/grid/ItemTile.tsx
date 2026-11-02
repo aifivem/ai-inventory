@@ -14,6 +14,7 @@ import { cn } from "../../lib/utils";
 import { itemUse } from "../actions";
 import { ui } from "../ui";
 import { drag, useDrag } from "./drag";
+import { DurabilityBar, MetaLines } from "./StackMeta";
 
 interface Props {
   stack: Stack;
@@ -28,30 +29,6 @@ interface Props {
 /** The look of a stack box, shared with the drag ghost: white-alpha rounded cell, hairline, soft inner shade. */
 export const TILE_CLASS =
   "flex items-center justify-center overflow-hidden rounded-[0.2vh] border-[0.1vh] px-[0.5vh] pt-[1.6vh] pb-[0.6vh]";
-
-/** What the tooltip lists from metadata (ammo, serial, condition, a stack's own description); script data stays hidden. */
-function MetaLines({ stack }: { stack: Stack }) {
-  const t = useLang();
-  const m = stack.metadata;
-  return (
-    <>
-      {typeof m.ammo === "number" && (
-        <p className="text-text-3">{t("UI_AMMO", m.ammo)}</p>
-      )}
-      {typeof m.durability === "number" && (
-        <p className="text-text-3">
-          {t("UI_DURABILITY", Math.round(m.durability))}
-        </p>
-      )}
-      {typeof m.serial === "string" && (
-        <p className="text-text-3">{t("UI_SERIAL", m.serial)}</p>
-      )}
-      {typeof m.description === "string" && (
-        <p className="line-clamp-3 text-text-3 italic">{m.description}</p>
-      )}
-    </>
-  );
-}
 
 /** Count and weight in the top corners of a stack box. */
 export function CornerLabels({
@@ -171,6 +148,9 @@ export const ItemTile = memo(function ItemTile({
           <span className="pointer-events-none absolute inset-x-[0.5vh] top-[0.4vh] truncate text-right text-[1.15vh] leading-none font-semibold text-white/80 [text-shadow:0_0.1vh_0.3vh_rgba(0,0,0,0.9)]">
             {def?.label ?? stack.name}
           </span>
+          {typeof stack.metadata.durability === "number" && (
+            <DurabilityBar value={stack.metadata.durability} />
+          )}
           {stack.count > 1 && (
             <span className="pointer-events-none absolute right-[0.5vh] bottom-[0.4vh] text-[1.2vh] leading-none font-bold text-white tabular-nums [text-shadow:0_0.1vh_0.3vh_rgba(0,0,0,0.9)]">
               {stack.count}

@@ -33,8 +33,8 @@ export function registerUsable(name: string, handler: UseHandler): void {
   handlers.set(name.toLowerCase(), handler);
 }
 
-/** Players whose use animation runs (one at a time). */
-const using = new PlayerMap<true>();
+/** Players whose use animation or weapon repair runs (one at a time). */
+export const using = new PlayerMap<true>();
 
 /** Consumes the item and tells scripts (after the animation, or at once when the item has none). */
 function finish(source: number, stack: Stack, def: ItemDef): void {
@@ -73,10 +73,7 @@ export function useSlot(
   const stack = inventory?.stacks.get(slot);
   const def = stack ? content.items.get(stack.name) : undefined;
   if (!inventory || !stack || !def) return fail("INV_ERR_GONE");
-  if (def.type === "weapon") {
-    weapons.toggle(source, stack);
-    return { ok: true };
-  }
+  if (def.type === "weapon") return weapons.toggle(source, stack);
   if (def.type === "component")
     return hash ? weapons.attach(source, stack, hash) : fail("INV_ERR_NOT_FIT");
   if (def.type === "ammo") return weapons.reload(source, 250);
@@ -150,13 +147,15 @@ onClientCallback(
 onClientEvent(
   EVENTS.ammo,
   {
-    args: ([slot, ammo]) => {
+    args: ([slot, ammo, hits]) => {
       const s = readInt(slot, 1, 10_000);
       const a = readInt(ammo, 0, 100_000);
-      return s !== null && a !== null ? [s, a] : null;
+      // At most a few swings land per report (twice a second); more is a forged report.
+      const h = hits == null ? 0 : readInt(hits, 0, 10);
+      return s !== null && a !== null && h !== null ? [s, a, h] : null;
     },
   },
-  (source, slot, ammo) => weapons.reportAmmo(source, slot, ammo),
+  (source, slot, ammo, hits) => weapons.reportAmmo(source, slot, ammo, hits),
 );
 
 export function dropPlayer(source: number): void {

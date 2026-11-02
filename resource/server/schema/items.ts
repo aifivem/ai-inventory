@@ -71,6 +71,7 @@ export const itemsFile: FileSpec = {
       fields: {
         ammo: text(48, true),
         throwable: { type: "bool", optional: true },
+        uses: spec.int(0, 100_000, true),
       },
     },
     component: {

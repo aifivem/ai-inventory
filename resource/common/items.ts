@@ -48,7 +48,8 @@ export interface ItemDef {
   /** Key of a rarity (panel Rarities tab), "" = none. */
   rarity: string;
   use: { anim: UseAnim; time: number; status: Record<string, number> };
-  weapon: { ammo: string; throwable: boolean } | null;
+  /** `uses`: shots (firearm) or hits (melee) from full durability to broken; 0 = the panel's default. */
+  weapon: { ammo: string; throwable: boolean; uses: number } | null;
   component: { hashes: string[] } | null;
 }
 
@@ -111,6 +112,7 @@ export function readItem(name: string, raw: unknown): ItemDef | null {
         ? {
             ammo: s(weapon.ammo).toLowerCase(),
             throwable: weapon.throwable === true,
+            uses: Math.round(n(weapon.uses, 0, 0, 100_000)),
           }
         : null,
     component:

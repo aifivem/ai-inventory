@@ -66,6 +66,19 @@ export interface EquippedWeapon {
   components: string[];
 }
 
+/** A weapon the repair kit menu lists. */
+export interface RepairRow {
+  slot: number;
+  label: string;
+  /** 0-100. */
+  durability: number;
+  serial: string;
+  ammo: number;
+  repairs: number;
+  /** It has had the panel's most repairs. */
+  maxed: boolean;
+}
+
 /** Item fields the screen needs (from the panel's item list). */
 export interface ItemView {
   name: string;

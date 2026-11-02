@@ -10,6 +10,7 @@ import {
 import { resolve } from "../../api/resolve";
 import { definitionView, itemView } from "../../api/views";
 import { content } from "../../content";
+import { setDurability } from "../../durability/api";
 
 function inventoryView(inv: unknown) {
   const inventory = resolve(inv);
@@ -107,12 +108,7 @@ export const itemExports: Record<string, (...args: unknown[]) => unknown> = {
   GetEmptySlot: (inv) =>
     resolve(inv)?.grid.findPlace({ w: 1, h: 1 })?.slot ?? null,
   SetMetadata: (inv, slot, metadata) => setMetadata(inv, slot, metadata),
-  SetDurability: (inv, slot, durability) => {
-    const stack =
-      typeof slot === "number" ? resolve(inv)?.stacks.get(slot) : undefined;
-    return stack
-      ? setMetadata(inv, slot, { ...stack.metadata, durability })
-      : false;
-  },
+  SetDurability: (inv, slot, durability) =>
+    setDurability(inv, slot, durability),
   SetMaxWeight: (inv, weight) => void setMaxWeight(inv, weight),
 };

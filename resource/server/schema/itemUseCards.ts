@@ -91,6 +91,14 @@ export const weaponCard: CardSpec = {
       hint: "ADMIN_H_THROWABLE",
     },
     {
+      widget: "number",
+      path: "weapon.uses",
+      label: "ADMIN_F_WEAR_USES",
+      hint: "ADMIN_H_WEAR_USES",
+      min: 0,
+      max: 100_000,
+    },
+    {
       widget: "tags",
       path: "component.hashes",
       label: "ADMIN_F_COMPONENTS",

@@ -19,5 +19,13 @@
     "maxWeight": 10000,
     "rows": 2
   },
-  "noWeaponWheel": true
+  "noWeaponWheel": true,
+  "durability": {
+    "enabled": true,
+    "shots": 1000,
+    "hits": 50,
+    "repairPercent": 100,
+    "repairTime": 5000,
+    "maxRepairs": 0
+  }
 }

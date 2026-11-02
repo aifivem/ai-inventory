@@ -33,12 +33,14 @@ function toWeapon(v: unknown): EquippedWeapon | null {
 
 /**
  * The weapon the server says the player holds: given to the ped with the stored ammo and attachments, ammo going down
- * reported twice a second while held. Weapons from anywhere else are taken away again.
+ * and melee hits (the server wears the weapon by them) reported twice a second while held. Weapons from anywhere else
+ * are taken away again.
  */
 class ClientWeapons {
   current: EquippedWeapon | null = null;
   private hash = 0;
   private reported = 0;
+  private hits = 0;
   private readonly reporter = every(500, () => this.report(), {
     active: false,
     name: "weaponAmmo",
@@ -57,6 +59,7 @@ class ClientWeapons {
     this.current = weapon;
     this.hash = hash;
     this.reported = weapon.ammo;
+    this.hits = 0;
     this.reporter.set(true);
   }
 
@@ -65,6 +68,7 @@ class ClientWeapons {
     SetCurrentPedWeapon(cache.ped, UNARMED, true);
     this.current = null;
     this.hash = 0;
+    this.hits = 0;
     this.reporter.set(false);
   }
 
@@ -83,12 +87,28 @@ class ClientWeapons {
     this.setComponents(this.hash, components);
   }
 
+  /** Damage the local ped dealt with the held weapon (melee wear; the server ignores hits of firearms). */
+  damaged(culprit: number, weapon: number): void {
+    if (
+      this.current &&
+      culprit === cache.ped &&
+      weapon >>> 0 === this.hash >>> 0
+    )
+      this.hits++;
+  }
+
   private report(): void {
     if (!this.current) return;
     const ammo = GetAmmoInPedWeapon(cache.ped, this.hash);
-    if (ammo >= this.reported) return;
-    this.reported = ammo;
-    emitNet(EVENTS.ammo, this.current.slot, ammo);
+    if (ammo >= this.reported && this.hits === 0) return;
+    this.reported = Math.min(this.reported, ammo);
+    emitNet(
+      EVENTS.ammo,
+      this.current.slot,
+      this.reported,
+      Math.min(this.hits, 10),
+    );
+    this.hits = 0;
   }
 
   async reload(): Promise<void> {
@@ -125,6 +145,9 @@ onServerEvent(
   (list) => weapons.syncComponents(list),
 );
 onCache("weapon", (weapon) => weapons.guard(weapon));
+on("entityDamaged", (_victim: number, culprit: number, weapon: number) =>
+  weapons.damaged(culprit, weapon),
+);
 
 new Keybind({
   name: "inventory_reload",
