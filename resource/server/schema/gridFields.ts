@@ -1,4 +1,4 @@
-import type { WidgetSpec } from "@aicore-fivem/shared";
+import type { WidgetSpec } from "@aifivem/shared";
 
 /** Rows and weight limit widgets of a grid size (`path`: its section, with a trailing dot, or "" at the top). */
 export const gridFields = (path: string): WidgetSpec[] => [

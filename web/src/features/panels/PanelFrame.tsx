@@ -1,6 +1,6 @@
 import { type ReactNode } from "react";
 import type { InventoryView } from "../../../../resource/common/nui";
-import { formatWeight } from "@aicore-fivem/lib/shared";
+import { formatWeight } from "@aifivem/lib/shared";
 import { CELL_VH } from "../../lib/cell";
 import { cn } from "../../lib/utils";
 import { useAppSelector } from "../../store";

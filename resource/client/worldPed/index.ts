@@ -1,4 +1,4 @@
-import { onStop } from "@aicore-fivem/lib/client";
+import { onStop } from "@aifivem/lib/client";
 import { worldPed } from "./worldPed";
 
 onStop(() => worldPed.hide());

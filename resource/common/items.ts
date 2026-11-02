@@ -1,4 +1,4 @@
-import { isRecord } from "@aicore-fivem/lib/shared";
+import { isRecord } from "@aifivem/lib/shared";
 import type { Size } from "./grid";
 
 /** Item definitions (`data/items.json`, panel records): read on the server from the panel store, on clients from the world mirror. No natives. */

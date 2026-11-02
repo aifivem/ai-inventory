@@ -1,4 +1,4 @@
-import { provideExport } from "@aicore-fivem/lib/server";
+import { provideExport } from "@aifivem/lib/server";
 import { inventoryExports } from "./inventories";
 import { itemExports } from "./items";
 

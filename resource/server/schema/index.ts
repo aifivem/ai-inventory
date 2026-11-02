@@ -1,4 +1,4 @@
-import type { PanelSchema } from "@aicore-fivem/shared";
+import type { PanelSchema } from "@aifivem/shared";
 import { benchesFile, benchesTab } from "./benches";
 import { itemsFile, itemsTab } from "./items";
 import { raritiesFile, raritiesTab } from "./rarities";

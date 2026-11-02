@@ -1,4 +1,4 @@
-import { isRecord } from "@aicore-fivem/lib/shared";
+import { isRecord } from "@aifivem/lib/shared";
 import type { Stack } from "common/nui";
 import { content } from "../content";
 import { drops } from "../drops";

@@ -1,4 +1,4 @@
-import { fail } from "@aicore-fivem/lib/shared";
+import { fail } from "@aifivem/lib/shared";
 import {
   coordsOf,
   entityCoords,
@@ -6,7 +6,7 @@ import {
   online,
   vehicleFromNet,
   vehicleOf,
-} from "@aicore-fivem/lib/server";
+} from "@aifivem/lib/server";
 import { nearPlace } from "common/places";
 import type { OpenResult, OpenTarget } from "common/nui";
 import { setReach } from "../access";

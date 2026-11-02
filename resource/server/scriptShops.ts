@@ -1,5 +1,5 @@
-import { PlayerMap } from "@aicore-fivem/lib/server";
-import type { ShopProduct } from "@aicore-fivem/shared";
+import { PlayerMap } from "@aifivem/lib/server";
+import type { ShopProduct } from "@aifivem/shared";
 import { EVENTS } from "common/events";
 import type { ShopView } from "common/nui";
 import { content } from "./content";

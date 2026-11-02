@@ -11,7 +11,7 @@ import {
   type BlipStyle,
   type PlacePed,
   type RecordReader,
-} from "@aicore-fivem/lib/shared";
+} from "@aifivem/lib/shared";
 import { grid, type GridSize } from "./settings";
 
 export interface Point {

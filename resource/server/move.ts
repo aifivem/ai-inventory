@@ -1,4 +1,4 @@
-import { fail } from "@aicore-fivem/lib/shared";
+import { fail } from "@aifivem/lib/shared";
 import type { ActionResult } from "common/events";
 import type { MoveInput, Stack } from "common/nui";
 import { isHotbarSlot } from "common/grid";

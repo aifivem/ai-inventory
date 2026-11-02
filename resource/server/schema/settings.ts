@@ -1,5 +1,5 @@
-import type { DataSpec, FileSpec, TabSpec } from "@aicore-fivem/shared";
-import { spec } from "@aicore-fivem/lib/shared";
+import type { DataSpec, FileSpec, TabSpec } from "@aifivem/shared";
+import { spec } from "@aifivem/lib/shared";
 import { gridFields } from "./gridFields";
 
 /** A grid size: rows and weight limit (plus `extra` fields). */

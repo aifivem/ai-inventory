@@ -1,10 +1,10 @@
-import type { FileSpec, TabSpec } from "@aicore-fivem/shared";
+import type { FileSpec, TabSpec } from "@aifivem/shared";
 import {
   BLIP_STYLE_FIELDS,
   PLACE_PED_SPEC,
   placePedFields,
   spec,
-} from "@aicore-fivem/lib/shared";
+} from "@aifivem/lib/shared";
 import { SHOP_BLIP } from "common/places";
 import { KEY } from "./dataSpecs";
 import { place, placeSections } from "./place";

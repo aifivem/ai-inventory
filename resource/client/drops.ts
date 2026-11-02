@@ -5,8 +5,8 @@ import {
   Points,
   requestModel,
   Zones,
-} from "@aicore-fivem/lib/client";
-import { isRecord, nearestOf, readFinite } from "@aicore-fivem/lib/shared";
+} from "@aifivem/lib/client";
+import { isRecord, nearestOf, readFinite } from "@aifivem/lib/shared";
 import { Locale } from "common";
 import { EVENTS } from "common/events";
 import type { DropPoint } from "common/nui";

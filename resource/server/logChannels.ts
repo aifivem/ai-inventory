@@ -1,4 +1,4 @@
-import { aiLogChannels } from "@aicore-fivem/lib/server";
+import { aiLogChannels } from "@aifivem/lib/server";
 
 aiLogChannels({
   moves: { active: false },

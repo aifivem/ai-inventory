@@ -1,5 +1,5 @@
-import type { FileSpec, TabSpec } from "@aicore-fivem/shared";
-import { spec } from "@aicore-fivem/lib/shared";
+import type { FileSpec, TabSpec } from "@aifivem/shared";
+import { spec } from "@aifivem/lib/shared";
 import { KEY, names, text } from "./dataSpecs";
 import { itemCard, sizeCard } from "./itemCards";
 import { useCard, weaponCard } from "./itemUseCards";

@@ -4,7 +4,7 @@ import {
   every,
   isNear,
   online,
-} from "@aicore-fivem/lib/server";
+} from "@aifivem/lib/server";
 import { EVENTS } from "common/events";
 import type { DropPoint } from "common/nui";
 import { setReach } from "./access";

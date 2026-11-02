@@ -1,5 +1,5 @@
-import { isRecord } from "@aicore-fivem/lib/shared";
-import { provideExport, registerExport } from "@aicore-fivem/lib/client";
+import { isRecord } from "@aifivem/lib/shared";
+import { provideExport, registerExport } from "@aifivem/lib/client";
 import { content } from "./content";
 import { screen } from "./screen";
 import { state } from "./state";

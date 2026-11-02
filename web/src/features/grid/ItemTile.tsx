@@ -7,7 +7,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "../../components/ui/tooltip";
-import { formatWeight } from "@aicore-fivem/lib/shared";
+import { formatWeight } from "@aifivem/lib/shared";
 import { CELL_GAP_VH, CELL_VH, imageUrl, tint } from "../../lib/cell";
 import { useLang } from "../../lib/lang";
 import { cn } from "../../lib/utils";

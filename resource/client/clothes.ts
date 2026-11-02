@@ -1,5 +1,5 @@
-import { cache, onCache, player } from "@aicore-fivem/lib/client";
-import { sleep } from "@aicore-fivem/lib/shared";
+import { cache, onCache, player } from "@aifivem/lib/client";
+import { sleep } from "@aifivem/lib/shared";
 import {
   CLOTHES,
   type ClothesId,

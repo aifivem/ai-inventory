@@ -1,4 +1,4 @@
-import { fail } from "@aicore-fivem/lib/shared";
+import { fail } from "@aifivem/lib/shared";
 import { EVENTS, type ActionResult } from "common/events";
 import type { EquippedWeapon, Stack } from "common/nui";
 import { content } from "./content";

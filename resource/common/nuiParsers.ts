@@ -1,4 +1,4 @@
-import { isRecord, readId, readInt } from "@aicore-fivem/lib/shared";
+import { isRecord, readId, readInt } from "@aifivem/lib/shared";
 import type { MoveInput, OpenTarget, Panel, ShopView } from "./nui";
 
 /** Parsers for boundary data. */

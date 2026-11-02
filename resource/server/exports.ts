@@ -1,5 +1,5 @@
-import { registerExport } from "@aicore-fivem/lib/server";
-import { isRecord } from "@aicore-fivem/lib/shared";
+import { registerExport } from "@aifivem/lib/server";
+import { isRecord } from "@aifivem/lib/shared";
 import { forceOpen } from "./api/forceOpen";
 import {
   addItem,

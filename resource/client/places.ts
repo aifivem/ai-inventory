@@ -2,8 +2,8 @@ import {
   RecordObjects,
   type BlipStyle,
   type PlacePed,
-} from "@aicore-fivem/lib/shared";
-import { allows, onMembershipChange, Points } from "@aicore-fivem/lib/client";
+} from "@aifivem/lib/shared";
+import { allows, onMembershipChange, Points } from "@aifivem/lib/client";
 import { Locale } from "common";
 import type { Place } from "common/places";
 import { content, world } from "./content";

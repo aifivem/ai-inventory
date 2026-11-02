@@ -1,4 +1,4 @@
-import { isRecord, readVec3 } from "@aicore-fivem/lib/shared";
+import { isRecord, readVec3 } from "@aifivem/lib/shared";
 import { forceOpen } from "../../api/forceOpen";
 import { addItem } from "../../api/items";
 import { resolve } from "../../api/resolve";

@@ -1,4 +1,4 @@
-import { every, onStop } from "@aicore-fivem/lib/server";
+import { every, onStop } from "@aifivem/lib/server";
 import { log } from "../log";
 import { inventories } from "./registry";
 import { prepareDatabase } from "./repo";

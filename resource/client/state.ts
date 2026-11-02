@@ -1,5 +1,5 @@
-import { isRecord } from "@aicore-fivem/lib/shared";
-import { onServerEvent } from "@aicore-fivem/lib/client";
+import { isRecord } from "@aifivem/lib/shared";
+import { onServerEvent } from "@aifivem/lib/client";
 import { EVENTS } from "common/events";
 import type { InventoryView, Stack } from "common/nui";
 import { content } from "./content";

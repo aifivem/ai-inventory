@@ -46,4 +46,4 @@ export const EVENTS = {
   detach: "ai-inventory:detach",
 } as const;
 
-export type { ActionResult } from "@aicore-fivem/shared";
+export type { ActionResult } from "@aifivem/shared";

@@ -1,4 +1,4 @@
-import { cache, ScriptCamera, TickLoop } from "@aicore-fivem/lib/client";
+import { cache, ScriptCamera, TickLoop } from "@aifivem/lib/client";
 import { add, cross, mul, screenPoint, type Vec } from "./vectors";
 
 /** The screen area (0 - 1) the equipment column keeps for the character. */

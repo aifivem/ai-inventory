@@ -1,11 +1,11 @@
-import { fail, readInt } from "@aicore-fivem/lib/shared";
+import { fail, readInt } from "@aifivem/lib/shared";
 import {
   aiLog,
   coordsOf,
   onClientCallback,
   online,
   resourceExport,
-} from "@aicore-fivem/lib/server";
+} from "@aifivem/lib/server";
 import { nearPlace } from "common/places";
 import { EVENTS, type ActionResult } from "common/events";
 import { content } from "./content";

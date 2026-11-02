@@ -1,11 +1,11 @@
-import { fail, oneArg, readInt } from "@aicore-fivem/lib/shared";
+import { fail, oneArg, readInt } from "@aifivem/lib/shared";
 import {
   notify,
   onClientCallback,
   onClientEvent,
   PlayerMap,
   progressFor,
-} from "@aicore-fivem/lib/server";
+} from "@aifivem/lib/server";
 import { Locale } from "common";
 import { EVENTS, type ActionResult } from "common/events";
 import { USE_ANIMS, type ItemDef } from "common/items";

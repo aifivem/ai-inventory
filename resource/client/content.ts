@@ -1,4 +1,4 @@
-import { AdminWorld } from "@aicore-fivem/lib/client";
+import { AdminWorld } from "@aifivem/lib/client";
 import { FILES, InventoryContent } from "common/content";
 import type { BenchView, ItemView, ShopView } from "common/nui";
 
