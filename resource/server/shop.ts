@@ -4,6 +4,7 @@ import {
   coordsOf,
   onClientCallback,
   online,
+  optionalExport,
   resourceExport,
 } from "@aifivem/lib/server";
 import { nearPlace } from "common/places";
@@ -68,6 +69,7 @@ onClientCallback(
       `bought ${count}x ${def.name} for $${price} at ${shop.id}`,
       { source, metadata: { shop: shop.id, item: def.name, count, price } },
     );
+    optionalExport("ai-police")?.ReportSighting(source, "shop");
     return { ok: true };
   },
 );
