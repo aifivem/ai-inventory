@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.5.0](https://github.com/aifivem/ai-inventory/compare/v0.4.2...v0.5.0) (2026-11-02)
+
+
+### New Features
+
+* **shops:** report wanted suspects to ai-police on a purchase ([1900dda](https://github.com/aifivem/ai-inventory/commit/1900dda43e54b092bfa75e5222e5074c394da571))
+* **weapons:** add weapon durability and the weapon repair kit ([e5cd9e3](https://github.com/aifivem/ai-inventory/commit/e5cd9e39521b4b16ccd514bc09b2a2eb73205a57))
+
+
+### Miscellaneous Chores
+
+* **data:** write the new settings defaults and panel schemas ([a108199](https://github.com/aifivem/ai-inventory/commit/a108199175bccd67e17b2395bf502de23be0b153))
+
 ## [0.4.2](https://github.com/aifivem/ai-inventory/compare/v0.4.1...v0.4.2) (2026-11-02)
 
 
