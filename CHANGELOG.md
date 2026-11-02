@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.1](https://github.com/aifivem/ai-inventory/compare/v0.4.0...v0.4.1) (2026-11-02)
+
+
+### Bug Fixes
+
+* **build:** keep the web build in dist/ so release zips have the NUI ([32eb734](https://github.com/aifivem/ai-inventory/commit/32eb7343ea22c3e42e05c4a741211a3dc3eabbd9))
+
+
+### Code Refactoring
+
+* import the shared packages from [@aifivem](https://github.com/aifivem) ([21fb881](https://github.com/aifivem/ai-inventory/commit/21fb88181bb967d76c75b63434e5affe5d6a4332))
+
 ## [0.4.0](https://github.com/aifivem/ai-inventory/compare/v0.3.0...v0.4.0) (2026-11-01)
 
 
