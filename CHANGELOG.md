@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/aifivem/ai-inventory/compare/v0.5.0...v0.6.0) (2026-11-05)
+
+
+### New Features
+
+* **data:** the eight sd-phone phone items, sold where a phone was sold ([16815c0](https://github.com/aifivem/ai-inventory/commit/16815c050dbc8bf365c9a789a8bcb9dea1d0a347))
+
 ## [0.5.0](https://github.com/aifivem/ai-inventory/compare/v0.4.2...v0.5.0) (2026-11-02)
 
 
