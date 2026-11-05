@@ -2200,6 +2200,142 @@
     "aliases": [],
     "rarity": "rare"
   },
+  "phone_black": {
+    "label": "Phone (Black)",
+    "description": "",
+    "weight": 190,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": true,
+    "image": "phone.png",
+    "aliases": [],
+    "rarity": "rare"
+  },
+  "phone_blue": {
+    "label": "Phone (Blue)",
+    "description": "",
+    "weight": 190,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": true,
+    "image": "phone.png",
+    "aliases": [],
+    "rarity": "rare"
+  },
+  "phone_green": {
+    "label": "Phone (Green)",
+    "description": "",
+    "weight": 190,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": true,
+    "image": "phone.png",
+    "aliases": [],
+    "rarity": "rare"
+  },
+  "phone_orange": {
+    "label": "Phone (Orange)",
+    "description": "",
+    "weight": 190,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": true,
+    "image": "phone.png",
+    "aliases": [],
+    "rarity": "rare"
+  },
+  "phone_pink": {
+    "label": "Phone (Pink)",
+    "description": "",
+    "weight": 190,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": true,
+    "image": "phone.png",
+    "aliases": [],
+    "rarity": "rare"
+  },
+  "phone_purple": {
+    "label": "Phone (Purple)",
+    "description": "",
+    "weight": 190,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": true,
+    "image": "phone.png",
+    "aliases": [],
+    "rarity": "rare"
+  },
+  "phone_red": {
+    "label": "Phone (Red)",
+    "description": "",
+    "weight": 190,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": true,
+    "image": "phone.png",
+    "aliases": [],
+    "rarity": "rare"
+  },
+  "phone_yellow": {
+    "label": "Phone (Yellow)",
+    "description": "",
+    "weight": 190,
+    "size": {
+      "w": 1,
+      "h": 1
+    },
+    "stack": 1,
+    "type": "item",
+    "usable": false,
+    "consume": 0,
+    "close": true,
+    "image": "phone.png",
+    "aliases": [],
+    "rarity": "rare"
+  },
   "radio": {
     "label": "Radio",
     "description": "",
